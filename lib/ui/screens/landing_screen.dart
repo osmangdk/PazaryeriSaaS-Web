@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/data/api_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,6 +20,257 @@ class _LandingScreenState extends State<LandingScreen> {
 
   bool _isAnnualPricing = true;
 
+  // AI Danışman State
+  final _apiService = ApiService();
+  final List<Map<String, dynamic>> _aiMessages = [];
+  bool _isAiThinking = false;
+  final TextEditingController _aiInputController = TextEditingController();
+  final ScrollController _aiScrollController = ScrollController();
+
+  void _initAiGreeting() {
+    if (_aiMessages.isEmpty) {
+      _aiMessages.add({
+        'role': 'assistant',
+        'content': 'Merhaba! Ben sizin **AI Pazaryeri Danışmanınızım**. 🤖\n\nPazaryeri SaaS\'ın 1 Ay (30 gün) 50.000 ₺ ücretsiz deneme imkanı, 1.2s anlık stok eşitleme, 2 Al 1 Öde kampanya kurguları ve Trendyol/Hepsiburada entegrasyonu hakkında merak ettiğiniz her şeyi bana sorabilirsiniz.',
+        'actions': [
+          {'label': '🎁 1 Ay Ücretsiz Deneme Nedir?', 'action': 'ask', 'prompt': '1 Ay ücretsiz deneme paketi neleri kapsıyor?'},
+          {'label': '🔥 2 Al 1 Öde Nasıl Çalışır?', 'action': 'ask', 'prompt': '2 Al 1 Öde kampanyaları nasıl çalışıyor?'},
+          {'label': '⚡ 1.2s Stok Eşitleme Nedir?', 'action': 'ask', 'prompt': 'Stok senkronizasyonu nasıl çalışır?'},
+          {'label': '🚀 Hemen Ücretsiz Başla', 'action': 'go_register', 'prompt': ''},
+        ]
+      });
+    }
+  }
+
+  void _scrollToBottomAi() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_aiScrollController.hasClients) {
+        _aiScrollController.animateTo(
+          _aiScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void _showAiConsultantDialog() {
+    _initAiGreeting();
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setAiState) {
+          void sendMessage(String text) async {
+            if (text.trim().isEmpty) return;
+            _aiInputController.clear();
+
+            setAiState(() {
+              _aiMessages.add({'role': 'user', 'content': text.trim()});
+              _isAiThinking = true;
+            });
+            _scrollToBottomAi();
+
+            final res = await _apiService.askAiAssistant(text.trim());
+
+            setAiState(() {
+              _isAiThinking = false;
+              if (res != null && res['reply'] != null) {
+                _aiMessages.add({
+                  'role': 'assistant',
+                  'content': res['reply'],
+                  'actions': res['suggestedActions'],
+                  'quickPrompts': res['quickPrompts'],
+                });
+              } else {
+                _aiMessages.add({
+                  'role': 'assistant',
+                  'content': 'Bağlantı kurulamadı. Lütfen tekrar deneyin.',
+                });
+              }
+            });
+            _scrollToBottomAi();
+          }
+
+          void handleActionClick(dynamic act) {
+            final actionType = act['actionType'] ?? act['action'];
+            if (actionType == 'go_register') {
+              Navigator.pop(ctx);
+              context.go('/register');
+            } else if (actionType == 'go_login') {
+              Navigator.pop(ctx);
+              context.go('/login');
+            } else if (act['prompt'] != null && act['prompt'].toString().isNotEmpty) {
+              sendMessage(act['prompt']);
+            }
+          }
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.purpleAccent, width: 1.5)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Colors.purpleAccent, Colors.blueAccent]),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('AI Pazaryeri Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      Row(
+                        children: [
+                          Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
+                          const SizedBox(width: 6),
+                          Text('Online & Size Rehberlik Etmeye Hazır', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 11)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 720,
+              height: 600,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Scrollbar(
+                      controller: _aiScrollController,
+                      thumbVisibility: true,
+                      interactive: true,
+                      thickness: 6,
+                      radius: const Radius.circular(8),
+                      child: ListView.separated(
+                        controller: _aiScrollController,
+                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                        itemCount: _aiMessages.length + (_isAiThinking ? 1 : 0),
+                        separatorBuilder: (_, __) => const SizedBox(height: 14),
+                        itemBuilder: (context, index) {
+                          if (index == _aiMessages.length && _isAiThinking) {
+                            return Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(color: Colors.purpleAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.purpleAccent.withOpacity(0.3))),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.purpleAccent, strokeWidth: 2)),
+                                    const SizedBox(width: 10),
+                                    Text('Yapay Zeka düşünüyor ve yanıt hazırlıyor...', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, fontStyle: FontStyle.italic)),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          final msg = _aiMessages[index];
+                          final isUser = msg['role'] == 'user';
+                          final actions = msg['actions'] as List<dynamic>?;
+                          final quickPrompts = msg['quickPrompts'] as List<dynamic>?;
+                          final rawContent = msg['content'] as String? ?? '';
+                          final displayContent = rawContent.replaceAll('**', '');
+
+                          return Column(
+                            crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                constraints: const BoxConstraints(maxWidth: 580),
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: isUser ? Colors.blueAccent.withOpacity(0.25) : const Color(0xFF1E293B),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: isUser ? Colors.blueAccent.withOpacity(0.5) : Colors.white12),
+                                ),
+                                child: Text(
+                                  displayContent,
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13, height: 1.5),
+                                ),
+                              ),
+                              if (actions != null && actions.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: actions.map((act) {
+                                    return ElevatedButton.icon(
+                                      onPressed: () => handleActionClick(act),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.purple.shade900,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                      icon: const Icon(Icons.touch_app, size: 14, color: Colors.amberAccent),
+                                      label: Text(act['label'] ?? '', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                              if (quickPrompts != null && quickPrompts.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: quickPrompts.map((p) {
+                                    return ActionChip(
+                                      label: Text(p.toString(), style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
+                                      backgroundColor: Colors.white.withOpacity(0.08),
+                                      side: const BorderSide(color: Colors.white24),
+                                      onPressed: () => sendMessage(p.toString()),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const Divider(color: Colors.white12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _aiInputController,
+                          style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: 'Bir soru sorun... (Örn: 1 Ay ücretsiz deneme nedir?)',
+                            hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.05),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white24)),
+                          ),
+                          onSubmitted: sendMessage,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        icon: const Icon(Icons.send_rounded, color: Colors.purpleAccent, size: 24),
+                        onPressed: () => sendMessage(_aiInputController.text),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   void _scrollTo(GlobalKey key) {
     Scrollable.ensureVisible(
       key.currentContext!,
@@ -30,6 +282,13 @@ class _LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAiConsultantDialog,
+        backgroundColor: Colors.purpleAccent.shade700,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
+        label: Text('✨ AI Pazaryeri Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+      ),
       backgroundColor: const Color(0xFF0A1118),
       body: Stack(
         children: [

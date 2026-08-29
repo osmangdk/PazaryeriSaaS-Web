@@ -39,7 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   void _initAiGreeting() {
     _aiMessages.add({
       'role': 'assistant',
-      'content': 'Merhaba! Ben sizin **Pazaryeri & E-Ticaret Yapay Zeka Danışmanınızım**. 🤖\n\nSistemi nasıl kullanacağınızı, 2 Al 1 Öde kampanyalarını, 1.2s stok eşitlemeyi veya kâr marjınızı nasıl optimize edeceğinizi bana 7/24 sorabilirsiniz.',
+      'content': 'Merhaba! Ben sizin **AI Pazaryeri Danışmanınızım**. 🤖\n\nSistemi nasıl kullanacağınızı, 2 Al 1 Öde kampanyalarını, 1.2s stok eşitlemeyi veya kâr marjınızı nasıl optimize edeceğinizi bana 7/24 sorabilirsiniz.',
       'actions': [
         {'label': '🔥 2 Al 1 Öde Nasıl Açılır?', 'action': 'ask', 'prompt': '2 Al 1 Öde kampanyası nasıl açılır?'},
         {'label': '🔗 Mağaza Nasıl Bağlanır?', 'action': 'ask', 'prompt': 'Trendyol mağazamı nasıl bağlarım?'},
@@ -162,7 +162,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Pazaryeri Yapay Zeka Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('AI Pazaryeri Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                       Row(
                         children: [
                           Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
@@ -1364,7 +1364,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         backgroundColor: Colors.purpleAccent.shade700,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
-        label: Text('✨ AI E-Ticaret Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+        label: Text('✨ AI Pazaryeri Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
       ),
       body: Container(
         decoration: const BoxDecoration(
