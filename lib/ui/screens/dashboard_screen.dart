@@ -27,6 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   final List<Map<String, dynamic>> _aiMessages = [];
   bool _isAiThinking = false;
   final TextEditingController _aiInputController = TextEditingController();
+  final ScrollController _aiScrollController = ScrollController();
 
   @override
   void initState() {
@@ -72,7 +73,19 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     if (mounted) context.go('/');
   }
 
-  // --- AI ASİSTAN SOHBET MODALI ---
+  void _scrollToBottomAi() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_aiScrollController.hasClients) {
+        _aiScrollController.animateTo(
+          _aiScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  // --- AI ASİSTAN SOHBET MODALI (KUSURSUZ KAYDIRMA VE OTO-KAYDIRMA) ---
   void _showAiAssistantDialog() {
     showDialog(
       context: context,
@@ -86,6 +99,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               _aiMessages.add({'role': 'user', 'content': text.trim()});
               _isAiThinking = true;
             });
+            _scrollToBottomAi();
 
             final res = await _apiService.askAiAssistant(text.trim());
 
@@ -105,6 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 });
               }
             });
+            _scrollToBottomAi();
           }
 
           void handleActionClick(dynamic act) {
@@ -162,86 +177,105 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ],
             ),
             content: SizedBox(
-              width: 620,
-              height: 520,
+              width: 720,
+              height: 600,
               child: Column(
                 children: [
-                  // Mesaj Listesi
+                  // Mesaj Listesi (Kaydırma Çubuğu & Mouse Wheel Desteği)
                   Expanded(
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: _aiMessages.length + (_isAiThinking ? 1 : 0),
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        if (index == _aiMessages.length && _isAiThinking) {
-                          return Row(
+                    child: Scrollbar(
+                      controller: _aiScrollController,
+                      thumbVisibility: true,
+                      interactive: true,
+                      thickness: 6,
+                      radius: const Radius.circular(8),
+                      child: ListView.separated(
+                        controller: _aiScrollController,
+                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                        itemCount: _aiMessages.length + (_isAiThinking ? 1 : 0),
+                        separatorBuilder: (_, __) => const SizedBox(height: 14),
+                        itemBuilder: (context, index) {
+                          if (index == _aiMessages.length && _isAiThinking) {
+                            return Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(color: Colors.purpleAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.purpleAccent.withOpacity(0.3))),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.purpleAccent, strokeWidth: 2)),
+                                    const SizedBox(width: 10),
+                                    Text('Yapay Zeka düşünüyor ve sistemi analiz ediyor...', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, fontStyle: FontStyle.italic)),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          final msg = _aiMessages[index];
+                          final isUser = msg['role'] == 'user';
+                          final actions = msg['actions'] as List<dynamic>?;
+                          final quickPrompts = msg['quickPrompts'] as List<dynamic>?;
+                          final rawContent = msg['content'] as String? ?? '';
+                          final displayContent = rawContent.replaceAll('**', '');
+
+                          return Column(
+                            crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                             children: [
-                              Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.purpleAccent.withOpacity(0.2), shape: BoxShape.circle), child: const Icon(Icons.auto_awesome, color: Colors.purpleAccent, size: 14)),
-                              const SizedBox(width: 8),
-                              Text('Yapay Zeka sistemi analiz ediyor...', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12, fontStyle: FontStyle.italic)),
+                              Container(
+                                constraints: const BoxConstraints(maxWidth: 580),
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: isUser ? Colors.blueAccent.withOpacity(0.25) : const Color(0xFF1E293B),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: isUser ? Colors.blueAccent.withOpacity(0.5) : Colors.white12),
+                                ),
+                                child: Text(
+                                  displayContent,
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13, height: 1.5),
+                                ),
+                              ),
+                              if (actions != null && actions.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: actions.map((act) {
+                                    return ElevatedButton.icon(
+                                      onPressed: () => handleActionClick(act),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.purple.shade900,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                      icon: const Icon(Icons.touch_app, size: 14, color: Colors.amberAccent),
+                                      label: Text(act['label'] ?? '', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                              if (quickPrompts != null && quickPrompts.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: quickPrompts.map((p) {
+                                    return ActionChip(
+                                      label: Text(p.toString(), style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
+                                      backgroundColor: Colors.white.withOpacity(0.08),
+                                      side: const BorderSide(color: Colors.white24),
+                                      onPressed: () => sendMessage(p.toString()),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
                             ],
                           );
-                        }
-
-                        final msg = _aiMessages[index];
-                        final isUser = msg['role'] == 'user';
-                        final actions = msg['actions'] as List<dynamic>?;
-                        final quickPrompts = msg['quickPrompts'] as List<dynamic>?;
-
-                        return Column(
-                          crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: isUser ? Colors.blueAccent.withOpacity(0.25) : Colors.white.withOpacity(0.06),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: isUser ? Colors.blueAccent.withOpacity(0.4) : Colors.white12),
-                              ),
-                              child: Text(
-                                msg['content'] ?? '',
-                                style: GoogleFonts.inter(color: Colors.white, fontSize: 13, height: 1.4),
-                              ),
-                            ),
-                            // Action / Quick Prompt Buttons
-                            if (actions != null && actions.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
-                                children: actions.map((act) {
-                                  return ElevatedButton.icon(
-                                    onPressed: () => handleActionClick(act),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.purple.shade900,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
-                                    icon: const Icon(Icons.touch_app, size: 14, color: Colors.amberAccent),
-                                    label: Text(act['label'] ?? '', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                            if (quickPrompts != null && quickPrompts.isNotEmpty) ...[
-                              const SizedBox(height: 6),
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
-                                children: quickPrompts.map((p) {
-                                  return ActionChip(
-                                    label: Text(p.toString(), style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
-                                    backgroundColor: Colors.white.withOpacity(0.08),
-                                    side: const BorderSide(color: Colors.white24),
-                                    onPressed: () => sendMessage(p.toString()),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ],
-                        );
-                      },
+                        },
+                      ),
                     ),
                   ),
                   const Divider(color: Colors.white12),
@@ -257,15 +291,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.05),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white24)),
                           ),
                           onSubmitted: sendMessage,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       IconButton(
-                        icon: const Icon(Icons.send_rounded, color: Colors.purpleAccent),
+                        icon: const Icon(Icons.send_rounded, color: Colors.purpleAccent, size: 24),
                         onPressed: () => sendMessage(_aiInputController.text),
                       ),
                     ],
