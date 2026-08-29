@@ -116,6 +116,17 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> toggleMarketplaceStatus(String id) async {
+    try {
+      final response = await _dio.post('/marketplaces/$id/toggle-status');
+      return response.data;
+    } on DioException catch (e) {
+      return {'error': e.response?.data?['message'] ?? e.message};
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>?> validateMarketplace(String id) async {
     try {
       final response = await _dio.post('/marketplaces/$id/validate');

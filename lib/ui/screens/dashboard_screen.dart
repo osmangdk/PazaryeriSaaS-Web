@@ -404,6 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 itemBuilder: (context, index) {
                   final c = _connections![index];
                   final String typeName = c['marketplaceName'] ?? 'Pazaryeri';
+                  final bool isActive = c['isActive'] == true;
                   final bool isTrendyol = typeName.toLowerCase().contains('trendyol');
                   final bool isHepsiburada = typeName.toLowerCase().contains('hepsiburada');
                   final Color brandColor = isTrendyol ? Colors.orange : (isHepsiburada ? Colors.deepOrange : Colors.blue);
@@ -411,28 +412,88 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   return Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.07),
+                      color: isActive ? Colors.white.withOpacity(0.07) : Colors.white.withOpacity(0.02),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: brandColor.withOpacity(0.3)),
+                      border: Border.all(color: isActive ? brandColor.withOpacity(0.4) : Colors.white12),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: brandColor.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-                          child: Icon(Icons.store, color: brandColor, size: 28),
+                          decoration: BoxDecoration(
+                            color: isActive ? brandColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.store, color: isActive ? brandColor : Colors.white38, size: 28),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(typeName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                              Row(
+                                children: [
+                                  Text(
+                                    typeName,
+                                    style: GoogleFonts.inter(
+                                      color: isActive ? Colors.white : Colors.white54,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: isActive ? Colors.greenAccent.withOpacity(0.15) : Colors.redAccent.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: isActive ? Colors.greenAccent.withOpacity(0.5) : Colors.redAccent.withOpacity(0.5)),
+                                    ),
+                                    child: Text(
+                                      isActive ? 'Aktif' : 'Pasif',
+                                      style: GoogleFonts.inter(
+                                        color: isActive ? Colors.greenAccent : Colors.redAccent,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                               const SizedBox(height: 4),
                               Text('Mağaza: ${c['storeName'] ?? 'Varsayılan'} • Satıcı ID: ${c['sellerId'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 13)),
                             ],
                           ),
                         ),
+                        // Aktif / Pasif Toggle Switch
+                        Row(
+                          children: [
+                            Text(
+                              isActive ? 'Açık' : 'Kapalı',
+                              style: GoogleFonts.inter(color: isActive ? Colors.greenAccent : Colors.white38, fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                            Switch(
+                              value: isActive,
+                              activeColor: Colors.greenAccent,
+                              onChanged: (val) async {
+                                final res = await _apiService.toggleMarketplaceStatus(c['id']);
+                                if (mounted) {
+                                  if (res?['error'] != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(res!['error']), backgroundColor: Colors.red),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(res?['message'] ?? 'Durum güncellendi.'), backgroundColor: Colors.blueAccent),
+                                    );
+                                    _loadData();
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 8),
                         IconButton(
                           icon: const Icon(Icons.check_circle_outline, color: Colors.greenAccent),
                           tooltip: 'API Doğrula',
