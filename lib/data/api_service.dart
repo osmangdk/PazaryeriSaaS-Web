@@ -75,6 +75,20 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> createProduct(String title, String sku, double price, int stockQuantity) async {
+    try {
+      final response = await _dio.post('/products', data: {
+        'title': title,
+        'sku': sku,
+        'price': price,
+        'stockQuantity': stockQuantity,
+      });
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<List<dynamic>?> getMarketplaceConnections() async {
     try {
       final response = await _dio.get('/marketplaces');

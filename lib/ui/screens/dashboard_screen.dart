@@ -345,6 +345,100 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  void _showAddProductDialog() {
+    final titleController = TextEditingController();
+    final skuController = TextEditingController();
+    final priceController = TextEditingController();
+    final stockController = TextEditingController(text: '100');
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1E293B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.white24)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.add_box, color: Colors.blueAccent),
+                ),
+                const SizedBox(width: 12),
+                Text('Yeni Ürün Ekle', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: SizedBox(
+              width: 450,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(labelText: 'Ürün Adı', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: skuController,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(labelText: 'Stok Kodu (SKU)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(labelText: 'Satış Fiyatı (₺)', labelStyle: GoogleFonts.inter(color: Colors.white60), prefixText: '₺ ', prefixStyle: GoogleFonts.inter(color: Colors.white), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: stockController,
+                      keyboardType: TextInputType.number,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(labelText: 'Stok Miktarı', labelStyle: GoogleFonts.inter(color: Colors.white60), suffixText: 'Adet', suffixStyle: GoogleFonts.inter(color: Colors.white), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: GoogleFonts.inter(color: Colors.white60))),
+              ElevatedButton(
+                onPressed: isSubmitting
+                    ? null
+                    : () async {
+                        if (titleController.text.isEmpty || skuController.text.isEmpty || priceController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen tüm zorunlu alanları doldurun.'), backgroundColor: Colors.orangeAccent));
+                          return;
+                        }
+                        setDlgState(() => isSubmitting = true);
+                        final price = double.tryParse(priceController.text) ?? 0.0;
+                        final stock = int.tryParse(stockController.text) ?? 0;
+                        final res = await _apiService.createProduct(titleController.text, skuController.text, price, stock);
+                        setDlgState(() => isSubmitting = false);
+
+                        if (res != null && mounted) {
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla eklendi!'), backgroundColor: Colors.green));
+                          _loadData();
+                        } else if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün eklenemedi!'), backgroundColor: Colors.red));
+                        }
+                      },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                child: isSubmitting ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Kaydet', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tenant = _metrics?['tenant'];
@@ -737,13 +831,24 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Ürün Kataloğu', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-            ElevatedButton.icon(
-              onPressed: () async {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tüm ürünlerin stokları aktif pazaryerlerine dağıtılıyor... (1.2s)'), backgroundColor: Colors.blueAccent));
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              icon: const Icon(Icons.flash_on, size: 18),
-              label: Text('Işık Hızında Stok Dağıt', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _showAddProductDialog,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green[700], foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text('Ürün Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tüm ürünlerin stokları aktif pazaryerlerine dağıtılıyor... (1.2s)'), backgroundColor: Colors.blueAccent));
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  icon: const Icon(Icons.flash_on, size: 18),
+                  label: Text('Işık Hızında Stok Dağıt', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                ),
+              ],
             ),
           ],
         ),
