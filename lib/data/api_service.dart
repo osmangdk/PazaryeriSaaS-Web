@@ -74,5 +74,73 @@ class ApiService {
       return null;
     }
   }
+
+  Future<List<dynamic>?> getMarketplaceConnections() async {
+    try {
+      final response = await _dio.get('/marketplaces');
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> connectMarketplace({
+    required int marketplaceType,
+    String? storeName,
+    String? sellerId,
+    String? apiKey,
+    String? apiSecret,
+  }) async {
+    try {
+      final response = await _dio.post('/marketplaces/connect', data: {
+        'marketplaceType': marketplaceType,
+        'storeName': storeName,
+        'sellerId': sellerId,
+        'apiKey': apiKey,
+        'apiSecret': apiSecret,
+      });
+      return response.data;
+    } on DioException catch (e) {
+      return {'error': e.response?.data?['message'] ?? e.message};
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
+
+  Future<bool> deleteMarketplaceConnection(String id) async {
+    try {
+      final response = await _dio.delete('/marketplaces/$id');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> validateMarketplace(String id) async {
+    try {
+      final response = await _dio.post('/marketplaces/$id/validate');
+      return response.data;
+    } catch (e) {
+      return {'isValid': false, 'message': 'Baglanti hatasi'};
+    }
+  }
+
+  Future<List<dynamic>?> getMarketplaceOrders() async {
+    try {
+      final response = await _dio.get('/marketplaces/orders');
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> syncProduct(String connectionId, String productId) async {
+    try {
+      final response = await _dio.post('/marketplaces/$connectionId/sync/$productId');
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
