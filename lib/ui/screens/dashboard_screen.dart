@@ -110,6 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             DropdownMenuItem(value: 5, child: Text('🔵 Pazarama')),
                             DropdownMenuItem(value: 6, child: Text('🌸 ÇiçekSepeti')),
                             DropdownMenuItem(value: 7, child: Text('🟡 PttAVM')),
+                            DropdownMenuItem(value: 8, child: Text('👔 Boyner')),
                           ],
                           onChanged: (val) {
                             if (val != null) {
