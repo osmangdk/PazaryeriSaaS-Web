@@ -89,6 +89,33 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> createRichProduct(Map<String, dynamic> productData) async {
+    try {
+      final response = await _dio.post('/products/rich', data: productData);
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getProductDetails(String productId) async {
+    try {
+      final response = await _dio.get('/products/$productId');
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> uploadProductToTrendyol(String productId) async {
+    try {
+      final response = await _dio.post('/products/$productId/upload-trendyol');
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<List<dynamic>?> getMarketplaceConnections() async {
     try {
       final response = await _dio.get('/marketplaces');
@@ -124,6 +151,15 @@ class ApiService {
   Future<bool> deleteMarketplaceConnection(String id) async {
     try {
       final response = await _dio.delete('/marketplaces/$id');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> toggleMarketplaceConnection(String id, bool isActive) async {
+    try {
+      final response = await _dio.patch('/marketplaces/$id/toggle');
       return response.statusCode == 200;
     } catch (e) {
       return false;

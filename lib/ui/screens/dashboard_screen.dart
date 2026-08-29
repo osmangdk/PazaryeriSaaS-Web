@@ -108,10 +108,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             keyboardType: TextInputType.number,
                             style: GoogleFonts.inter(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText: 'Maliyet (₺)',
+                              labelText: 'Maliyet Fiyatı (₺)',
                               labelStyle: GoogleFonts.inter(color: Colors.white60),
-                              prefixText: '₺ ',
-                              prefixStyle: GoogleFonts.inter(color: Colors.white),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.05),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -125,10 +123,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             keyboardType: TextInputType.number,
                             style: GoogleFonts.inter(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText: 'Hedef Kâr (%)',
+                              labelText: 'Hedef Net Kâr (%)',
                               labelStyle: GoogleFonts.inter(color: Colors.white60),
-                              suffixText: '%',
-                              suffixStyle: GoogleFonts.inter(color: Colors.white),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.05),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -142,52 +138,53 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             keyboardType: TextInputType.number,
                             style: GoogleFonts.inter(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText: 'Kargo (₺)',
+                              labelText: 'Kargo Maliyeti (₺)',
                               labelStyle: GoogleFonts.inter(color: Colors.white60),
-                              prefixText: '₺ ',
-                              prefixStyle: GoogleFonts.inter(color: Colors.white),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.05),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: isCalculating ? null : doCalculate,
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16)),
-                          child: Text('Hesapla', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.refresh, color: Colors.blueAccent),
+                          onPressed: doCalculate,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    const Divider(color: Colors.white12),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     if (isCalculating)
-                      const Center(child: CircularProgressIndicator(color: Colors.orangeAccent))
+                      const Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: Colors.orangeAccent))
                     else if (calculatedResults != null)
-                      Table(
-                        border: TableBorder.all(color: Colors.white12, borderRadius: BorderRadius.circular(8)),
+                      Column(
                         children: [
-                          TableRow(
-                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05)),
-                            children: [
-                              _tableCell('Pazaryeri', isHeader: true),
-                              _tableCell('Komisyon %', isHeader: true),
-                              _tableCell('Tavsiye Fiyat', isHeader: true),
-                              _tableCell('Komisyon Kesintisi', isHeader: true),
-                              _tableCell('Net Kâr', isHeader: true),
-                            ],
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(8)),
+                            child: Row(
+                              children: [
+                                Expanded(flex: 3, child: Text('Pazaryeri', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                Expanded(flex: 2, child: Text('Komisyon', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                Expanded(flex: 3, child: Text('Önerilen Fiyat', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
+                                Expanded(flex: 2, child: Text('Net Kâr', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                              ],
+                            ),
                           ),
-                          ...calculatedResults!.map((r) => TableRow(
+                          const SizedBox(height: 6),
+                          ...calculatedResults!.map((item) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                              child: Row(
                                 children: [
-                                  _tableCell(r['marketplaceName'] ?? '', isBold: true),
-                                  _tableCell('%${r['commissionPercent']}'),
-                                  _tableCell('₺${r['recommendedSalePrice']}', textColor: Colors.greenAccent, isBold: true),
-                                  _tableCell('₺${r['commissionAmount']}', textColor: Colors.redAccent),
-                                  _tableCell('₺${r['netProfitAmount']} (%${r['netProfitMarginPercent']})', textColor: Colors.blueAccent, isBold: true),
+                                  Expanded(flex: 3, child: Text(item['marketplace'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13))),
+                                  Expanded(flex: 2, child: Text('%${item['commissionRate']}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12))),
+                                  Expanded(flex: 3, child: Text('₺${item['recommendedSalePrice']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14))),
+                                  Expanded(flex: 2, child: Text('₺${item['targetProfitAmount']}', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12))),
                                 ],
-                              )),
+                              ),
+                            );
+                          }),
                         ],
                       ),
                   ],
@@ -203,22 +200,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  Widget _tableCell(String text, {bool isHeader = false, bool isBold = false, Color? textColor}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: GoogleFonts.inter(
-          color: textColor ?? (isHeader ? Colors.white : Colors.white70),
-          fontWeight: isHeader || isBold ? FontWeight.bold : FontWeight.normal,
-          fontSize: isHeader ? 12 : 13,
-        ),
-      ),
-    );
-  }
-
-  void _showConnectMarketplaceDialog() {
+  void _showAddMarketplaceDialog() {
     int selectedType = 1;
     final storeNameController = TextEditingController();
     final sellerIdController = TextEditingController();
@@ -230,9 +212,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) {
-          final isTrendyol = selectedType == 1;
-          final isHepsiburada = selectedType == 2;
-
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.white24)),
@@ -240,14 +219,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isTrendyol ? Colors.orange.withOpacity(0.2) : (isHepsiburada ? Colors.deepOrange.withOpacity(0.2) : Colors.blue.withOpacity(0.2)),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(Icons.storefront, color: isTrendyol ? Colors.orange : (isHepsiburada ? Colors.deepOrange : Colors.blue)),
+                  decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.add_link, color: Colors.blueAccent),
                 ),
                 const SizedBox(width: 12),
-                Text('Pazaryeri Bağla', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('Yeni Pazaryeri Bağla', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
               ],
             ),
             content: SizedBox(
@@ -258,52 +234,46 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   children: [
                     DropdownButtonFormField<int>(
                       value: selectedType,
-                      dropdownColor: const Color(0xFF0F172A),
+                      dropdownColor: const Color(0xFF1E293B),
                       style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: 'Pazaryeri Seçin',
-                        labelStyle: GoogleFonts.inter(color: Colors.white60),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.05),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+                      decoration: InputDecoration(labelText: 'Pazaryeri Seçin', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                       items: const [
                         DropdownMenuItem(value: 1, child: Text('🟠 Trendyol')),
-                        DropdownMenuItem(value: 2, child: Text('🟧 Hepsiburada')),
-                        DropdownMenuItem(value: 3, child: Text('🟣 N11')),
-                        DropdownMenuItem(value: 4, child: Text('📦 Amazon')),
-                        DropdownMenuItem(value: 5, child: Text('🔵 Pazarama')),
+                        DropdownMenuItem(value: 2, child: Text('🟠 Hepsiburada')),
+                        DropdownMenuItem(value: 3, child: Text('📦 Amazon TR')),
+                        DropdownMenuItem(value: 4, child: Text('🔴 N11')),
+                        DropdownMenuItem(value: 5, child: Text('🟣 Pazarama')),
                         DropdownMenuItem(value: 6, child: Text('🌸 ÇiçekSepeti')),
-                        DropdownMenuItem(value: 7, child: Text('📮 PttAVM')),
-                        DropdownMenuItem(value: 8, child: Text('👔 Boyner')),
-                        DropdownMenuItem(value: 9, child: Text('🚗 Sahibinden')),
+                        DropdownMenuItem(value: 7, child: Text('🟡 PttAVM')),
+                        DropdownMenuItem(value: 8, child: Text('🔵 Boyner')),
+                        DropdownMenuItem(value: 9, child: Text('🟡 Sahibinden')),
                       ],
-                      onChanged: (val) => setDialogState(() => selectedType = val!),
+                      onChanged: (val) => setDialogState(() => selectedType = val ?? 1),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: storeNameController,
                       style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'Mağaza Adı (Takma Ad)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                      decoration: InputDecoration(labelText: 'Mağaza Adı', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: sellerIdController,
                       style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'Satıcı ID / Merchant ID', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                      decoration: InputDecoration(labelText: 'Satıcı ID (Supplier ID / Merchant ID)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: apiKeyController,
                       style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'API Key / Kullanıcı Adı', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                      decoration: InputDecoration(labelText: 'API Anahtarı (API Key / Client ID)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: apiSecretController,
                       obscureText: true,
                       style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'API Secret / Şifre', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                      decoration: InputDecoration(labelText: 'API Gizli Anahtar (API Secret)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                     ),
                   ],
                 ),
@@ -345,11 +315,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  void _showAddProductDialog() {
-    final titleController = TextEditingController();
-    final skuController = TextEditingController();
-    final priceController = TextEditingController();
-    final stockController = TextEditingController(text: '100');
+  void _showAddRichProductDialog() {
+    final titleController = TextEditingController(text: "Tudors Erkek 5'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört");
+    final brandController = TextEditingController(text: "Tudors");
+    final categoryController = TextEditingController(text: "Polo Yaka Tişört");
+    final modelCodeController = TextEditingController(text: "942363515");
+    final skuController = TextEditingController(text: "TDR-POLO-5PK");
+    final priceController = TextEditingController(text: "1083.90");
+    final listPriceController = TextEditingController(text: "1747.80");
+    final costPriceController = TextEditingController(text: "450.00");
+    final desiController = TextEditingController(text: "2.0");
+    final stockController = TextEditingController(text: "385");
+    final imagesController = TextEditingController(text: "https://cdn.dsmcdn.com/ty1687/prod/QC_PREP/20250603/18/c2992fcf-6771-3257-8743-e1c6731041fd/1_org_zoom.jpg, https://cdn.dsmcdn.com/ty1686/prod/QC_PREP/20250603/18/53f6bf86-2c9f-3e2c-87c1-206a47e4ad34/1_org_zoom.jpg");
+    final fitController = TextEditingController(text: "Slim Fit");
+    final materialController = TextEditingController(text: "%55 Polyester, %45 Pamuk");
+    final collarController = TextEditingController(text: "Polo Yaka");
+    final colorsController = TextEditingController(text: "Gri-Mavi-Haki-Yeşil-Siyah");
     bool isSubmitting = false;
 
     showDialog(
@@ -363,43 +344,152 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.add_box, color: Colors.blueAccent),
+                  decoration: BoxDecoration(color: Colors.orange.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.shopping_bag, color: Colors.orangeAccent),
                 ),
                 const SizedBox(width: 12),
-                Text('Yeni Ürün Ekle', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('Gelişmiş Ürün & Varyant Tanımla (Trendyol V2 Standart)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
               ],
             ),
             content: SizedBox(
-              width: 450,
+              width: 650,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text('1. Temel Bilgiler & Tanımlayıcılar', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: titleController,
                       style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'Ürün Adı', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                      decoration: InputDecoration(labelText: 'Ürün Başlığı', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: skuController,
-                      style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'Stok Kodu (SKU)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: brandController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Marka (Brand)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: categoryController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Kategori', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: modelCodeController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Model Kodu (Grup)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: priceController,
-                      keyboardType: TextInputType.number,
-                      style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'Satış Fiyatı (₺)', labelStyle: GoogleFonts.inter(color: Colors.white60), prefixText: '₺ ', prefixStyle: GoogleFonts.inter(color: Colors.white), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    const SizedBox(height: 16),
+                    Text('2. Fiyatlandırma, KDV & Lojistik (Desi)', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: priceController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Satış Fiyatı (₺)', prefixText: '₺ ', prefixStyle: GoogleFonts.inter(color: Colors.greenAccent), labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: listPriceController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Liste Fiyatı (Üstü Çizili)', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: costPriceController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Maliyet (₺)', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: desiController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Desi / Ağırlık', suffixText: 'Desi', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    Text('3. Kategori Nitelikleri (Attributes)', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: fitController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Kalıp (Fit)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: materialController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Materyal', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: collarController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Yaka Tipi', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text('4. Çoklu Resim Bağlantıları (1-8 Adet)', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
                     TextField(
-                      controller: stockController,
-                      keyboardType: TextInputType.number,
-                      style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'Stok Miktarı', labelStyle: GoogleFonts.inter(color: Colors.white60), suffixText: 'Adet', suffixStyle: GoogleFonts.inter(color: Colors.white), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                      controller: imagesController,
+                      maxLines: 2,
+                      style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                      decoration: InputDecoration(labelText: 'Görsel CDN URL leri (virgülle ayrılmış)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.blueAccent.withOpacity(0.3))),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.auto_awesome, color: Colors.blueAccent),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Otomatik Beden Varyantları (XS, S, M, L, XL, 2XL, 3XL) bağımsız barkodlar ve stoklarla oluşturulacaktır.',
+                              style: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -411,26 +501,75 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 onPressed: isSubmitting
                     ? null
                     : () async {
-                        if (titleController.text.isEmpty || skuController.text.isEmpty || priceController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen tüm zorunlu alanları doldurun.'), backgroundColor: Colors.orangeAccent));
+                        if (titleController.text.isEmpty || priceController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen zorunlu alanları doldurun.'), backgroundColor: Colors.orangeAccent));
                           return;
                         }
                         setDlgState(() => isSubmitting = true);
-                        final price = double.tryParse(priceController.text) ?? 0.0;
-                        final stock = int.tryParse(stockController.text) ?? 0;
-                        final res = await _apiService.createProduct(titleController.text, skuController.text, price, stock);
+                        final price = double.tryParse(priceController.text) ?? 1083.90;
+                        final listPrice = double.tryParse(listPriceController.text) ?? 1747.80;
+                        final costPrice = double.tryParse(costPriceController.text) ?? 450.0;
+                        final desi = double.tryParse(desiController.text) ?? 2.0;
+                        final stock = int.tryParse(stockController.text) ?? 385;
+
+                        final rawImages = imagesController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
+                        // 7 Beden varyantı üret
+                        final sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+                        final variants = sizes.map((sz) {
+                          return {
+                            'sku': '${skuController.text}-$sz',
+                            'barcode': '868000${sz.hashCode.abs().toString().padLeft(6, '0')}',
+                            'size': sz,
+                            'color': colorsController.text,
+                            'price': price,
+                            'listPrice': listPrice,
+                            'stockQuantity': (stock / sizes.length).round(),
+                            'isActive': true
+                          };
+                        }).toList();
+
+                        final richPayload = {
+                          'title': titleController.text,
+                          'sku': skuController.text,
+                          'barcode': '8680009423635',
+                          'modelCode': modelCodeController.text,
+                          'brand': brandController.text,
+                          'categoryName': categoryController.text,
+                          'price': price,
+                          'listPrice': listPrice,
+                          'costPrice': costPrice,
+                          'vatRate': 20,
+                          'stockQuantity': stock,
+                          'dimensionalWeight': desi,
+                          'cargoCompany': 'Trendyol Express',
+                          'deliveryDuration': 2,
+                          'description': "${titleController.text} - ${fitController.text}, ${materialController.text}, ${collarController.text}",
+                          'images': rawImages,
+                          'attributes': {
+                            'Kalıp': fitController.text,
+                            'Materyal': materialController.text,
+                            'Yaka': collarController.text,
+                            'Renk': colorsController.text,
+                            'Paket': "5'li",
+                            'Cinsiyet': 'Erkek'
+                          },
+                          'variants': variants
+                        };
+
+                        final res = await _apiService.createRichProduct(richPayload);
                         setDlgState(() => isSubmitting = false);
 
                         if (res != null && mounted) {
                           Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla eklendi!'), backgroundColor: Colors.green));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Zengin Ürün & 7 Beden Varyantı Başarıyla Eklendi!'), backgroundColor: Colors.green));
                           _loadData();
                         } else if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün eklenemedi!'), backgroundColor: Colors.red));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün eklenirken bir hata oluştu!'), backgroundColor: Colors.red));
                         }
                       },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-                child: isSubmitting ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Kaydet', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800]),
+                child: isSubmitting ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Zengin Ürünü Kaydet 🚀', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ],
           );
@@ -463,59 +602,102 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           child: Column(
             children: [
               // Top Bar
-              Padding(
+              Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  border: const Border(bottom: BorderSide(color: Colors.white12)),
+                ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 24),
+                      decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.storefront, color: Colors.blueAccent, size: 24),
                     ),
                     const SizedBox(width: 12),
-                    Text('PazaryeriSaaS', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('30 Gün / 50.000 ₺ Ücretsiz Deneme Paketi', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                      ],
+                    ),
                     const Spacer(),
                     OutlinedButton.icon(
                       onPressed: _showPricingCalculatorDialog,
-                      icon: const Icon(Icons.calculate_outlined, color: Colors.orangeAccent, size: 18),
-                      label: Text('Akıllı Fiyat Robotu', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13)),
-                      style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orangeAccent)),
+                      style: OutlinedButton.styleFrom(foregroundColor: Colors.orangeAccent, side: const BorderSide(color: Colors.orangeAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                      icon: const Icon(Icons.calculate, size: 18),
+                      label: Text('Akıllı Fiyat Robotu', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(width: 8),
-                    IconButton(icon: const Icon(Icons.refresh, color: Colors.white70), onPressed: _loadData),
-                    IconButton(icon: const Icon(Icons.logout, color: Colors.white70), onPressed: _logout),
+                    ElevatedButton.icon(
+                      onPressed: _showAddMarketplaceDialog,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                      icon: const Icon(Icons.add_link, size: 18),
+                      label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(Icons.logout, color: Colors.redAccent),
+                      tooltip: 'Çıkış Yap',
+                      onPressed: _logout,
+                    ),
                   ],
                 ),
               ),
 
               // Navigation Tabs
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildTabButton(0, 'Genel Bakış', Icons.dashboard_outlined),
-                      const SizedBox(width: 8),
-                      _buildTabButton(1, 'Pazaryerleri (${_connections?.length ?? 0})', Icons.storefront_outlined),
-                      const SizedBox(width: 8),
-                      _buildTabButton(2, 'Siparişler (${_orders?.length ?? 0})', Icons.shopping_bag_outlined),
-                      const SizedBox(width: 8),
-                      _buildTabButton(3, 'Ürünler (${_products?.length ?? 0})', Icons.inventory_2_outlined),
-                      const SizedBox(width: 8),
-                      _buildTabButton(4, 'Finans & Kâr Analizi 📊', Icons.analytics_outlined),
-                    ],
-                  ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Row(
+                  children: [
+                    _buildTabButton(0, 'Pazaryeri Entegrasyonları', Icons.hub_outlined),
+                    const SizedBox(width: 12),
+                    _buildTabButton(1, 'Siparişler', Icons.shopping_bag_outlined),
+                    const SizedBox(width: 12),
+                    _buildTabButton(2, 'Ürün Kataloğu & Varyantlar', Icons.inventory_2_outlined),
+                    const SizedBox(width: 12),
+                    _buildTabButton(3, 'Finans & Kâr Analizi 📊', Icons.query_stats_outlined),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
 
+              // Main Content
               Expanded(
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
                     : SingleChildScrollView(
                         padding: const EdgeInsets.all(24),
-                        child: _buildCurrentTabContent(companyName, productCount, productLimit, connCount, connLimit, daysLeft),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Usage Meter
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(child: _buildLimitStat('Kalan Deneme Süresi', '$daysLeft Gün', Icons.timer_outlined, Colors.amberAccent)),
+                                  Container(width: 1, height: 40, color: Colors.white12),
+                                  Expanded(child: _buildLimitStat('Aktif Pazaryerleri', '$connCount / $connLimit', Icons.cable, Colors.blueAccent)),
+                                  Container(width: 1, height: 40, color: Colors.white12),
+                                  Expanded(child: _buildLimitStat('Kayıtlı Ürünler', '$productCount / $productLimit', Icons.inventory_2, Colors.greenAccent)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            if (_currentTabIndex == 0) _buildConnectionsTab(),
+                            if (_currentTabIndex == 1) _buildOrdersTab(),
+                            if (_currentTabIndex == 2) _buildProductsTab(),
+                            if (_currentTabIndex == 3) _buildFinancialsTab(),
+                          ],
+                        ),
                       ),
               ),
             ],
@@ -555,109 +737,31 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildCurrentTabContent(String companyName, int productCount, int productLimit, int connCount, int connLimit, int daysLeft) {
-    switch (_currentTabIndex) {
-      case 1:
-        return _buildMarketplacesTab();
-      case 2:
-        return _buildOrdersTab();
-      case 3:
-        return _buildProductsTab();
-      case 4:
-        return _buildFinancialsTab();
-      default:
-        return _buildOverviewTab(companyName, productCount, productLimit, connCount, connLimit, daysLeft);
-    }
-  }
-
-  Widget _buildOverviewTab(String companyName, int productCount, int productLimit, int connCount, int connLimit, int daysLeft) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildLimitStat(String label, String val, IconData icon, Color color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Hoşgeldiniz,', style: GoogleFonts.inter(color: Colors.white60, fontSize: 16)),
-        Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 24),
-
-        // Plan & Limit Kartı
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 20),
-                      const SizedBox(width: 8),
-                      Text('Ücretsiz Deneme (1 Ay / 50.000 ₺)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                    ],
-                  ),
-                  Text('$daysLeft gün kaldı', style: GoogleFonts.inter(color: Colors.amber, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Ürün Kotası ($productCount / $productLimit)', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
-                        const SizedBox(height: 6),
-                        LinearProgressIndicator(value: productCount / productLimit, backgroundColor: Colors.white12, color: Colors.blueAccent),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Pazaryeri Bağlantısı ($connCount / $connLimit)', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
-                        const SizedBox(height: 6),
-                        LinearProgressIndicator(value: connCount / connLimit, backgroundColor: Colors.white12, color: Colors.greenAccent),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        Icon(icon, color: color, size: 24),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+            Text(val, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+          ],
         ),
-        const SizedBox(height: 24),
-        _buildMarketplaceConnectionsOverview(),
-        const SizedBox(height: 24),
-        _buildRecentOrdersOverview(),
       ],
     );
   }
 
-  Widget _buildMarketplacesTab() {
+  Widget _buildConnectionsTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Bağlı Pazaryerleri', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-            ElevatedButton.icon(
-              onPressed: _showConnectMarketplaceDialog,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-            ),
-          ],
-        ),
+        Text('Bağlı Pazaryeri Kanalları', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         _connections == null || _connections!.isEmpty
-            ? _buildEmptyState('Henüz pazaryeri bağlanmamış.', Icons.storefront_outlined)
+            ? _buildEmptyState('Henüz bağlı bir pazaryeri bulunmuyor. Üst menüden "Pazaryeri Bağla" butonuna tıklayın.', Icons.hub_outlined)
             : ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -665,61 +769,33 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final c = _connections![index];
-                  final String typeName = c['marketplaceName'] ?? 'Pazaryeri';
-                  final bool isTrendyol = typeName.toLowerCase().contains('trendyol');
-                  final bool isHepsiburada = typeName.toLowerCase().contains('hepsiburada');
-                  final Color brandColor = isTrendyol ? Colors.orange : (isHepsiburada ? Colors.deepOrange : Colors.blue);
-                  final bool isActive = c['isActive'] ?? true;
-
+                  final isActive = c['isActive'] == true;
                   return Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: brandColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: brandColor.withOpacity(0.3)),
-                    ),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                     child: Row(
                       children: [
-                        Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: brandColor.withOpacity(0.2), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.storefront, color: brandColor, size: 28)),
+                        Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.orange.withOpacity(0.2), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.storefront, color: Colors.orangeAccent, size: 28)),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Text(typeName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: isActive ? Colors.greenAccent.withOpacity(0.2) : Colors.redAccent.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(isActive ? 'Aktif' : 'Pasif', style: GoogleFonts.inter(color: isActive ? Colors.greenAccent : Colors.redAccent, fontSize: 11, fontWeight: FontWeight.bold)),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
+                              Text(c['marketplaceName'] ?? 'Pazaryeri', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                               Text('Mağaza: ${c['storeName']} • Satıcı ID: ${c['sellerId']}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 13)),
                             ],
                           ),
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(isActive ? 'Açık' : 'Kapalı', style: GoogleFonts.inter(color: isActive ? Colors.greenAccent : Colors.white38, fontSize: 12, fontWeight: FontWeight.w600)),
-                            Switch(
-                              value: isActive,
-                              activeColor: Colors.greenAccent,
-                              onChanged: (val) async {
-                                final res = await _apiService.toggleMarketplaceStatus(c['id']);
-                                if (mounted) {
-                                  _loadData();
-                                }
-                              },
-                            ),
-                          ],
+                        Switch(
+                          value: isActive,
+                          activeColor: Colors.greenAccent,
+                          onChanged: (val) async {
+                            final ok = await _apiService.toggleMarketplaceConnection(c['id'], val);
+                            if (ok && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(val ? 'Pazaryeri aktif edildi.' : 'Pazaryeri durduruldu.'), backgroundColor: val ? Colors.green : Colors.orange));
+                              _loadData();
+                            }
+                          },
                         ),
                         IconButton(
                           icon: const Icon(Icons.check_circle_outline, color: Colors.greenAccent),
@@ -764,53 +840,52 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final o = _orders![index];
-                  final orderId = o['orderId'] ?? o['orderNumber'] ?? 'ORD-001';
+                  final orderId = o['orderId'] ?? 'ORD-001';
                   return Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.07),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.white12),
-                    ),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Sipariş: $orderId', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
-                              child: Text(o['status'] ?? 'Onaylandı', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
+                            Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.shopping_bag, color: Colors.greenAccent, size: 24)),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${o['customerName']} • ${o['marketplace']}', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                                  Text('Sipariş No: $orderId • Durum: ${o['status']}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                                ],
+                              ),
                             ),
+                            Text('₺${o['totalPrice']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Text('Tutar: ${o['totalPrice']} ${o['currency'] ?? 'TRY'} • Takip No: ${o['cargoTrackingNumber'] ?? 'TRK-' + orderId}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 13)),
                         const SizedBox(height: 12),
-                        const Divider(color: Colors.white10),
+                        const Divider(color: Colors.white12),
                         const SizedBox(height: 8),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            ElevatedButton.icon(
+                            OutlinedButton.icon(
                               onPressed: () {
                                 final url = _apiService.getInvoiceUrl(orderId);
                                 html.window.open(url, '_blank');
                               },
-                              icon: const Icon(Icons.receipt_long, size: 16),
-                              label: Text('GİB E-Fatura Görüntüle', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green[700], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                              icon: const Icon(Icons.receipt_long, size: 16, color: Colors.blueAccent),
+                              label: Text('GİB E-Fatura Görüntüle', style: GoogleFonts.inter(fontSize: 12, color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+                              style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 10),
                             OutlinedButton.icon(
                               onPressed: () {
                                 final url = _apiService.getShippingLabelUrl(orderId);
                                 html.window.open(url, '_blank');
                               },
-                              icon: const Icon(Icons.qr_code, size: 16),
-                              label: Text('Kargo Barkodu Yazdır', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
-                              style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white24), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                              icon: const Icon(Icons.qr_code, size: 16, color: Colors.orangeAccent),
+                              label: Text('Kargo Barkodu Yazdır', style: GoogleFonts.inter(fontSize: 12, color: Colors.orangeAccent, fontWeight: FontWeight.bold)),
+                              style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orangeAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                             ),
                           ],
                         ),
@@ -830,14 +905,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Ürün Kataloğu', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text('Ürün Kataloğu & Varyant Matrisi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
             Row(
               children: [
                 ElevatedButton.icon(
-                  onPressed: _showAddProductDialog,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green[700], foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text('Ürün Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  onPressed: _showAddRichProductDialog,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  icon: const Icon(Icons.add_shopping_cart, size: 18),
+                  label: Text('Gelişmiş Ürün Tanımla (Varyantlı)', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
@@ -854,12 +929,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         ),
         const SizedBox(height: 16),
         _products == null || _products!.isEmpty
-            ? _buildEmptyState('Henüz ürün eklenmemiş.', Icons.inventory_2_outlined)
+            ? _buildEmptyState('Henüz ürün eklenmemiş. Yukarıdaki "Gelişmiş Ürün Tanımla" butonuyla yeni ürün ekleyebilirsiniz.', Icons.inventory_2_outlined)
             : ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _products!.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) => _buildProductCard(_products![index]),
               ),
       ],
@@ -867,44 +942,116 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   }
 
   Widget _buildProductCard(dynamic p) {
+    final variantCount = p['variantCount'] ?? 0;
+    final imageCount = p['imageCount'] ?? 0;
+    final brand = p['brand'] ?? 'Genel';
+    final category = p['categoryName'] ?? 'Giyim';
+    final modelCode = p['modelCode'] ?? p['sku'];
+    final desi = p['dimensionalWeight'] ?? 1.0;
+    final listPrice = p['listPrice'];
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
-      child: Row(
+      child: Column(
         children: [
-          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 24)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(p['name'] ?? 'İsimsiz Ürün', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                Text('SKU: ${p['sku']} • Barkod: ${p['barcode'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('₺${p['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-              Text('Stok: ${p['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  image: p['firstImage'] != null
+                      ? DecorationImage(image: NetworkImage(p['firstImage']), fit: BoxFit.cover)
+                      : null,
+                ),
+                child: p['firstImage'] == null ? const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 28) : null,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p['title'] ?? p['name'] ?? 'İsimsiz Ürün', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        _tagBadge(brand, Colors.blueAccent),
+                        _tagBadge(category, Colors.tealAccent),
+                        _tagBadge('Model: $modelCode', Colors.purpleAccent),
+                        _tagBadge('Desi: $desi', Colors.amberAccent),
+                        if (variantCount > 0) _tagBadge('$variantCount Beden Varyantı', Colors.orangeAccent),
+                        if (imageCount > 0) _tagBadge('$imageCount Görsel', Colors.lightBlueAccent),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('SKU: ${p['sku']} • Barkod: ${p['barcode'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('₺${p['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 17)),
+                  if (listPrice != null)
+                    Text('₺$listPrice', style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 12)),
+                  Text('Stok: ${p['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
+                ],
+              ),
             ],
           ),
-          const SizedBox(width: 12),
-          IconButton(
-            icon: const Icon(Icons.sync, color: Colors.blueAccent),
-            tooltip: 'Tüm Kanallara Stok Dağıt (Broadcast)',
-            onPressed: () async {
-              final res = await _apiService.broadcastStock(p['id'], p['stockQuantity']);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(res?['isSuccess'] == true ? 'Stok 1.2 saniyede tüm pazaryerlerine eşitlendi!' : 'Stok dağıtımında hata!'), backgroundColor: Colors.blueAccent),
-                );
-              }
-            },
+          const SizedBox(height: 12),
+          const Divider(color: Colors.white12),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () async {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trendyol v2 Ürün Oluşturma API isteği gönderiliyor...'), backgroundColor: Colors.orange));
+                  final res = await _apiService.uploadProductToTrendyol(p['id']);
+                  if (mounted) {
+                    final isOk = res?['isSuccess'] == true;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(isOk ? 'Ürün Trendyol kataloğuna başarıyla aktarıldı!' : (res?['errorMessage'] ?? 'Trendyol aktarımında hata!')), backgroundColor: isOk ? Colors.green : Colors.orange),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                icon: const Icon(Icons.cloud_upload, size: 16),
+                label: Text('Trendyol a Yükle (v2)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final res = await _apiService.broadcastStock(p['id'], p['stockQuantity']);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(res?['isSuccess'] == true ? 'Stok 1.2 saniyede tüm pazaryerlerine eşitlendi!' : 'Stok dağıtımında hata!'), backgroundColor: Colors.blueAccent),
+                    );
+                  }
+                },
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.blueAccent, side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                icon: const Icon(Icons.flash_on, size: 16),
+                label: Text('Stok Dağıt (1.2s)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _tagBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(4), border: Border.all(color: color.withOpacity(0.3))),
+      child: Text(label, style: GoogleFonts.inter(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
     );
   }
 
@@ -927,160 +1074,84 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             const SizedBox(width: 12),
             Expanded(child: _finCard('Komisyon Kesintileri', '₺${commission}', Icons.percent, Colors.orangeAccent)),
             const SizedBox(width: 12),
-            Expanded(child: _finCard('Kargo Giderleri', '₺${cargo}', Icons.local_shipping, Colors.purpleAccent)),
+            Expanded(child: _finCard('Tahmini Kargo Gideri', '₺${cargo}', Icons.local_shipping, Colors.purpleAccent)),
             const SizedBox(width: 12),
-            Expanded(child: _finCard('Net Kâr (%$margin)', '₺${netProfit}', Icons.trending_up, Colors.greenAccent)),
+            Expanded(child: _finCard('Net Kâr Marjı (%$margin)', '₺${netProfit}', Icons.trending_up, Colors.greenAccent)),
           ],
         ),
         const SizedBox(height: 24),
-        Text('Kanal Bazlı Finansal Dağılım', style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        Text('Kanal Bazlı Kârlılık Dağılımı', style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        breakdowns.isEmpty
-            ? Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(12)),
-                child: Text('Aktif pazaryerlerinden sipariş verisi çekildikçe finansal metrikler anlık hesaplanmaktadır.', style: GoogleFonts.inter(color: Colors.white60)),
-              )
-            : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: breakdowns.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final b = breakdowns[index];
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(b['channelName'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                        Text('Sipariş: ${b['orderCount']}', style: GoogleFonts.inter(color: Colors.white70)),
-                        Text('Ciro: ₺${b['grossSales']}', style: GoogleFonts.inter(color: Colors.white)),
-                        Text('Komisyon: ₺${b['commissionAmount']}', style: GoogleFonts.inter(color: Colors.orangeAccent)),
-                        Text('Net Kâr: ₺${b['netProfit']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  );
-                },
-              ),
+        if (breakdowns.isEmpty)
+          _buildEmptyState('Finansal dağılım verisi hesaplanıyor...', Icons.analytics_outlined)
+        else
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(flex: 3, child: Text('Kanal', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
+                    Expanded(flex: 2, child: Text('Sipariş', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
+                    Expanded(flex: 2, child: Text('Brüt Ciro', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
+                    Expanded(flex: 2, child: Text('Komisyon', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
+                    Expanded(flex: 2, child: Text('Net Kâr', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold))),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(color: Colors.white12),
+                const SizedBox(height: 8),
+                ...breakdowns.map((b) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          Expanded(flex: 3, child: Text(b['marketplace'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold))),
+                          Expanded(flex: 2, child: Text('${b['orderCount']} Adet', style: GoogleFonts.inter(color: Colors.white70))),
+                          Expanded(flex: 2, child: Text('₺${b['grossSales']}', style: GoogleFonts.inter(color: Colors.white))),
+                          Expanded(flex: 2, child: Text('₺${b['commissionDeducted']}', style: GoogleFonts.inter(color: Colors.orangeAccent))),
+                          Expanded(flex: 2, child: Text('₺${b['netProfit']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                    )),
+              ],
+            ),
+          ),
       ],
     );
   }
 
-  Widget _finCard(String title, String value, IconData icon, Color color) {
+  Widget _finCard(String title, String val, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+              Icon(icon, color: color, size: 20),
+            ],
+          ),
           const SizedBox(height: 12),
-          Text(title, style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
-          const SizedBox(height: 4),
-          Text(value, style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
+          Text(val, style: GoogleFonts.inter(color: color, fontSize: 20, fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 
-  Widget _buildMarketplaceConnectionsOverview() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Bağlı Pazaryerleri', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-            TextButton(onPressed: () => setState(() => _currentTabIndex = 1), child: Text('Tümünü Gör', style: GoogleFonts.inter(color: Colors.blueAccent))),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _connections == null || _connections!.isEmpty
-            ? _buildEmptyState('Bağlı pazaryeri yok. Sağ üstteki sekmeden hemen bağlayabilirsiniz.', Icons.storefront_outlined)
-            : Row(
-                children: _connections!.map((c) {
-                  final String typeName = c['marketplaceName'] ?? 'Pazaryeri';
-                  final bool isTrendyol = typeName.toLowerCase().contains('trendyol');
-                  final bool isHepsiburada = typeName.toLowerCase().contains('hepsiburada');
-                  final Color brandColor = isTrendyol ? Colors.orange : (isHepsiburada ? Colors.deepOrange : Colors.blue);
-
-                  return Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: brandColor.withOpacity(0.12), borderRadius: BorderRadius.circular(14), border: Border.all(color: brandColor.withOpacity(0.4))),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.storefront, color: brandColor, size: 24),
-                          const SizedBox(height: 8),
-                          Text(typeName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text(c['storeName'] ?? 'Aktif', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-      ],
-    );
-  }
-
-  Widget _buildRecentOrdersOverview() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Son Siparişler', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-            TextButton(onPressed: () => setState(() => _currentTabIndex = 2), child: Text('Tümünü Gör', style: GoogleFonts.inter(color: Colors.blueAccent))),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _orders == null || _orders!.isEmpty
-            ? _buildEmptyState('Henüz sipariş yok.', Icons.shopping_bag_outlined)
-            : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _orders!.length > 3 ? 3 : _orders!.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final o = _orders![index];
-                  final orderId = o['orderId'] ?? o['orderNumber'] ?? 'ORD-001';
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Sipariş: $orderId', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
-                        Text('${o['totalPrice']} TRY', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  );
-                },
-              ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState(String text, IconData icon) {
+  Widget _buildEmptyState(String message, IconData icon) {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.02), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10)),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
       child: Column(
         children: [
-          Icon(icon, size: 40, color: Colors.white30),
+          Icon(icon, size: 48, color: Colors.white24),
           const SizedBox(height: 12),
-          Text(text, textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14)),
+          Text(message, textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14)),
         ],
       ),
     );
