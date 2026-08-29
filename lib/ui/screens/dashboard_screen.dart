@@ -983,6 +983,384 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  void _showEditProductDialog(String productId, Map<String, dynamic> product) {
+    final titleController = TextEditingController(text: product['title'] ?? '');
+    final brandController = TextEditingController(text: product['brand'] ?? '');
+    final categoryController = TextEditingController(text: product['categoryName'] ?? '');
+    final priceController = TextEditingController(text: (product['price'] ?? '').toString());
+    final stockController = TextEditingController(text: (product['stockQuantity'] ?? '').toString());
+    final listPriceController = TextEditingController(text: (product['listPrice'] ?? '').toString());
+    final desiController = TextEditingController(text: (product['dimensionalWeight'] ?? '1.5').toString());
+    final skuController = TextEditingController(text: product['sku'] ?? '');
+    final descriptionController = TextEditingController(text: product['description'] ?? '');
+    final urlInputController = TextEditingController();
+
+    List<String> uploadedImages = List<String>.from(product['images'] ?? []);
+    int selectedCampaignType = product['campaignType'] ?? 1;
+    String selectedCampaignName = product['campaignName'] ?? '🔥 2 Al 1 Öde (BOGO)';
+    bool isSaving = false;
+    bool isUploadingImage = false;
+    bool showAdvancedOptions = false;
+
+    final campaignOptions = [
+      {'type': 0, 'name': '✅ Kampanyasız (Normal Fiyat)', 'desc': 'Herhangi bir kampanya yoktur'},
+      {'type': 1, 'name': '🔥 2 Al 1 Öde (BOGO)', 'desc': 'Müşteri 2 adet alınca 1\'ini ücretsiz alır'},
+      {'type': 2, 'name': '🏷️ %25 İndirim', 'desc': 'Fiyat %25 indirimli gösterilir'},
+      {'type': 3, 'name': '🎁 3 Al 2 Öde', 'desc': 'Müşteri 3 adet alınca 2\'sini öder'},
+      {'type': 4, 'name': '💥 Flaş Kampanya', 'desc': 'Sınırlı süreli indirim'},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          void pickAndUploadImage() {
+            final uploadInput = html.FileUploadInputElement();
+            uploadInput.accept = 'image/*';
+            uploadInput.click();
+
+            uploadInput.onChange.listen((e) {
+              final files = uploadInput.files;
+              if (files != null && files.isNotEmpty) {
+                final file = files[0];
+                final reader = html.FileReader();
+                setDlgState(() => isUploadingImage = true);
+
+                reader.onLoadEnd.listen((e) async {
+                  final base64String = reader.result as String;
+                  final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
+                  setDlgState(() {
+                    isUploadingImage = false;
+                    uploadedImages.add(uploadedUrl ?? base64String);
+                  });
+                });
+                reader.readAsDataUrl(file);
+              }
+            });
+          }
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.amberAccent, width: 1.5)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.amber.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.edit, color: Colors.amberAccent),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Ürünü Güncelle', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text('Ürün bilgilerini ve kampanya ayarlarını düzenleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 820,
+              height: 580,
+              child: SingleChildScrollView(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Sol: Görseller
+                    SizedBox(
+                      width: 280,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('📸 Ürün Görselleri', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                          const SizedBox(height: 8),
+                          InkWell(
+                            onTap: pickAndUploadImage,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              height: 110,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.amberAccent.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.amberAccent.withOpacity(0.4), style: BorderStyle.solid, width: 1.5),
+                              ),
+                              child: isUploadingImage
+                                  ? const Center(child: CircularProgressIndicator(color: Colors.amberAccent))
+                                  : Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.add_photo_alternate_outlined, color: Colors.amberAccent, size: 32),
+                                        const SizedBox(height: 6),
+                                        Text('Yeni Fotoğraf Ekle', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: urlInputController,
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 11),
+                                  decoration: InputDecoration(
+                                    hintText: 'Resim URL si yapıştır...',
+                                    hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                    filled: true,
+                                    fillColor: Colors.white.withOpacity(0.05),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final url = urlInputController.text.trim();
+                                  if (url.isNotEmpty) {
+                                    setDlgState(() { uploadedImages.add(url); urlInputController.clear(); });
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.amberAccent, foregroundColor: Colors.black, padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10)),
+                                child: const Icon(Icons.add, size: 16),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          if (uploadedImages.isNotEmpty) ...[
+                            Text('Mevcut Görseller (${uploadedImages.length})', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                            const SizedBox(height: 6),
+                            SizedBox(
+                              height: 160,
+                              child: GridView.builder(
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 6, crossAxisSpacing: 6),
+                                itemCount: uploadedImages.length,
+                                itemBuilder: (ctx, i) => Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(uploadedImages[i], fit: BoxFit.cover, width: double.infinity, height: double.infinity,
+                                          errorBuilder: (c, e, s) => Container(color: Colors.white10, child: const Icon(Icons.broken_image, color: Colors.white38))),
+                                    ),
+                                    Positioned(
+                                      top: 2, right: 2,
+                                      child: InkWell(
+                                        onTap: () => setDlgState(() => uploadedImages.removeAt(i)),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                                          child: const Icon(Icons.close, size: 12, color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    // Sağ: Form alanları
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: titleController,
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                            decoration: InputDecoration(labelText: 'Ürün Başlığı *', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: brandController,
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                  decoration: InputDecoration(labelText: 'Marka', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  controller: categoryController,
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                  decoration: InputDecoration(labelText: 'Kategori', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: priceController,
+                                  keyboardType: TextInputType.number,
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                  decoration: InputDecoration(labelText: 'Satış Fiyatı *', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  controller: stockController,
+                                  keyboardType: TextInputType.number,
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                  decoration: InputDecoration(labelText: 'Stok Adedi', suffixText: 'Adet', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: descriptionController,
+                            maxLines: 2,
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                            decoration: InputDecoration(labelText: 'Ürün Açıklaması', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                          ),
+                          const SizedBox(height: 12),
+                          Text('🎯 Kampanya Tipi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.amberAccent.withOpacity(0.4))),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<int>(
+                                value: selectedCampaignType,
+                                dropdownColor: const Color(0xFF1E293B),
+                                isExpanded: true,
+                                style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                items: campaignOptions.map((c) {
+                                  return DropdownMenuItem<int>(
+                                    value: c['type'] as int,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(c['name'] as String, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                                        Text(c['desc'] as String, style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    final chosen = campaignOptions.firstWhere((c) => c['type'] == val);
+                                    setDlgState(() { selectedCampaignType = val; selectedCampaignName = chosen['name'] as String; });
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          InkWell(
+                            onTap: () => setDlgState(() => showAdvancedOptions = !showAdvancedOptions),
+                            child: Row(
+                              children: [
+                                Icon(showAdvancedOptions ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.amberAccent, size: 18),
+                                const SizedBox(width: 6),
+                                Text(showAdvancedOptions ? 'Gelişmiş Seçenekleri Gizle' : '⚙️ Liste Fiyatı, Desi, SKU', style: GoogleFonts.inter(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          if (showAdvancedOptions) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: listPriceController,
+                                    keyboardType: TextInputType.number,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(labelText: 'Liste Fiyatı (Üstü Çizili)', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    controller: desiController,
+                                    keyboardType: TextInputType.number,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(labelText: 'Kargo Desisi', suffixText: 'Desi', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    controller: skuController,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(labelText: 'SKU Kodu', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60))),
+              ElevatedButton(
+                onPressed: isSaving
+                    ? null
+                    : () async {
+                        if (titleController.text.trim().isEmpty || priceController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen Ürün Başlığı ve Satış Fiyatı alanlarını girin.'), backgroundColor: Colors.orangeAccent));
+                          return;
+                        }
+                        setDlgState(() => isSaving = true);
+
+                        final updatePayload = {
+                          'title': titleController.text.trim(),
+                          'brand': brandController.text.trim(),
+                          'categoryName': categoryController.text.trim(),
+                          'price': double.tryParse(priceController.text) ?? 0,
+                          'listPrice': double.tryParse(listPriceController.text),
+                          'stockQuantity': int.tryParse(stockController.text) ?? 0,
+                          'dimensionalWeight': double.tryParse(desiController.text) ?? 1.5,
+                          'sku': skuController.text.trim(),
+                          'description': descriptionController.text.trim(),
+                          'images': uploadedImages,
+                          'campaignType': selectedCampaignType,
+                          'campaignName': selectedCampaignName,
+                        };
+
+                        final res = await _apiService.updateProduct(productId, updatePayload);
+                        setDlgState(() => isSaving = false);
+
+                        if (mounted) {
+                          Navigator.pop(ctx);
+                          if (res != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla güncellendi! ✅'), backgroundColor: Colors.green));
+                            _loadData();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Güncelleme sırasında bir hata oluştu.'), backgroundColor: Colors.red));
+                          }
+                        }
+                      },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[700], padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                child: isSaving
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : Text('Güncelle ✅', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   void _showPricingCalculatorDialog() {
     final costController = TextEditingController(text: '150');
     final profitController = TextEditingController(text: '25');
@@ -1991,6 +2369,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 style: OutlinedButton.styleFrom(foregroundColor: Colors.lightBlueAccent, side: const BorderSide(color: Colors.lightBlueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                 icon: const Icon(Icons.visibility, size: 16),
                 label: Text('Detayları İncele', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () => _showEditProductDialog(productId, p),
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.amberAccent, side: const BorderSide(color: Colors.amberAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                icon: const Icon(Icons.edit_outlined, size: 16),
+                label: Text('Düzenle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
               ),
               const Spacer(),
               ElevatedButton.icon(
