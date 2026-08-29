@@ -164,11 +164,30 @@ class ApiService {
     }
 
     final msg = message.toLowerCase();
-    if (msg.contains('2 al 1') || msg.contains('kampanya') || msg.contains('promosyon') || msg.contains('indirim')) {
+    if (msg.contains('temsilci') || msg.contains('whatsapp') || msg.contains('destek') || msg.contains('çağrı') || msg.contains('telefon')) {
+      return {
+        'reply': '📞 Müşteri Temsilcisi & Canlı Destek Kanallarımız:\n\nUzman ekibimizle dilediğiniz an iletişime geçebilirsiniz:\n* 🟢 WhatsApp Destek Hattı: 7/24 anlık mesajlaşma\n* 📞 Çağrı Merkezi: 0850 000 00 00\n* ✉️ E-Posta: destek@pazaryeri.com',
+        'suggestedActions': [
+          {'label': '🟢 WhatsApp Canlı Destek', 'actionType': 'open_whatsapp_support'},
+          {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'},
+        ],
+        'quickPrompts': ['1 Ay ücretsiz deneme nedir?', 'Trendyol mağazamı nasıl bağlarım?']
+      };
+    } else if (msg.contains('trendyol') || msg.contains('hepsiburada') || msg.contains('mağaza') || msg.contains('pazaryeri') || msg.contains('bağla') || msg.contains('api')) {
+      return {
+        'reply': '🔗 Pazaryeri Mağazası Bağlama Rehberi (Trendyol & Hepsiburada):\n\nPazaryerinizi bağlamak yalnızca 1 dakikanızı alır:\n1. Sağ üstteki "Pazaryeri Bağla" butonuna tıklayın.\n2. Açılan listeden mağazanızı seçin (Trendyol, Hepsiburada, Amazon TR, N11, Pazarama vb.).\n3. Satıcı panelinizden temin ettiğiniz Satıcı ID (Merchant ID), API Key ve API Secret bilgilerinizi girip "Bağla" butonuna basın.\n4. Sistem API bağlantınızı 1 saniyede test ederek tüm sipariş ve ürünlerinizi anında merkeze çeker.',
+        'suggestedActions': [
+          {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'},
+          {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}
+        ],
+        'quickPrompts': ['2 Al 1 Öde nasıl açılır?', 'Stoklar nasıl eşitlenir?']
+      };
+    } else if (msg.contains('2 al 1') || msg.contains('kampanya') || msg.contains('promosyon') || msg.contains('indirim') || msg.contains('bogo')) {
       return {
         'reply': '🔥 2 Al 1 Öde & Promosyon Kampanyası Tanımlama:\n\nPazaryeri SaaS panelinde ürünlerinize tek tıkla kampanya kurgusu atayabilirsiniz:\n\n1. Ürün Kataloğu sekmesindeki "+ Yeni Ürün & Kampanya Ekle" butonuna tıklayın.\n2. "🎯 Pazaryeri Kampanyası" seçeneğinden "🔥 2 Al 1 Öde (BOGO)" seçeneğini seçin.\n3. Canlı hesaplayıcı, ürünün satış fiyatına göre müşterinin sepetteki birim maliyetini otomatik hesaplar.\n4. Kaydettiğinizde sistem kampanya etiketini ve sepet indirim kurgusunu Trendyol & Hepsiburada ya otomatik entegre eder.',
         'suggestedActions': [
-          {'label': '🚀 Hemen Ücretsiz Başla', 'actionType': 'go_register'}
+          {'label': '🚀 Hemen Ücretsiz Başla', 'actionType': 'go_register'},
+          {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}
         ],
         'quickPrompts': ['Stok senkronizasyonu nasıl çalışır?', '1 Ay ücretsiz deneme nedir?']
       };
@@ -176,7 +195,8 @@ class ApiService {
       return {
         'reply': '🎁 1 Ay (30 Gün) Boyunca 50.000 ₺ İşlem Hacmine Kadar %100 Ücretsiz!\n\nPazaryeriSaaS ı kredi kartı girmeden hemen deneyebilirsiniz:\n* 30 Gün Ücretsiz Kullanım\n* 50.000 ₺ Satış Hacmi & 50 Ürün Kotası\n* 3 Aktif Pazaryeri Bağlantısı (Trendyol, Hepsiburada, Amazon TR vb.)\n* 1.2s Gerçek Zamanlı Stok Senkronizasyonu\n* GİB E-Fatura & Kargo Barkodu Basımı',
         'suggestedActions': [
-          {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'}
+          {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'},
+          {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}
         ],
         'quickPrompts': ['Trendyol mağazamı nasıl bağlarım?', '2 Al 1 Öde nasıl açılır?']
       };
@@ -184,26 +204,20 @@ class ApiService {
       return {
         'reply': '⚡ Işık Hızında (1.2s) Çok Kanallı Stok Eşitleme:\n\n* Otomatik Düşüş: Trendyol veya Hepsiburada dan 1 adet sipariş geldiğinde, ürünün stoğu 1.2 saniye içinde tüm bağlı diğer kanallarda otomatik düşürülür.\n* Sıfır Çift Satış (Overselling Zero): Stok tükenmesi kaynaklı cezai iptalleri engeller.\n* Tek Tıkla Dağıtım: Ürünler sayfasındaki "⚡ Hızlı Stok Dağıt" butonu ile tüm envanterinizi dilediğiniz an eşitleyebilirsiniz.',
         'suggestedActions': [
-          {'label': '🚀 Ücretsiz Başla', 'actionType': 'go_register'}
+          {'label': '🚀 Ücretsiz Başla', 'actionType': 'go_register'},
+          {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}
         ],
         'quickPrompts': ['Pazaryeri nasıl bağlanır?', 'Kâr marjımı nasıl hesaplarım?']
-      };
-    } else if (msg.contains('nasıl bağlanır') || msg.contains('mağaza bağla') || msg.contains('pazaryeri bağla') || msg.contains('trendyol') || msg.contains('hepsiburada')) {
-      return {
-        'reply': 'Merhaba! Pazaryerlerinizi bağlamak oldukça basittir:\n\n1. Sağ üstteki "Pazaryeri Bağla" butonuna tıklayın (veya üye girişi yapın).\n2. Açılan menüden pazaryerinizi seçin (Trendyol, Hepsiburada, Amazon TR, N11, Pazarama vb.).\n3. Satıcı panelinizden temin ettiğiniz Satıcı ID (Merchant ID), API Key ve API Secret bilgilerini girip "Bağla"ya basın.\n4. Sistem API bağlantınızı 1 saniyede test ederek tüm mağazalarınızı anında tek merkezde toplar.',
-        'suggestedActions': [
-          {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'}
-        ],
-        'quickPrompts': ['2 Al 1 Öde nasıl açılır?', 'Stoklar nasıl eşitlenir?']
       };
     }
 
     return {
       'reply': 'Merhaba! Ben sizin AI Pazaryeri Danışmanınızım. 🤖\n\nSize aşağıdaki konularda 7/24 rehberlik edebilirim:\n* 🛒 2 Al 1 Öde & Promosyon Kampanyası Tanımlama\n* 🔗 Pazaryeri Mağaza Bağlantıları (Trendyol, Hepsiburada vb.)\n* ⚡ 1.2 Saniyelik Hızlı Stok Eşitleme Mantığı\n* 📑 GİB E-Fatura & Kargo Barkodu Basımı\n* 🖩 Akıllı Komisyon & Kârlı Fiyatlandırma Robotu\n* 🎁 1 Ay / 50.000 ₺ Ücretsiz Deneme Paketi Detayları\n\nBana sormak istediğiniz konuyu yazabilir veya aşağıdaki hızlı butonlara basabilirsiniz!',
       'suggestedActions': [
-        {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'}
+        {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'},
+        {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}
       ],
-      'quickPrompts': ['1 Ay ücretsiz deneme nedir?', '2 Al 1 Öde kampanyası nasıl açılır?', 'Stok senkronizasyonu nasıl çalışır?']
+      'quickPrompts': ['1 Ay ücretsiz deneme nedir?', '2 Al 1 Öde nasıl açılır?', 'Stok senkronizasyonu nasıl çalışır?']
     };
   }
 

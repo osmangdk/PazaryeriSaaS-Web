@@ -25,6 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
   // AI Chat State
   final List<Map<String, dynamic>> _aiMessages = [];
+  final Set<String> _askedPrompts = {};
   bool _isAiThinking = false;
   final TextEditingController _aiInputController = TextEditingController();
   final ScrollController _aiScrollController = ScrollController();
@@ -45,8 +46,154 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         {'label': '🔗 Mağaza Nasıl Bağlanır?', 'action': 'ask', 'prompt': 'Trendyol mağazamı nasıl bağlarım?'},
         {'label': '⚡ Stoklar Nasıl Eşitlenir?', 'action': 'ask', 'prompt': 'Stok senkronizasyonu nasıl çalışır?'},
         {'label': '🖩 Fiyat Robotu Nasıl Kullanılır?', 'action': 'ask', 'prompt': 'Kâr marjımı nasıl hesaplarım?'},
+        {'label': '📞 Müşteri Temsilcisine Bağlan', 'action': 'open_support_channels', 'prompt': ''},
       ]
     });
+  }
+
+  void _showCustomerSupportDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.greenAccent, width: 1.5)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.support_agent, color: Colors.greenAccent, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Müşteri Temsilcisi & Canlı Destek', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('Uzman ekibimiz size yardımcı olmaya hazır', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 11)),
+                ],
+              ),
+            ),
+            IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+          ],
+        ),
+        content: SizedBox(
+          width: 480,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () {
+                  html.window.open('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum', '_blank');
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.greenAccent.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+                        child: const Icon(Icons.chat_bubble, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('WhatsApp Canlı Destek Hattı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('7/24 Anlık mesajlaşma & canlı temsilci', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.greenAccent, size: 14),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () {
+                  html.window.open('tel:08500000000', '_self');
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blueAccent.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: const BoxDecoration(color: Colors.blueAccent, shape: BoxShape.circle),
+                        child: const Icon(Icons.phone, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Çağrı Merkezi (0850 000 00 00)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('Hafta içi 09:00 - 18:00 sesli destek', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.blueAccent, size: 14),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () {
+                  html.window.open('mailto:destek@pazaryeri.com?subject=PazaryeriSaaS%20Destek%20Talebi', '_self');
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.purpleAccent.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.purpleAccent.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: const BoxDecoration(color: Colors.purpleAccent, shape: BoxShape.circle),
+                        child: const Icon(Icons.email_outlined, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('E-Posta Destek Talebi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('destek@pazaryeri.com (Maks. 15 dk dönüş)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.purpleAccent, size: 14),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Kapat', style: GoogleFonts.inter(color: Colors.white70))),
+        ],
+      ),
+    );
   }
 
   Future<void> _loadData() async {
@@ -94,6 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           void sendMessage(String text) async {
             if (text.trim().isEmpty) return;
             _aiInputController.clear();
+            _askedPrompts.add(text.trim().toLowerCase());
 
             setAiState(() {
               _aiMessages.add({'role': 'user', 'content': text.trim()});
@@ -133,13 +281,17 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             } else if (actionType == 'open_pricing_calc') {
               Navigator.pop(ctx);
               _showPricingCalculatorDialog();
+            } else if (actionType == 'open_support_channels') {
+              _showCustomerSupportDialog();
+            } else if (actionType == 'open_whatsapp_support') {
+              html.window.open('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum', '_blank');
             } else if (actionType == 'switch_tab_orders') {
               Navigator.pop(ctx);
               setState(() => _currentTabIndex = 1);
             } else if (actionType == 'broadcast_stock') {
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Stoklar tüm pazaryerlerine 1.2 saniyede dağıtılıyor...'), backgroundColor: Colors.blueAccent));
-            } else if (act['prompt'] != null) {
+            } else if (act['prompt'] != null && act['prompt'].toString().isNotEmpty) {
               sendMessage(act['prompt']);
             }
           }
@@ -220,6 +372,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           final quickPrompts = msg['quickPrompts'] as List<dynamic>?;
                           final rawContent = msg['content'] as String? ?? '';
                           final displayContent = rawContent.replaceAll('**', '');
+                          final unaskedPrompts = (quickPrompts ?? []).where((p) => !_askedPrompts.contains(p.toString().trim().toLowerCase())).toList();
 
                           return Column(
                             crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -257,12 +410,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   }).toList(),
                                 ),
                               ],
-                              if (quickPrompts != null && quickPrompts.isNotEmpty) ...[
+                              if (unaskedPrompts.isNotEmpty) ...[
                                 const SizedBox(height: 8),
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 8,
-                                  children: quickPrompts.map((p) {
+                                  children: unaskedPrompts.map((p) {
                                     return InkWell(
                                       onTap: () => sendMessage(p.toString()),
                                       borderRadius: BorderRadius.circular(8),
