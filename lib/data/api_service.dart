@@ -153,5 +153,45 @@ class ApiService {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>?> broadcastStock(String productId, int newStock) async {
+    try {
+      final response = await _dio.post('/sync/stock/$productId', data: {'newStock': newStock});
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List<dynamic>?> calculatePricing(double baseCost, double profitMargin, double shippingCost, double vat) async {
+    try {
+      final response = await _dio.post('/pricing/calculate', data: {
+        'baseCost': baseCost,
+        'targetProfitMarginPercent': profitMargin,
+        'shippingCost': shippingCost,
+        'vatPercent': vat
+      });
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getFinancialSummary() async {
+    try {
+      final response = await _dio.get('/analytics/financial-summary');
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String getInvoiceUrl(String orderId) {
+    return 'https://pazaryerisaas-production.up.railway.app/api/invoices/$orderId/html';
+  }
+
+  String getShippingLabelUrl(String orderId) {
+    return 'https://pazaryerisaas-production.up.railway.app/api/invoices/$orderId/label';
+  }
 }
 
