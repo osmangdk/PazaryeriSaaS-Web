@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -20,6 +20,24 @@ class ApiService {
         return handler.next(options);
       },
     ));
+  }
+
+  Future<String?> register(String email, String password, String companyName) async {
+    try {
+      final response = await _dio.post('/auth/register', data: {
+        'email': email,
+        'password': password,
+        'companyName': companyName,
+      });
+      final token = response.data['token'];
+      if (token != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('jwt_token', token);
+      }
+      return token;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<String?> login(String email, String password) async {

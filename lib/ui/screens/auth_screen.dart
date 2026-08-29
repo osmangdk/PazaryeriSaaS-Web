@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:frontend/data/api_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,11 +22,19 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _submit() async {
     setState(() => _isLoading = true);
     
-    // Basit bir simülasyon. Normalde register/login API cagrilir
-    final token = await _apiService.login(
-      _emailController.text, 
-      _passwordController.text
-    );
+    String? token;
+    if (_isLogin) {
+      token = await _apiService.login(
+        _emailController.text,
+        _passwordController.text,
+      );
+    } else {
+      token = await _apiService.register(
+        _emailController.text,
+        _passwordController.text,
+        _companyController.text,
+      );
+    }
     
     setState(() => _isLoading = false);
 

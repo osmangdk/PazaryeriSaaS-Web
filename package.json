@@ -1,7 +1,1 @@
-{
-  "name": "pazaryerisaas-frontend",
-  "version": "1.0.0",
-  "scripts": {
-    "vercel-build": "if [ ! -d \"flutter\" ]; then git clone https://github.com/flutter/flutter.git -b stable; fi && export PATH=\"$PATH:$PWD/flutter/bin\" && flutter build web --release"
-  }
-}
+{"name":"pazaryerisaas-frontend","version":"1.0.0"}
