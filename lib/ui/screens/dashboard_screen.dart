@@ -1,5 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:frontend/data/api_service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -24,7 +27,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() => _isLoading = true);
     final metrics = await _apiService.getDashboardMetrics();
     final products = await _apiService.getProducts();
-    
     setState(() {
       _metrics = metrics;
       _products = products;
@@ -32,12 +34,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token');
+    if (mounted) context.go('/login');
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     final String companyName = _metrics?['companyName'] ?? 'Firma';
     final int productCount = _metrics?['productCount'] ?? 0;
     final int productLimit = _metrics?['productLimit'] ?? 10;
@@ -46,85 +50,110 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final int daysLeft = _metrics?['daysLeft'] ?? 0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Hoşgeldiniz, $companyName!', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Kalan Deneme Süresi: $daysLeft Gün', style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                _buildStatCard('Ürün Kotası', '$productCount / $productLimit', Colors.blue),
-                const SizedBox(width: 16),
-                _buildStatCard('Pazaryeri', '$connCount / $connLimit', Colors.orange),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Ürünler', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Yeni Ürün Ekle Modal
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Ürün Ekle'),
-                )
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _products == null || _products!.isEmpty
-                  ? const Center(child: Text('Henüz ürün eklenmemiş.'))
-                  : ListView.builder(
-                      itemCount: _products!.length,
-                      itemBuilder: (context, index) {
-                        final p = _products![index];
-                        return Card(
-                          child: ListTile(
-                            title: Text(p['title'] ?? ''),
-                            subtitle: Text('SKU: ${p['sku']} | Stok: ${p['stockQuantity']} | Fiyat: ${p['price']}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _buildStatusDot(Colors.grey, 'Durum Bilinmiyor'),
-                              ],
-                            ),
-                            onTap: () {
-                              // Ürün detayı ve sync işlemi
-                            },
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, Color color) {
-    return Expanded(
-      child: Card(
-        color: color.withOpacity(0.1),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: SafeArea(
           child: Column(
             children: [
-              Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(value, style: TextStyle(fontSize: 24, color: color, fontWeight: FontWeight.bold)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Text('PazaryeriSaaS', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    const Spacer(),
+                    IconButton(icon: const Icon(Icons.refresh, color: Colors.white70), onPressed: _loadData),
+                    IconButton(icon: const Icon(Icons.logout, color: Colors.white70), onPressed: _logout),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Hoşgeldiniz,', style: GoogleFonts.inter(color: Colors.white60, fontSize: 16)),
+                            Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: daysLeft <= 7 ? Colors.redAccent.withOpacity(0.2) : Colors.greenAccent.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: daysLeft <= 7 ? Colors.redAccent : Colors.greenAccent, width: 1),
+                              ),
+                              child: Text(
+                                'Kalan Deneme Suresi: $daysLeft Gun',
+                                style: GoogleFonts.inter(color: daysLeft <= 7 ? Colors.redAccent : Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            Row(
+                              children: [
+                                Expanded(child: _buildStatCard(icon: Icons.inventory_2_outlined, title: 'Urun Kotasi', value: '$productCount / $productLimit', color: Colors.blueAccent)),
+                                const SizedBox(width: 16),
+                                Expanded(child: _buildStatCard(icon: Icons.storefront_outlined, title: 'Pazaryeri', value: '$connCount / $connLimit', color: const Color(0xFFFF9500))),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Urunlerim', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                                ElevatedButton.icon(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                  icon: const Icon(Icons.add, size: 18),
+                                  label: Text('Urun Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _products == null || _products!.isEmpty
+                                ? Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 48),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.05),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: Colors.white12),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const Icon(Icons.inventory_2_outlined, color: Colors.white30, size: 48),
+                                        const SizedBox(height: 12),
+                                        Text('Henuz urun eklenmemis.', style: GoogleFonts.inter(color: Colors.white38, fontSize: 15)),
+                                      ],
+                                    ),
+                                  )
+                                : ListView.separated(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: _products!.length,
+                                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                    itemBuilder: (context, index) => _buildProductCard(_products![index]),
+                                  ),
+                          ],
+                        ),
+                      ),
+              ),
             ],
           ),
         ),
@@ -132,16 +161,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatusDot(Color color, String tooltip) {
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        width: 12,
-        height: 12,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-        ),
+  Widget _buildStatCard({required IconData icon, required String title, required String value, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 12),
+          Text(title, style: GoogleFonts.inter(color: Colors.white60, fontSize: 13)),
+          const SizedBox(height: 4),
+          Text(value, style: GoogleFonts.inter(color: color, fontSize: 26, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductCard(dynamic p) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+            child: const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(p['title'] ?? 'Urun', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+                const SizedBox(height: 4),
+                Text('SKU: ${p['sku'] ?? '-'}  |  Stok: ${p['stockQuantity'] ?? 0}  |  ${p['price'] ?? 0} TL', style: GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Colors.white30),
+        ],
       ),
     );
   }
