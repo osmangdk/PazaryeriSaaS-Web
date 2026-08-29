@@ -570,7 +570,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final listPriceController = TextEditingController(text: '1747.80');
     final desiController = TextEditingController(text: '1.5');
     final skuController = TextEditingController(text: 'TDR-PL-01');
+    final barcodeController = TextEditingController();
     final urlInputController = TextEditingController();
+    final attrKeyController = TextEditingController();
+    final attrValueController = TextEditingController();
+
+    Map<String, String> productAttributes = {};
+
+    // Kategori şablonları
+    final categoryTemplates = {
+      '💻 Laptop & Bilgisayar': ['İşlemci', 'RAM (Sistem Belleği)', 'SSD Kapasitesi', 'Ekran Boyutu', 'İşletim Sistemi', 'Ekran Kartı', 'Çözünürlük', 'Renk', 'Ağırlık', 'Garanti Süresi'],
+      '📱 Telefon & Tablet': ['Dahili Hafıza', 'RAM', 'Renk', 'Ekran Boyutu', 'Kamera Çözünürlüğü', 'Pil Gücü', 'İşletim Sistemi', 'Garanti'],
+      '👕 Giyim & Tekstil': ['Kalıp', 'Kumaş', 'Yaka', 'Renk', 'Cinsiyet', 'Sezon', 'Paket'],
+      '🏠 Ev & Yaşam': ['Malzeme', 'Güç', 'Kapasite', 'Renk', 'Boyut', 'Garanti'],
+      '🎮 Oyun & Konsol': ['Platform', 'Depolama', 'Kapasite', 'Renk', 'Garanti'],
+      '🔧 Araç & Gereç': ['Güç', 'Voltaj', 'Kapasite', 'Ölçü', 'Garanti'],
+    };
 
     List<String> uploadedImages = [
       "https://cdn.dsmcdn.com/ty1687/prod/QC_PREP/20250603/18/c2992fcf-6771-3257-8743-e1c6731041fd/1_org_zoom.jpg",
@@ -578,8 +593,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     ];
     int selectedCampaignType = 1;
     String selectedCampaignName = "🔥 2 Al 1 Öde (BOGO)";
+    int variantTemplateType = 0; // 0=Tekstil, 1=Laptop, 2=Telefon
     bool isUploadingImage = false;
     bool showAdvancedOptions = false;
+    bool showAttributesSection = true;
     bool autoCreateVariants = true;
     bool isSaving = false;
 
@@ -587,6 +604,106 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDlgState) {
+          void applyLenovoLaptopPreset() {
+            setDlgState(() {
+              titleController.text = 'Lenovo IdeaPad Slim 3 AMD Ryzen 7 170 16GB 512GB SSD Freedos 15.3" Taşınabilir Bilgisayar 83K700PSTR';
+              brandController.text = 'Lenovo';
+              categoryController.text = 'Dizüstü Bilgisayar (Laptop)';
+              priceController.text = '31999.00';
+              listPriceController.text = '33683.16';
+              stockController.text = '65';
+              desiController.text = '3.5';
+              skuController.text = 'LEN-83K700PSTR';
+              barcodeController.text = '8680009847120';
+              selectedCampaignType = 4;
+              selectedCampaignName = '🛒 Seçili Lenovo Laptoplarda Sepette %5 İndirim';
+              variantTemplateType = 1;
+              autoCreateVariants = true;
+              showAttributesSection = true;
+              uploadedImages = [
+                'https://productimages.hepsiburada.net/s/777/550/110000889146191.jpg',
+                'https://productimages.hepsiburada.net/s/777/550/110000889146192.jpg',
+                'https://productimages.hepsiburada.net/s/777/550/110000889146193.jpg'
+              ];
+              productAttributes = {
+                'İşlemci': 'AMD Ryzen 7 170',
+                'RAM (Sistem Belleği)': '16 GB',
+                'SSD Kapasitesi': '512 GB NVMe SSD',
+                'Ekran Boyutu': '15.3 inç',
+                'İşletim Sistemi': 'FreeDOS',
+                'Model Kodu': '83K700PSTR',
+                'Ekran Kartı': 'Tümleşik AMD Radeon Graphics',
+                'Çözünürlük': '1920 x 1200 FHD+ WUXGA',
+                'Panel Tipi': 'IPS 300 nit Yansıma Önleyici',
+                'Renk': 'Koyu Gri (Artic Grey)',
+                'Ağırlık': '1.62 kg',
+                'Garanti Süresi': '2 Yıl Lenovo Türkiye Garantili'
+              };
+            });
+          }
+
+          void applyIPhonePreset() {
+            setDlgState(() {
+              titleController.text = 'Apple iPhone 17 Pro Max 256 GB Kozmik Turuncu (Apple Türkiye Garantili)';
+              brandController.text = 'Apple';
+              categoryController.text = 'Akıllı Telefon';
+              priceController.text = '89999.00';
+              listPriceController.text = '94999.00';
+              stockController.text = '40';
+              desiController.text = '1.0';
+              skuController.text = 'APL-IP17PM-256G';
+              barcodeController.text = '8680009948211';
+              selectedCampaignType = 0;
+              selectedCampaignName = 'Standart Satış';
+              variantTemplateType = 2;
+              autoCreateVariants = true;
+              showAttributesSection = true;
+              uploadedImages = [
+                'https://productimages.hepsiburada.net/s/777/550/110000889146191.jpg'
+              ];
+              productAttributes = {
+                'Dahili Hafıza': '256 GB',
+                'Renk': 'Kozmik Turuncu',
+                'RAM': '12 GB',
+                'Ekran Boyutu': '6.9 inç OLED Super Retina XDR',
+                'İşlemci': 'Apple A19 Pro',
+                'Kamera': '48 MP Üçlü Kamera Sistemi',
+                'Pil': '4850 mAh',
+                'İşletim Sistemi': 'iOS 19',
+                'Garanti': '2 Yıl Apple Türkiye Garantili'
+              };
+            });
+          }
+
+          void applyTudorsPreset() {
+            setDlgState(() {
+              titleController.text = "Tudors Erkek 5'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört";
+              brandController.text = 'Tudors';
+              categoryController.text = 'Polo Yaka Tişört';
+              priceController.text = '1083.90';
+              listPriceController.text = '1747.80';
+              stockController.text = '100';
+              desiController.text = '1.5';
+              skuController.text = 'TDR-PL-01';
+              barcodeController.text = '8680009423635';
+              selectedCampaignType = 1;
+              selectedCampaignName = '🔥 2 Al 1 Öde (BOGO)';
+              variantTemplateType = 0;
+              autoCreateVariants = true;
+              showAttributesSection = true;
+              uploadedImages = [
+                'https://cdn.dsmcdn.com/ty1687/prod/QC_PREP/20250603/18/c2992fcf-6771-3257-8743-e1c6731041fd/1_org_zoom.jpg',
+                'https://cdn.dsmcdn.com/ty1686/prod/QC_PREP/20250603/18/53f6bf86-2c9f-3e2c-87c1-206a47e4ad34/1_org_zoom.jpg'
+              ];
+              productAttributes = {
+                'Kalıp': 'Slim Fit',
+                'Materyal': '%55 Polyester %45 Pamuk',
+                'Yaka': 'Polo Yaka',
+                'Renk': 'Gri-Mavi-Haki-Yeşil-Siyah',
+                'Paket': "5'li"
+              };
+            });
+          }
           void pickAndUploadImage() {
             final uploadInput = html.FileUploadInputElement();
             uploadInput.accept = 'image/*';
@@ -646,11 +763,64 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               width: 820,
               height: 580,
               child: SingleChildScrollView(
-                child: Row(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 280,
+                    // Hızlı Şablonlar Barı
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.flash_on, color: Colors.amberAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Text('Hızlı Şablon:', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  ActionChip(
+                                    avatar: const Icon(Icons.laptop_chromebook, size: 14, color: Colors.orangeAccent),
+                                    label: Text('💻 Lenovo Laptop (Hepsiburada)', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    backgroundColor: Colors.orange.withOpacity(0.2),
+                                    side: const BorderSide(color: Colors.orangeAccent),
+                                    onPressed: applyLenovoLaptopPreset,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  ActionChip(
+                                    avatar: const Icon(Icons.phone_iphone, size: 14, color: Colors.tealAccent),
+                                    label: Text('📱 iPhone 17 Pro Max', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    backgroundColor: Colors.teal.withOpacity(0.2),
+                                    side: const BorderSide(color: Colors.tealAccent),
+                                    onPressed: applyIPhonePreset,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  ActionChip(
+                                    avatar: const Icon(Icons.checkroom, size: 14, color: Colors.lightBlueAccent),
+                                    label: Text('👕 Tudors Polo Tişört', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    backgroundColor: Colors.blueAccent.withOpacity(0.2),
+                                    side: const BorderSide(color: Colors.blueAccent),
+                                    onPressed: applyTudorsPreset,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 280,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -889,6 +1059,167 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     decoration: InputDecoration(labelText: 'Özel Stok Kodu (SKU)', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
                                   ),
                                 ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    controller: barcodeController,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(labelText: 'Barkod', prefixIcon: const Icon(Icons.barcode_reader, size: 16, color: Colors.white38), labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          // ── Dinamik Özellikler Editörü ──────────────────────────
+                          const SizedBox(height: 14),
+                          InkWell(
+                            onTap: () => setDlgState(() => showAttributesSection = !showAttributesSection),
+                            child: Row(
+                              children: [
+                                Icon(showAttributesSection ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.indigoAccent, size: 18),
+                                const SizedBox(width: 6),
+                                Text('🏷️ Ürün Özellikleri (RAM, Renk, Kapasite...)', style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 12, fontWeight: FontWeight.w600)),
+                                const SizedBox(width: 8),
+                                if (productAttributes.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(color: Colors.indigoAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                                    child: Text('${productAttributes.length} özellik', style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (showAttributesSection) ...[
+                            const SizedBox(height: 8),
+                            // Kategori Şablonları
+                            Text('Hızlı Şablon:', style: GoogleFonts.inter(color: Colors.white54, fontSize: 11)),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: categoryTemplates.entries.map((entry) {
+                                return InkWell(
+                                  onTap: () {
+                                    setDlgState(() {
+                                      for (final key in entry.value) {
+                                        if (!productAttributes.containsKey(key)) {
+                                          productAttributes[key] = '';
+                                        }
+                                      }
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.indigo.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: Colors.indigoAccent.withOpacity(0.3)),
+                                    ),
+                                    child: Text(entry.key, style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 11, fontWeight: FontWeight.w600)),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 10),
+                            // Mevcut özellikler
+                            if (productAttributes.isNotEmpty) ...[
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: Colors.indigo.withOpacity(0.06), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.indigoAccent.withOpacity(0.2))),
+                                child: Column(
+                                  children: productAttributes.entries.map((entry) {
+                                    final valCtrl = TextEditingController(text: entry.value);
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 6),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 2,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              decoration: BoxDecoration(color: Colors.indigoAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                                              child: Text(entry.key, style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 12, fontWeight: FontWeight.w600)),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            flex: 3,
+                                            child: TextField(
+                                              controller: valCtrl,
+                                              onChanged: (v) => productAttributes[entry.key] = v,
+                                              style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                              decoration: InputDecoration(
+                                                hintText: 'Değer girin...',
+                                                hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                                filled: true,
+                                                fillColor: Colors.white.withOpacity(0.05),
+                                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InkWell(
+                                            onTap: () => setDlgState(() => productAttributes.remove(entry.key)),
+                                            child: const Icon(Icons.close, color: Colors.redAccent, size: 18),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            // Yeni özellik ekle
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: TextField(
+                                    controller: attrKeyController,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(
+                                      hintText: 'Özellik adı (RAM)',
+                                      hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      filled: true, fillColor: Colors.white.withOpacity(0.05),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  flex: 3,
+                                  child: TextField(
+                                    controller: attrValueController,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(
+                                      hintText: 'Değer (16 GB)',
+                                      hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      filled: true, fillColor: Colors.white.withOpacity(0.05),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    final k = attrKeyController.text.trim();
+                                    final v = attrValueController.text.trim();
+                                    if (k.isNotEmpty) {
+                                      setDlgState(() {
+                                        productAttributes[k] = v;
+                                        attrKeyController.clear();
+                                        attrValueController.clear();
+                                      });
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.indigoAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
+                                  child: const Icon(Icons.add, size: 16),
+                                ),
                               ],
                             ),
                           ],
@@ -897,47 +1228,122 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60))),
-              ElevatedButton(
-                onPressed: isSaving
-                    ? null
-                    : () async {
-                        if (titleController.text.trim().isEmpty || priceController.text.trim().isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen Ürün Başlığı ve Satış Fiyatı alanlarını girin.'), backgroundColor: Colors.orangeAccent));
-                          return;
-                        }
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60))),
+          ElevatedButton(
+            onPressed: isSaving
+                ? null
+                : () async {
+                    if (titleController.text.trim().isEmpty || priceController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lütfen Ürün Başlığı ve Satış Fiyatı alanlarını girin.'), backgroundColor: Colors.orangeAccent));
+                      return;
+                    }
 
-                        setDlgState(() => isSaving = true);
-                        final price = double.tryParse(priceController.text) ?? 1083.90;
-                        final listPrice = double.tryParse(listPriceController.text) ?? price * 1.3;
-                        final stock = int.tryParse(stockController.text) ?? 100;
-                        final desi = double.tryParse(desiController.text) ?? 1.5;
-                        final sku = skuController.text.trim().isNotEmpty ? skuController.text.trim() : 'PRD-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+                    setDlgState(() => isSaving = true);
+                    final price = double.tryParse(priceController.text) ?? 1083.90;
+                    final listPrice = double.tryParse(listPriceController.text) ?? price * 1.3;
+                    final stock = int.tryParse(stockController.text) ?? 100;
+                    final desi = double.tryParse(desiController.text) ?? 1.5;
+                    final sku = skuController.text.trim().isNotEmpty ? skuController.text.trim() : 'PRD-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
-                        List<Map<String, dynamic>> variants = [];
-                        if (autoCreateVariants) {
-                          final sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
-                          variants = sizes.map((sz) {
-                            return {
-                              'sku': '$sku-$sz',
-                              'barcode': '868000${sz.hashCode.abs().toString().padLeft(6, '0')}',
-                              'size': sz,
-                              'color': 'Çok Renkli',
-                              'price': price,
-                              'listPrice': listPrice,
-                              'stockQuantity': (stock / sizes.length).round(),
-                              'isActive': true
-                            };
-                          }).toList();
-                        }
+                    List<Map<String, dynamic>> variants = [];
+                    if (autoCreateVariants) {
+                      if (variantTemplateType == 1) {
+                        // Laptop / Tech RAM & SSD Variants
+                        variants = [
+                          {
+                            'sku': '$sku-16G-512G',
+                            'barcode': barcodeController.text.isNotEmpty ? '${barcodeController.text.trim()}-512' : '8680009847120',
+                            'size': '16GB RAM / 512GB SSD',
+                            'color': productAttributes['Renk'] ?? 'Artic Grey',
+                            'price': price,
+                            'listPrice': listPrice,
+                            'stockQuantity': (stock * 0.5).round(),
+                            'isActive': true
+                          },
+                          {
+                            'sku': '$sku-16G-1TB',
+                            'barcode': barcodeController.text.isNotEmpty ? '${barcodeController.text.trim()}-1TB' : '8680009847121',
+                            'size': '16GB RAM / 1TB SSD',
+                            'color': productAttributes['Renk'] ?? 'Artic Grey',
+                            'price': (price * 1.23).roundToDouble(),
+                            'listPrice': (listPrice * 1.25).roundToDouble(),
+                            'stockQuantity': (stock * 0.3).round(),
+                            'isActive': true
+                          },
+                          {
+                            'sku': '$sku-24G-1TB',
+                            'barcode': barcodeController.text.isNotEmpty ? '${barcodeController.text.trim()}-24G' : '8680009847122',
+                            'size': '24GB RAM / 1TB SSD',
+                            'color': productAttributes['Renk'] ?? 'Artic Grey',
+                            'price': (price * 1.40).roundToDouble(),
+                            'listPrice': (listPrice * 1.42).roundToDouble(),
+                            'stockQuantity': (stock * 0.2).round(),
+                            'isActive': true
+                          },
+                        ];
+                      } else if (variantTemplateType == 2) {
+                        // Smartphone / Storage Variants
+                        variants = [
+                          {
+                            'sku': '$sku-128G',
+                            'barcode': '8680009948210',
+                            'size': '128 GB',
+                            'color': productAttributes['Renk'] ?? 'Kozmik Turuncu',
+                            'price': (price * 0.9).roundToDouble(),
+                            'listPrice': (listPrice * 0.9).roundToDouble(),
+                            'stockQuantity': (stock * 0.3).round(),
+                            'isActive': true
+                          },
+                          {
+                            'sku': '$sku-256G',
+                            'barcode': barcodeController.text.isNotEmpty ? barcodeController.text.trim() : '8680009948211',
+                            'size': '256 GB',
+                            'color': productAttributes['Renk'] ?? 'Kozmik Turuncu',
+                            'price': price,
+                            'listPrice': listPrice,
+                            'stockQuantity': (stock * 0.5).round(),
+                            'isActive': true
+                          },
+                          {
+                            'sku': '$sku-512G',
+                            'barcode': '8680009948212',
+                            'size': '512 GB',
+                            'color': productAttributes['Renk'] ?? 'Kozmik Turuncu',
+                            'price': (price * 1.18).roundToDouble(),
+                            'listPrice': (listPrice * 1.20).roundToDouble(),
+                            'stockQuantity': (stock * 0.2).round(),
+                            'isActive': true
+                          },
+                        ];
+                      } else {
+                        // Apparel Beden
+                        final sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+                        variants = sizes.map((sz) {
+                          return {
+                            'sku': '$sku-$sz',
+                            'barcode': '868000${sz.hashCode.abs().toString().padLeft(6, '0')}',
+                            'size': sz,
+                            'color': productAttributes['Renk'] ?? 'Çok Renkli',
+                            'price': price,
+                            'listPrice': listPrice,
+                            'stockQuantity': (stock / sizes.length).round(),
+                            'isActive': true
+                          };
+                        }).toList();
+                      }
+                    }
 
                         final richPayload = {
                           'title': titleController.text,
                           'sku': sku,
-                          'barcode': '868000${DateTime.now().millisecondsSinceEpoch.toString().substring(6)}',
+                          'barcode': barcodeController.text.trim().isNotEmpty
+                              ? barcodeController.text.trim()
+                              : '868000${DateTime.now().millisecondsSinceEpoch.toString().substring(6)}',
                           'modelCode': sku,
                           'brand': brandController.text.isNotEmpty ? brandController.text : 'Genel',
                           'categoryName': categoryController.text.isNotEmpty ? categoryController.text : 'Giyim',
@@ -953,12 +1359,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           'images': uploadedImages,
                           'campaignType': selectedCampaignType,
                           'campaignName': selectedCampaignName,
-                          'attributes': {
-                            'Kalıp': 'Slim Fit',
-                            'Kategori': categoryController.text,
-                            'Marka': brandController.text,
-                            'Kampanya': selectedCampaignName
-                          },
+                          'attributes': productAttributes.isEmpty
+                              ? {
+                                  'Kalıp': 'Slim Fit',
+                                  'Kategori': categoryController.text,
+                                  'Marka': brandController.text,
+                                  'Kampanya': selectedCampaignName
+                                }
+                              : productAttributes,
                           'variants': variants
                         };
 
@@ -992,8 +1400,24 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final listPriceController = TextEditingController(text: (product['listPrice'] ?? '').toString());
     final desiController = TextEditingController(text: (product['dimensionalWeight'] ?? '1.5').toString());
     final skuController = TextEditingController(text: product['sku'] ?? '');
+    final barcodeController = TextEditingController(text: product['barcode'] ?? '');
     final descriptionController = TextEditingController(text: product['description'] ?? '');
     final urlInputController = TextEditingController();
+    final attrKeyController = TextEditingController();
+    final attrValueController = TextEditingController();
+
+    // Load existing attributes
+    final rawAttrs = product['attributes'] as Map<String, dynamic>?;
+    Map<String, String> productAttributes = rawAttrs?.map((k, v) => MapEntry(k, v.toString())) ?? {};
+
+    final categoryTemplates = {
+      '📱 Telefon / Elektronik': ['RAM', 'Depolama', 'Renk', 'Ekran Boyutu', 'İşlemci', 'Batarya', 'Kamera'],
+      '💻 Bilgisayar': ['İşlemci', 'RAM', 'Depolama', 'Ekran', 'GPU', 'İşletim Sistemi', 'Ağırlık'],
+      '👕 Giyim & Tekstil': ['Renk', 'Kumaş', 'Kalıp', 'Cinsiyet', 'Sezon'],
+      '🏠 Ev & Yaşam': ['Malzeme', 'Boyut', 'Renk', 'Ağırlık', 'Garanti'],
+      '🎮 Oyun & Hobi': ['Platform', 'Tür', 'Oyuncu Sayısı', 'Yaş Sınırı', 'Dil'],
+      '🔧 Araç & Gereç': ['Güç', 'Voltaj', 'Kapasite', 'Ölçü', 'Garanti'],
+    };
 
     List<String> uploadedImages = List<String>.from(product['images'] ?? []);
     int selectedCampaignType = product['campaignType'] ?? 1;
@@ -1001,6 +1425,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     bool isSaving = false;
     bool isUploadingImage = false;
     bool showAdvancedOptions = false;
+    bool showAttributesSection = true;
 
     final campaignOptions = [
       {'type': 0, 'name': '✅ Kampanyasız (Normal Fiyat)', 'desc': 'Herhangi bir kampanya yoktur'},
@@ -1299,6 +1724,150 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     decoration: InputDecoration(labelText: 'SKU Kodu', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
                                   ),
                                 ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    controller: barcodeController,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(labelText: 'Barkod', prefixIcon: const Icon(Icons.barcode_reader, size: 16, color: Colors.white38), labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          // ── Dinamik Özellikler Editörü ──────────────────────────
+                          const SizedBox(height: 14),
+                          InkWell(
+                            onTap: () => setDlgState(() => showAttributesSection = !showAttributesSection),
+                            child: Row(
+                              children: [
+                                Icon(showAttributesSection ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.indigoAccent, size: 18),
+                                const SizedBox(width: 6),
+                                Text('🏷️ Ürün Özellikleri (RAM, Renk, Kapasite...)', style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 12, fontWeight: FontWeight.w600)),
+                                const SizedBox(width: 8),
+                                if (productAttributes.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(color: Colors.indigoAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                                    child: Text('${productAttributes.length} özellik', style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (showAttributesSection) ...[
+                            const SizedBox(height: 8),
+                            Text('Hızlı Şablon:', style: GoogleFonts.inter(color: Colors.white54, fontSize: 11)),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: categoryTemplates.entries.map((entry) {
+                                return InkWell(
+                                  onTap: () {
+                                    setDlgState(() {
+                                      for (final key in entry.value) {
+                                        if (!productAttributes.containsKey(key)) productAttributes[key] = '';
+                                      }
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(color: Colors.indigo.withOpacity(0.12), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.indigoAccent.withOpacity(0.3))),
+                                    child: Text(entry.key, style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 11, fontWeight: FontWeight.w600)),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 10),
+                            if (productAttributes.isNotEmpty) ...[
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: Colors.indigo.withOpacity(0.06), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.indigoAccent.withOpacity(0.2))),
+                                child: Column(
+                                  children: productAttributes.entries.map((entry) {
+                                    final valCtrl = TextEditingController(text: entry.value);
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 6),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 2,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                              decoration: BoxDecoration(color: Colors.indigoAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                                              child: Text(entry.key, style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 12, fontWeight: FontWeight.w600)),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            flex: 3,
+                                            child: TextField(
+                                              controller: valCtrl,
+                                              onChanged: (v) => productAttributes[entry.key] = v,
+                                              style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                              decoration: InputDecoration(
+                                                hintText: 'Değer girin...', hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                                filled: true, fillColor: Colors.white.withOpacity(0.05),
+                                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InkWell(
+                                            onTap: () => setDlgState(() => productAttributes.remove(entry.key)),
+                                            child: const Icon(Icons.close, color: Colors.redAccent, size: 18),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: TextField(
+                                    controller: attrKeyController,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(
+                                      hintText: 'Özellik adı (RAM)', hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      filled: true, fillColor: Colors.white.withOpacity(0.05),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  flex: 3,
+                                  child: TextField(
+                                    controller: attrValueController,
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                                    decoration: InputDecoration(
+                                      hintText: 'Değer (16 GB)', hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      filled: true, fillColor: Colors.white.withOpacity(0.05),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    final k = attrKeyController.text.trim();
+                                    final v = attrValueController.text.trim();
+                                    if (k.isNotEmpty) {
+                                      setDlgState(() { productAttributes[k] = v; attrKeyController.clear(); attrValueController.clear(); });
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.indigoAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
+                                  child: const Icon(Icons.add, size: 16),
+                                ),
                               ],
                             ),
                           ],
@@ -1330,10 +1899,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           'stockQuantity': int.tryParse(stockController.text) ?? 0,
                           'dimensionalWeight': double.tryParse(desiController.text) ?? 1.5,
                           'sku': skuController.text.trim(),
+                          'barcode': barcodeController.text.trim(),
                           'description': descriptionController.text.trim(),
                           'images': uploadedImages,
                           'campaignType': selectedCampaignType,
                           'campaignName': selectedCampaignName,
+                          'attributes': productAttributes,
                         };
 
                         final res = await _apiService.updateProduct(productId, updatePayload);
@@ -2243,6 +2814,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             Text('Ürün Kataloğu & Kampanya Yönetimi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
             Row(
               children: [
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hepsiburada Lenovo Laptop demo ürünü ekleniyor...'), backgroundColor: Colors.orange));
+                    final res = await _apiService.seedDemoProducts();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(res?['message'] ?? 'Lenovo IdeaPad Laptop kataloğa eklendi!'), backgroundColor: Colors.green),
+                      );
+                      _loadData();
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.tealAccent, side: const BorderSide(color: Colors.tealAccent), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  icon: const Icon(Icons.laptop_chromebook, size: 18),
+                  label: Text('💻 + Lenovo Laptop Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: _showSimplifiedAddProductDialog,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
@@ -2287,6 +2874,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final productId = p['id'].toString();
     final campaignName = p['campaignName'] ?? 'Standart Satış';
     final campaignType = p['campaignType'] ?? 0;
+    final barcode = p['barcode'] as String?;
+    final rawAttrs = p['attributes'] as Map<String, dynamic>?;
+    final attributes = rawAttrs?.map((k, v) => MapEntry(k, v.toString())) ?? <String, String>{};
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -2337,12 +2927,46 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           _tagBadge(category, Colors.tealAccent),
                           _tagBadge('Model: $modelCode', Colors.purpleAccent),
                           _tagBadge('Desi: $desi', Colors.amberAccent),
-                          if (variantCount > 0) _tagBadge('$variantCount Beden Varyantı', Colors.orangeAccent),
+                          if (variantCount > 0) _tagBadge('$variantCount Beden', Colors.orangeAccent),
                           if (imageCount > 0) _tagBadge('$imageCount Görsel', Colors.lightBlueAccent),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text('SKU: ${p['sku']} • Barkod: ${p['barcode'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                      // SKU & Barcode row
+                      Row(
+                        children: [
+                          const Icon(Icons.qr_code_2, color: Colors.white38, size: 14),
+                          const SizedBox(width: 4),
+                          Text('SKU: ${p['sku']}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                          if (barcode != null && barcode.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            const Icon(Icons.barcode_reader, color: Colors.white38, size: 14),
+                            const SizedBox(width: 4),
+                            Text('Barkod: $barcode', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                          ],
+                        ],
+                      ),
+                      // Dynamic attributes chips
+                      if (attributes.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            ...attributes.entries.take(5).map((e) => _attrBadge(e.key, e.value)),
+                            if (attributes.length > 5)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: Colors.white24),
+                                ),
+                                child: Text('+${attributes.length - 5} daha', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
+                              ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -2431,6 +3055,25 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(4), border: Border.all(color: color.withOpacity(0.3))),
       child: Text(label, style: GoogleFonts.inter(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _attrBadge(String key, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.indigo.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: Colors.indigoAccent.withOpacity(0.4)),
+      ),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(text: '$key: ', style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+            TextSpan(text: value, style: GoogleFonts.inter(color: Colors.white70, fontSize: 10)),
+          ],
+        ),
+      ),
     );
   }
 

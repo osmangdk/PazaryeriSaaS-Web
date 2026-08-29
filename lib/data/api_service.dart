@@ -139,6 +139,15 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> seedDemoProducts() async {
+    try {
+      final response = await _dio.post('/products/seed-demo-products');
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<String?> uploadImage(String base64Data, String fileName) async {
     try {
       final response = await _dio.post('/products/upload-image', data: {
