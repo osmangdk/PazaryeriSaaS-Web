@@ -578,6 +578,472 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  void _showProductDetailsDialog(String productId) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator(color: Colors.blueAccent)),
+    );
+
+    final details = await _apiService.getProductDetails(productId);
+    if (!mounted) return;
+    Navigator.pop(context); // Close loading
+
+    if (details == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün detayları yüklenemedi!'), backgroundColor: Colors.red));
+      return;
+    }
+
+    String selectedImage = (details['images'] as List<dynamic>?)?.firstOrNull?.toString() ?? '';
+    final images = (details['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+    final attributes = (details['attributes'] as Map<String, dynamic>?) ?? {};
+    final variants = (details['variants'] as List<dynamic>?) ?? [];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDetailState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.white24)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.inventory_2, color: Colors.blueAccent),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(details['title'] ?? 'Ürün Detayları', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text('Marka: ${details['brand'] ?? 'Genel'} • Kategori: ${details['categoryName'] ?? 'Giyim'} • Model: ${details['modelCode'] ?? details['sku']}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 800,
+              height: 580,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Row: Image Gallery + Core Specs
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left: Gallery
+                        SizedBox(
+                          width: 260,
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 240,
+                                width: 260,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white12),
+                                  image: selectedImage.isNotEmpty
+                                      ? DecorationImage(image: NetworkImage(selectedImage), fit: BoxFit.contain)
+                                      : null,
+                                ),
+                                child: selectedImage.isEmpty ? const Center(child: Icon(Icons.image_not_supported, color: Colors.white24, size: 48)) : null,
+                              ),
+                              const SizedBox(height: 8),
+                              if (images.length > 1)
+                                SizedBox(
+                                  height: 50,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: images.length,
+                                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                    itemBuilder: (context, idx) {
+                                      final imgUrl = images[idx];
+                                      final isCur = imgUrl == selectedImage;
+                                      return InkWell(
+                                        onTap: () => setDetailState(() => selectedImage = imgUrl),
+                                        child: Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: isCur ? Colors.blueAccent : Colors.white24, width: isCur ? 2 : 1),
+                                            image: DecorationImage(image: NetworkImage(imgUrl), fit: BoxFit.cover),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        // Right: Pricing, Logistics & Specs
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Price Box
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: Colors.greenAccent.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.greenAccent.withOpacity(0.2)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Satış Fiyatı', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                                        Text('₺${details['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 22)),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 24),
+                                    if (details['listPrice'] != null)
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Liste Fiyatı', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                                          Text('₺${details['listPrice']}', style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 16)),
+                                        ],
+                                      ),
+                                    const Spacer(),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text('Toplam Stok', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                                        Text('${details['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              // Specs Grid
+                              _specRow('SKU (Stok Kodu)', details['sku'] ?? '-'),
+                              _specRow('Barkod', details['barcode'] ?? '-'),
+                              _specRow('Kargo Desisi', '${details['dimensionalWeight'] ?? 1.0} Desi'),
+                              _specRow('Kargo Şirketi', details['cargoCompany'] ?? 'Trendyol Express'),
+                              _specRow('Teslimat Süresi', '${details['deliveryDuration'] ?? 2} İş Günü'),
+                              _specRow('KDV Oranı', '%${details['vatRate'] ?? 20}'),
+                              if (details['costPrice'] != null)
+                                _specRow('Maliyet Fiyatı', '₺${details['costPrice']}'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    // Attributes section
+                    if (attributes.isNotEmpty) ...[
+                      Text('🏷️ Kategori Nitelikleri & Özellikler', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: attributes.entries.map((e) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.06), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white12)),
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(text: '${e.key}: ', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w500)),
+                                  TextSpan(text: '${e.value}', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                    // Variants Matrix Table
+                    Text('👥 Beden & Renk Varyant Matrisi (${variants.length} Varyant)', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    if (variants.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(8)),
+                        child: Text('Bu ürünün alt varyantı bulunmuyor (Tekil ürün).', style: GoogleFonts.inter(color: Colors.white60, fontSize: 13)),
+                      )
+                    else
+                      Container(
+                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white12)),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: const BorderRadius.vertical(top: Radius.circular(10))),
+                              child: Row(
+                                children: [
+                                  Expanded(flex: 2, child: Text('Beden', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                  Expanded(flex: 3, child: Text('Renk', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                  Expanded(flex: 4, child: Text('SKU / Barkod', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                  Expanded(flex: 2, child: Text('Fiyat', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
+                                  Expanded(flex: 2, child: Text('Stok', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                ],
+                              ),
+                            ),
+                            ...variants.map((v) => Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.white12))),
+                                  child: Row(
+                                    children: [
+                                      Expanded(flex: 2, child: Text(v['size'] ?? '-', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13))),
+                                      Expanded(flex: 3, child: Text(v['color'] ?? '-', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12))),
+                                      Expanded(flex: 4, child: Text('${v['sku']} • ${v['barcode'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11))),
+                                      Expanded(flex: 2, child: Text('₺${v['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13))),
+                                      Expanded(flex: 2, child: Text('${v['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white, fontSize: 12))),
+                                    ],
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _showEditProductDialog(details);
+                },
+                icon: const Icon(Icons.edit, size: 16, color: Colors.orangeAccent),
+                label: Text('Ürünü Düzenle / Güncelle', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orangeAccent)),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                child: Text('Kapat', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _specRow(String label, String val) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+          Text(val, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  void _showEditProductDialog(Map<String, dynamic> product) {
+    final titleController = TextEditingController(text: product['title'] ?? product['name']);
+    final brandController = TextEditingController(text: product['brand']);
+    final categoryController = TextEditingController(text: product['categoryName']);
+    final modelCodeController = TextEditingController(text: product['modelCode']);
+    final skuController = TextEditingController(text: product['sku']);
+    final barcodeController = TextEditingController(text: product['barcode']);
+    final priceController = TextEditingController(text: product['price']?.toString());
+    final listPriceController = TextEditingController(text: product['listPrice']?.toString());
+    final costPriceController = TextEditingController(text: product['costPrice']?.toString());
+    final desiController = TextEditingController(text: product['dimensionalWeight']?.toString() ?? '1.0');
+    final stockController = TextEditingController(text: product['stockQuantity']?.toString());
+    final images = (product['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+    final imagesController = TextEditingController(text: images.join(', '));
+    bool isSaving = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setEditState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1E293B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.white24)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.orange.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.edit_note, color: Colors.orangeAccent),
+                ),
+                const SizedBox(width: 12),
+                Text('Ürün Bilgilerini Güncelle', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
+            content: SizedBox(
+              width: 650,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(labelText: 'Ürün Başlığı', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: brandController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Marka', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: categoryController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Kategori', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: modelCodeController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Model Kodu', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: skuController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'SKU', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: barcodeController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Barkod', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: priceController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Satış Fiyatı (₺)', prefixText: '₺ ', prefixStyle: GoogleFonts.inter(color: Colors.greenAccent), labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: listPriceController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Liste Fiyatı (₺)', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: costPriceController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Maliyet (₺)', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: stockController,
+                            keyboardType: TextInputType.number,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(labelText: 'Stok Miktarı', suffixText: 'Adet', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: imagesController,
+                      maxLines: 2,
+                      style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                      decoration: InputDecoration(labelText: 'Görsel URL leri (virgülle ayrılmış)', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: GoogleFonts.inter(color: Colors.white60))),
+              ElevatedButton(
+                onPressed: isSaving
+                    ? null
+                    : () async {
+                        setEditState(() => isSaving = true);
+                        final rawImages = imagesController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
+                        final updatePayload = {
+                          'title': titleController.text,
+                          'sku': skuController.text,
+                          'barcode': barcodeController.text,
+                          'modelCode': modelCodeController.text,
+                          'brand': brandController.text,
+                          'categoryName': categoryController.text,
+                          'price': double.tryParse(priceController.text) ?? product['price'],
+                          'listPrice': double.tryParse(listPriceController.text) ?? product['listPrice'],
+                          'costPrice': double.tryParse(costPriceController.text) ?? product['costPrice'],
+                          'vatRate': product['vatRate'] ?? 20,
+                          'stockQuantity': int.tryParse(stockController.text) ?? product['stockQuantity'],
+                          'dimensionalWeight': double.tryParse(desiController.text) ?? product['dimensionalWeight'] ?? 1.0,
+                          'cargoCompany': product['cargoCompany'] ?? 'Trendyol Express',
+                          'deliveryDuration': product['deliveryDuration'] ?? 2,
+                          'description': product['description'] ?? titleController.text,
+                          'images': rawImages,
+                          'attributes': product['attributes'] ?? {}
+                        };
+
+                        final res = await _apiService.updateProduct(product['id'], updatePayload);
+                        setEditState(() => isSaving = false);
+
+                        if (res != null && mounted) {
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla güncellendi!'), backgroundColor: Colors.green));
+                          _loadData();
+                        } else if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün güncellenirken hata oluştu!'), backgroundColor: Colors.red));
+                        }
+                      },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800]),
+                child: isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Güncellemeleri Kaydet', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tenant = _metrics?['tenant'];
@@ -949,72 +1415,94 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final modelCode = p['modelCode'] ?? p['sku'];
     final desi = p['dimensionalWeight'] ?? 1.0;
     final listPrice = p['listPrice'];
+    final productId = p['id'].toString();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
       child: Column(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10),
-                  image: p['firstImage'] != null
-                      ? DecorationImage(image: NetworkImage(p['firstImage']), fit: BoxFit.cover)
-                      : null,
+          InkWell(
+            onTap: () => _showProductDetailsDialog(productId),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 65,
+                  height: 65,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    image: p['firstImage'] != null
+                        ? DecorationImage(image: NetworkImage(p['firstImage']), fit: BoxFit.cover)
+                        : null,
+                  ),
+                  child: p['firstImage'] == null ? const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 28) : null,
                 ),
-                child: p['firstImage'] == null ? const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 28) : null,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(p['title'] ?? p['name'] ?? 'İsimsiz Ürün', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          _tagBadge(brand, Colors.blueAccent),
+                          _tagBadge(category, Colors.tealAccent),
+                          _tagBadge('Model: $modelCode', Colors.purpleAccent),
+                          _tagBadge('Desi: $desi', Colors.amberAccent),
+                          if (variantCount > 0) _tagBadge('$variantCount Beden Varyantı', Colors.orangeAccent),
+                          if (imageCount > 0) _tagBadge('$imageCount Görsel', Colors.lightBlueAccent),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text('SKU: ${p['sku']} • Barkod: ${p['barcode'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(p['title'] ?? p['name'] ?? 'İsimsiz Ürün', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        _tagBadge(brand, Colors.blueAccent),
-                        _tagBadge(category, Colors.tealAccent),
-                        _tagBadge('Model: $modelCode', Colors.purpleAccent),
-                        _tagBadge('Desi: $desi', Colors.amberAccent),
-                        if (variantCount > 0) _tagBadge('$variantCount Beden Varyantı', Colors.orangeAccent),
-                        if (imageCount > 0) _tagBadge('$imageCount Görsel', Colors.lightBlueAccent),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text('SKU: ${p['sku']} • Barkod: ${p['barcode'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                    Text('₺${p['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 17)),
+                    if (listPrice != null)
+                      Text('₺$listPrice', style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 12)),
+                    Text('Stok: ${p['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('₺${p['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 17)),
-                  if (listPrice != null)
-                    Text('₺$listPrice', style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 12)),
-                  Text('Stok: ${p['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           const Divider(color: Colors.white12),
           const SizedBox(height: 6),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              OutlinedButton.icon(
+                onPressed: () => _showProductDetailsDialog(productId),
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.lightBlueAccent, side: const BorderSide(color: Colors.lightBlueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                icon: const Icon(Icons.visibility, size: 16),
+                label: Text('Detayları İncele', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final details = await _apiService.getProductDetails(productId);
+                  if (details != null && mounted) {
+                    _showEditProductDialog(details);
+                  }
+                },
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.orangeAccent, side: const BorderSide(color: Colors.orangeAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                icon: const Icon(Icons.edit, size: 16),
+                label: Text('Düzenle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              const Spacer(),
               ElevatedButton.icon(
                 onPressed: () async {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trendyol v2 Ürün Oluşturma API isteği gönderiliyor...'), backgroundColor: Colors.orange));
-                  final res = await _apiService.uploadProductToTrendyol(p['id']);
+                  final res = await _apiService.uploadProductToTrendyol(productId);
                   if (mounted) {
                     final isOk = res?['isSuccess'] == true;
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1029,7 +1517,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               const SizedBox(width: 8),
               OutlinedButton.icon(
                 onPressed: () async {
-                  final res = await _apiService.broadcastStock(p['id'], p['stockQuantity']);
+                  final res = await _apiService.broadcastStock(productId, p['stockQuantity']);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(res?['isSuccess'] == true ? 'Stok 1.2 saniyede tüm pazaryerlerine eşitlendi!' : 'Stok dağıtımında hata!'), backgroundColor: Colors.blueAccent),
@@ -1039,6 +1527,18 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 style: OutlinedButton.styleFrom(foregroundColor: Colors.blueAccent, side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                 icon: const Icon(Icons.flash_on, size: 16),
                 label: Text('Stok Dağıt (1.2s)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              const SizedBox(width: 6),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                tooltip: 'Ürünü Sil',
+                onPressed: () async {
+                  final ok = await _apiService.deleteProduct(productId);
+                  if (ok && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün silindi.'), backgroundColor: Colors.redAccent));
+                    _loadData();
+                  }
+                },
               ),
             ],
           ),

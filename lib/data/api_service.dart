@@ -116,6 +116,24 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> updateProduct(String productId, Map<String, dynamic> productData) async {
+    try {
+      final response = await _dio.put('/products/$productId', data: productData);
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> deleteProduct(String productId) async {
+    try {
+      final response = await _dio.delete('/products/$productId');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<List<dynamic>?> getMarketplaceConnections() async {
     try {
       final response = await _dio.get('/marketplaces');
