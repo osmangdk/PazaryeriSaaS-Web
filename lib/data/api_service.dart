@@ -146,6 +146,17 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> askAiAssistant(String message) async {
+    try {
+      final response = await _dio.post('/aiassistant/chat', data: {
+        'message': message,
+      });
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<List<dynamic>?> getMarketplaceConnections() async {
     try {
       final response = await _dio.get('/marketplaces');

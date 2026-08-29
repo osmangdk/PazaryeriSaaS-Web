@@ -23,10 +23,29 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   bool _isLoading = true;
   int _currentTabIndex = 0;
 
+  // AI Chat State
+  final List<Map<String, dynamic>> _aiMessages = [];
+  bool _isAiThinking = false;
+  final TextEditingController _aiInputController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadData();
+    _initAiGreeting();
+  }
+
+  void _initAiGreeting() {
+    _aiMessages.add({
+      'role': 'assistant',
+      'content': 'Merhaba! Ben sizin **Pazaryeri & E-Ticaret Yapay Zeka Danışmanınızım**. 🤖\n\nSistemi nasıl kullanacağınızı, 2 Al 1 Öde kampanyalarını, 1.2s stok eşitlemeyi veya kâr marjınızı nasıl optimize edeceğinizi bana 7/24 sorabilirsiniz.',
+      'actions': [
+        {'label': '🔥 2 Al 1 Öde Nasıl Açılır?', 'action': 'ask', 'prompt': '2 Al 1 Öde kampanyası nasıl açılır?'},
+        {'label': '🔗 Mağaza Nasıl Bağlanır?', 'action': 'ask', 'prompt': 'Trendyol mağazamı nasıl bağlarım?'},
+        {'label': '⚡ Stoklar Nasıl Eşitlenir?', 'action': 'ask', 'prompt': 'Stok senkronizasyonu nasıl çalışır?'},
+        {'label': '🖩 Fiyat Robotu Nasıl Kullanılır?', 'action': 'ask', 'prompt': 'Kâr marjımı nasıl hesaplarım?'},
+      ]
+    });
   }
 
   Future<void> _loadData() async {
@@ -53,7 +72,214 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     if (mounted) context.go('/');
   }
 
-  // --- KAMPANYA SEÇİCİ VE CANLI HESAPLAMA WIDGET'I ---
+  // --- AI ASİSTAN SOHBET MODALI ---
+  void _showAiAssistantDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setAiState) {
+          void sendMessage(String text) async {
+            if (text.trim().isEmpty) return;
+            _aiInputController.clear();
+
+            setAiState(() {
+              _aiMessages.add({'role': 'user', 'content': text.trim()});
+              _isAiThinking = true;
+            });
+
+            final res = await _apiService.askAiAssistant(text.trim());
+
+            setAiState(() {
+              _isAiThinking = false;
+              if (res != null && res['reply'] != null) {
+                _aiMessages.add({
+                  'role': 'assistant',
+                  'content': res['reply'],
+                  'actions': res['suggestedActions'],
+                  'quickPrompts': res['quickPrompts'],
+                });
+              } else {
+                _aiMessages.add({
+                  'role': 'assistant',
+                  'content': 'Bağlantı kurulamadı. Lütfen tekrar deneyin.',
+                });
+              }
+            });
+          }
+
+          void handleActionClick(dynamic act) {
+            final actionType = act['actionType'] ?? act['action'];
+            if (actionType == 'open_add_product') {
+              Navigator.pop(ctx);
+              _showSimplifiedAddProductDialog();
+            } else if (actionType == 'open_connect_marketplace') {
+              Navigator.pop(ctx);
+              _showAddMarketplaceDialog();
+            } else if (actionType == 'open_pricing_calc') {
+              Navigator.pop(ctx);
+              _showPricingCalculatorDialog();
+            } else if (actionType == 'switch_tab_orders') {
+              Navigator.pop(ctx);
+              setState(() => _currentTabIndex = 1);
+            } else if (actionType == 'broadcast_stock') {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Stoklar tüm pazaryerlerine 1.2 saniyede dağıtılıyor...'), backgroundColor: Colors.blueAccent));
+            } else if (act['prompt'] != null) {
+              sendMessage(act['prompt']);
+            }
+          }
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.purpleAccent, width: 1.5)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Colors.purpleAccent, Colors.blueAccent]),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Pazaryeri Yapay Zeka Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      Row(
+                        children: [
+                          Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
+                          const SizedBox(width: 6),
+                          Text('Online & Sistemi Yönlendirmeye Hazır', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 11)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 620,
+              height: 520,
+              child: Column(
+                children: [
+                  // Mesaj Listesi
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: _aiMessages.length + (_isAiThinking ? 1 : 0),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        if (index == _aiMessages.length && _isAiThinking) {
+                          return Row(
+                            children: [
+                              Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.purpleAccent.withOpacity(0.2), shape: BoxShape.circle), child: const Icon(Icons.auto_awesome, color: Colors.purpleAccent, size: 14)),
+                              const SizedBox(width: 8),
+                              Text('Yapay Zeka sistemi analiz ediyor...', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12, fontStyle: FontStyle.italic)),
+                            ],
+                          );
+                        }
+
+                        final msg = _aiMessages[index];
+                        final isUser = msg['role'] == 'user';
+                        final actions = msg['actions'] as List<dynamic>?;
+                        final quickPrompts = msg['quickPrompts'] as List<dynamic>?;
+
+                        return Column(
+                          crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isUser ? Colors.blueAccent.withOpacity(0.25) : Colors.white.withOpacity(0.06),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: isUser ? Colors.blueAccent.withOpacity(0.4) : Colors.white12),
+                              ),
+                              child: Text(
+                                msg['content'] ?? '',
+                                style: GoogleFonts.inter(color: Colors.white, fontSize: 13, height: 1.4),
+                              ),
+                            ),
+                            // Action / Quick Prompt Buttons
+                            if (actions != null && actions.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: actions.map((act) {
+                                  return ElevatedButton.icon(
+                                    onPressed: () => handleActionClick(act),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.purple.shade900,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    icon: const Icon(Icons.touch_app, size: 14, color: Colors.amberAccent),
+                                    label: Text(act['label'] ?? '', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                            if (quickPrompts != null && quickPrompts.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: quickPrompts.map((p) {
+                                  return ActionChip(
+                                    label: Text(p.toString(), style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
+                                    backgroundColor: Colors.white.withOpacity(0.08),
+                                    side: const BorderSide(color: Colors.white24),
+                                    onPressed: () => sendMessage(p.toString()),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(color: Colors.white12),
+                  // Mesaj Yazma Alanı
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _aiInputController,
+                          style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: 'Bir soru sorun... (Örn: 2 Al 1 Öde nasıl yapılır?)',
+                            hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.05),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white24)),
+                          ),
+                          onSubmitted: sendMessage,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.send_rounded, color: Colors.purpleAccent),
+                        onPressed: () => sendMessage(_aiInputController.text),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // --- KAMPANYA SEÇİCİ WIDGET'I ---
   Widget _buildCampaignSelector({
     required int currentType,
     required double basePrice,
@@ -112,7 +338,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             },
           ),
           const SizedBox(height: 8),
-          // Canlı Hesaplama Özeti
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(8)),
@@ -121,10 +346,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 const Icon(Icons.info_outline, color: Colors.amberAccent, size: 16),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    cur['desc'] as String,
-                    style: GoogleFonts.inter(color: Colors.white70, fontSize: 11),
-                  ),
+                  child: Text(cur['desc'] as String, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
                 ),
               ],
             ),
@@ -134,7 +356,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  // --- SADE & KULLANIŞLI ÜRÜN EKLEME MODALI ---
+  // --- SADE ÜRÜN EKLEME MODALI ---
   void _showSimplifiedAddProductDialog() {
     final titleController = TextEditingController();
     final brandController = TextEditingController(text: 'Tudors');
@@ -150,7 +372,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       "https://cdn.dsmcdn.com/ty1687/prod/QC_PREP/20250603/18/c2992fcf-6771-3257-8743-e1c6731041fd/1_org_zoom.jpg",
       "https://cdn.dsmcdn.com/ty1686/prod/QC_PREP/20250603/18/53f6bf86-2c9f-3e2c-87c1-206a47e4ad34/1_org_zoom.jpg"
     ];
-    int selectedCampaignType = 1; // Default to 2 Al 1 Öde
+    int selectedCampaignType = 1;
     String selectedCampaignName = "🔥 2 Al 1 Öde (BOGO)";
     bool isUploadingImage = false;
     bool showAdvancedOptions = false;
@@ -223,7 +445,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // SOL KOLON: GÖRSEL YÜKLEME & GALERİ
                     SizedBox(
                       width: 280,
                       child: Column(
@@ -327,7 +548,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       ),
                     ),
                     const SizedBox(width: 24),
-                    // SAĞ KOLON: TEMEL BİLGİLER + KAMPANYA SEÇİCİ
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +610,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ],
                           ),
                           const SizedBox(height: 14),
-                          // KAMPANYA SEÇİCİ
                           _buildCampaignSelector(
                             currentType: selectedCampaignType,
                             basePrice: currentPrice,
@@ -402,7 +621,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             },
                           ),
                           const SizedBox(height: 12),
-                          // Otomatik Beden Dağıtımı Toggle
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(color: Colors.purpleAccent.withOpacity(0.08), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.purpleAccent.withOpacity(0.2))),
@@ -428,7 +646,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // Gelişmiş Ayarlar Butonu (İsteğe Bağlı)
                           InkWell(
                             onTap: () => setDlgState(() => showAdvancedOptions = !showAdvancedOptions),
                             child: Row(
@@ -935,7 +1152,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Active Campaign Banner
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
@@ -1109,6 +1325,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final daysLeft = limits?['daysLeft'] ?? 30;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAiAssistantDialog,
+        backgroundColor: Colors.purpleAccent.shade700,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
+        label: Text('✨ AI E-Ticaret Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -1143,6 +1366,18 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       ],
                     ),
                     const Spacer(),
+                    ElevatedButton.icon(
+                      onPressed: _showAiAssistantDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple.shade800,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      ),
+                      icon: const Icon(Icons.auto_awesome, size: 16, color: Colors.amberAccent),
+                      label: Text('AI Asistan', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                    const SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: _showPricingCalculatorDialog,
                       style: OutlinedButton.styleFrom(foregroundColor: Colors.orangeAccent, side: const BorderSide(color: Colors.orangeAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
