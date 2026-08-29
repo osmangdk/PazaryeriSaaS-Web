@@ -33,27 +33,33 @@ class _LandingScreenState extends State<LandingScreen> {
       backgroundColor: const Color(0xFF0A1118),
       body: Stack(
         children: [
-          SingleChildScrollView(
+          Scrollbar(
             controller: _scrollController,
-            child: Column(
-              children: [
-                const SizedBox(height: 80),
-                _buildHeroSection(),
-                const SizedBox(height: 60),
-                _buildMarketplacesSection(key: _marketplacesKey),
-                const SizedBox(height: 80),
-                _buildFeaturesSection(key: _featuresKey),
-                const SizedBox(height: 80),
-                _buildHowItWorksSection(key: _howItWorksKey),
-                const SizedBox(height: 80),
-                _buildPricingSection(key: _pricingKey),
-                const SizedBox(height: 80),
-                _buildFaqSection(key: _faqKey),
-                const SizedBox(height: 80),
-                _buildCtaBanner(),
-                const SizedBox(height: 60),
-                _buildFooter(),
-              ],
+            thumbVisibility: true,
+            interactive: true,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  const SizedBox(height: 80),
+                  _buildHeroSection(),
+                  const SizedBox(height: 60),
+                  _buildMarketplacesSection(key: _marketplacesKey),
+                  const SizedBox(height: 80),
+                  _buildFeaturesSection(key: _featuresKey),
+                  const SizedBox(height: 80),
+                  _buildHowItWorksSection(key: _howItWorksKey),
+                  const SizedBox(height: 80),
+                  _buildPricingSection(key: _pricingKey),
+                  const SizedBox(height: 80),
+                  _buildFaqSection(key: _faqKey),
+                  const SizedBox(height: 80),
+                  _buildCtaBanner(),
+                  const SizedBox(height: 60),
+                  _buildFooter(),
+                ],
+              ),
             ),
           ),
           Positioned(top: 0, left: 0, right: 0, child: _buildNavbar()),

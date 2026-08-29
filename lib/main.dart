@@ -1,9 +1,23 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/router.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
+}
+
+class AppCustomScrollBehavior extends MaterialScrollBehavior {
+  const AppCustomScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
 }
 
 class MyApp extends ConsumerWidget {
@@ -15,6 +29,7 @@ class MyApp extends ConsumerWidget {
     
     return MaterialApp.router(
       title: 'Pazaryeri SaaS',
+      scrollBehavior: const AppCustomScrollBehavior(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
