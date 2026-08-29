@@ -219,14 +219,31 @@ class _LandingScreenState extends State<LandingScreen> {
                               if (quickPrompts != null && quickPrompts.isNotEmpty) ...[
                                 const SizedBox(height: 8),
                                 Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
+                                  spacing: 8,
+                                  runSpacing: 8,
                                   children: quickPrompts.map((p) {
-                                    return ActionChip(
-                                      label: Text(p.toString(), style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
-                                      backgroundColor: Colors.white.withOpacity(0.08),
-                                      side: const BorderSide(color: Colors.white24),
-                                      onPressed: () => sendMessage(p.toString()),
+                                    return InkWell(
+                                      onTap: () => sendMessage(p.toString()),
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF1E293B),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.purpleAccent.withOpacity(0.6), width: 1.2),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.help_outline_rounded, size: 14, color: Colors.cyanAccent),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              p.toString(),
+                                              style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     );
                                   }).toList(),
                                 ),
