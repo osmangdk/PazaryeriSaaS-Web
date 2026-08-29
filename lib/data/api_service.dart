@@ -134,6 +134,18 @@ class ApiService {
     }
   }
 
+  Future<String?> uploadImage(String base64Data, String fileName) async {
+    try {
+      final response = await _dio.post('/products/upload-image', data: {
+        'base64Data': base64Data,
+        'fileName': fileName,
+      });
+      return response.data?['imageUrl'];
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<List<dynamic>?> getMarketplaceConnections() async {
     try {
       final response = await _dio.get('/marketplaces');
