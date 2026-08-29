@@ -112,7 +112,7 @@ class _LandingScreenState extends State<LandingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text('14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+            child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
           ),
         ],
       ),
@@ -161,7 +161,7 @@ class _LandingScreenState extends State<LandingScreen> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 780),
               child: Text(
-                'Trendyol, Hepsiburada, Amazon, N11, ÇiçekSepeti, PttAVM, Boyner, Sahibinden ve Pazarama siparişlerinizi tek merkezde toplayın. Çift satış riskini sıfırlayın, satışlarınızı hızla büyütün.',
+                'Trendyol, Hepsiburada, Amazon, N11, ÇiçekSepeti, PttAVM, Boyner, Sahibinden ve Pazarama siparişlerinizi tek merkezde toplayın. 1 ay boyunca 50.000 ₺ işlem hacmine kadar tamamen ücretsiz deneyin.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(color: Colors.white60, fontSize: 16, height: 1.6),
               ),
@@ -175,7 +175,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 ElevatedButton.icon(
                   onPressed: () => context.go('/login'),
                   icon: const Icon(Icons.rocket_launch, size: 18),
-                  label: Text('14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                  label: Text('1 Ay (30 Gün) Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                 ),
                 OutlinedButton.icon(
@@ -192,10 +192,10 @@ class _LandingScreenState extends State<LandingScreen> {
               runSpacing: 8,
               alignment: WrapAlignment.center,
               children: [
-                _microTrustItem('90 Saniyede Kurulum'),
+                _microTrustItem('30 Gün / 50.000 ₺ Ücretsiz Limit'),
                 _microTrustItem('Kredi Kartı Gerekmez'),
                 _microTrustItem('%100 Çift Satış Koruması'),
-                _microTrustItem('7/24 Kesintisiz Destek'),
+                _microTrustItem('90 Saniyede Kurulum'),
               ],
             ),
           ],
@@ -411,7 +411,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: 'Yeni başlayan e-ticaret satıcıları için', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
+                      Expanded(child: _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: '1 Ay Boyunca 50.000 ₺ Satışa Kadar Ücretsiz', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
                       const SizedBox(width: 16),
                       Expanded(child: _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '₺1.199' : '₺1.599', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['Tüm Pazaryerleri (Sınırsız)', 'Sınırsız Sipariş & Ürün', 'Otomatik E-Fatura & Barkod', 'Akıllı Fiyatlandırma Robotu', 'Öncelikli WhatsApp Desteği'], isPopular: true)),
                       const SizedBox(width: 16),
@@ -420,7 +420,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   )
                 : Column(
                     children: [
-                      _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: 'Yeni başlayan e-ticaret satıcıları için', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
+                      _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: '1 Ay Boyunca 50.000 ₺ Satışa Kadar Ücretsiz', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
                       const SizedBox(height: 16),
                       _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '₺1.199' : '₺1.599', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['Tüm Pazaryerleri (Sınırsız)', 'Sınırsız Sipariş & Ürün', 'Otomatik E-Fatura & Barkod', 'Akıllı Fiyatlandırma Robotu', 'Öncelikli WhatsApp Desteği'], isPopular: true),
                       const SizedBox(height: 16),
@@ -472,7 +472,7 @@ class _LandingScreenState extends State<LandingScreen> {
             child: ElevatedButton(
               onPressed: () => context.go('/login'),
               style: ElevatedButton.styleFrom(backgroundColor: isPopular ? Colors.blueAccent : Colors.white12, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              child: Text('14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -484,7 +484,7 @@ class _LandingScreenState extends State<LandingScreen> {
     final faqs = [
       {'q': 'Kurulum ne kadar sürer? Teknik bilgiye ihtiyacım var mı?', 'a': 'Hayır, hiçbir kodlama veya teknik bilgi gerekmez. Pazaryerlerinizden aldığınız API anahtarlarını panelimize girerek mağazalarınızı 90 saniye içinde bağlayabilirsiniz.'},
       {'q': 'Gerçekten çift satış (overselling) riskini engelliyor musunuz?', 'a': 'Evet. Gelişmiş Sync-Engine altyapımız, bir kanaldan sipariş düştüğü anda milisaniyeler seviyesinde diğer tüm platformlardaki stok miktarını günceller ve ceza puanı almanızı engeller.'},
-      {'q': '14 günlük ücretsiz deneme süresinde kredi kartı girmem gerekir mi?', 'a': 'Kesinlikle hayır. Kredi kartı bilginizi almadan tüm Pro özellikleri 14 gün boyunca sınırsız deneyebilirsiniz.'},
+      {'q': '1 aylık ücretsiz deneme süresinde kredi kartı girmem gerekir mi?', 'a': 'Kesinlikle hayır. Kredi kartı bilginizi girmeden 30 gün boyunca (50.000 ₺ işlem hacmine kadar) tüm Pro özellikleri sınırsız deneyebilirsiniz.'},
       {'q': 'Kullandığım muhasebe ve ERP programları ile entegre olabilir mi?', 'a': 'Platformumuz Paraşüt, Bizmu, Logo, Mikro, Zirve gibi tüm popüler ön muhasebe ve ERP yazılımlarıyla tam entegre çalışmaktadır.'},
     ];
 
@@ -531,12 +531,12 @@ class _LandingScreenState extends State<LandingScreen> {
           children: [
             Text('Bugün Başlayın, İlk Satışınızı 10 Dakika İçinde Otomatize Edin.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
             const SizedBox(height: 16),
-            Text('14 gün boyunca kredi kartsız ücretsiz deneyin. E-ticaret operasyonunuzu sıfır hata ile büyütün.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
+            Text('30 gün boyunca (50.000 ₺ ciroya kadar) kredi kartsız ücretsiz deneyin. E-ticaret operasyonunuzu sıfır hata ile büyütün.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
             const SizedBox(height: 28),
             ElevatedButton(
               onPressed: () => context.go('/login'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blueAccent, padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text('Hemen 14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.w900, fontSize: 16)),
+              child: Text('Hemen 1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.w900, fontSize: 16)),
             ),
           ],
         ),
