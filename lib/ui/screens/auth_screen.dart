@@ -55,7 +55,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Tüm ekranı kaplayan modern bir gradyan arkaplan
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -65,14 +64,44 @@ class _AuthScreenState extends State<AuthScreen> {
             end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Card(
-                elevation: 12,
-                shadowColor: Colors.black45,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Stack(
+          children: [
+            // Top Left Home Link
+            Positioned(
+              top: 24,
+              left: 24,
+              child: InkWell(
+                onTap: () => context.go('/'),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.arrow_back, color: Colors.white, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Ana Sayfaya Dön',
+                        style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Card(
+                    elevation: 12,
+                    shadowColor: Colors.black45,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 400),
                   padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 40.0),
@@ -175,13 +204,33 @@ class _AuthScreenState extends State<AuthScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                      )
+                      ),
+
+                      const SizedBox(height: 12),
+                      const Divider(color: Colors.black12),
+                      const SizedBox(height: 8),
+
+                      // Ana Sayfaya Dön Butonu
+                      TextButton.icon(
+                        onPressed: () => context.go('/'),
+                        icon: const Icon(Icons.arrow_back, size: 16, color: Color(0xFF64748B)),
+                        label: Text(
+                          'Ana Sayfaya Dön',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF64748B),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
           ),
+            ),
+          ],
         ),
       ),
     );

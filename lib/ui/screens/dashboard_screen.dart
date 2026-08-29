@@ -45,7 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
-    if (mounted) context.go('/login');
+    if (mounted) context.go('/');
   }
 
   void _showConnectMarketplaceDialog() {
