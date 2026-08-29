@@ -92,16 +92,16 @@ class _LandingScreenState extends State<LandingScreen> {
           ),
           const Spacer(),
           if (isDesktop) ...[
-            _navButton('Ozellikler', () => _scrollTo(_featuresKey)),
+            _navButton('Özellikler', () => _scrollTo(_featuresKey)),
             _navButton('Pazaryerleri', () => _scrollTo(_marketplacesKey)),
-            _navButton('Nasil Calisir?', () => _scrollTo(_howItWorksKey)),
-            _navButton('Fiyatlandirma', () => _scrollTo(_pricingKey)),
+            _navButton('Nasıl Çalışır?', () => _scrollTo(_howItWorksKey)),
+            _navButton('Fiyatlandırma', () => _scrollTo(_pricingKey)),
             _navButton('SSS', () => _scrollTo(_faqKey)),
             const SizedBox(width: 20),
           ],
           TextButton(
             onPressed: () => context.go('/login'),
-            child: Text('Giris Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600)),
+            child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600)),
           ),
           const SizedBox(width: 12),
           ElevatedButton(
@@ -112,7 +112,7 @@ class _LandingScreenState extends State<LandingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text('14 Gun Ucretsiz Basla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+            child: Text('14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
           ),
         ],
       ),
@@ -147,13 +147,13 @@ class _LandingScreenState extends State<LandingScreen> {
                 children: [
                   const Icon(Icons.flash_on, color: Colors.blueAccent, size: 16),
                   const SizedBox(width: 8),
-                  Text('2026 Nesil Entegrasyon Motoru - 1.2sn Senkronizasyon', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text('2026 Nesil Entegrasyon Motoru — 1.2sn Senkronizasyon', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 13, fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'Pazaryeri Kaosuna Son:\nTum Satislari, Stoklari ve Kargolari Tek Panelden Yonetin.',
+              'Pazaryeri Kaosuna Son:\nTüm Satışları, Stokları ve Kargoları Tek Panelden Yönetin.',
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(color: Colors.white, fontSize: isMobile ? 28 : 46, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -1),
             ),
@@ -161,7 +161,7 @@ class _LandingScreenState extends State<LandingScreen> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 780),
               child: Text(
-                'Trendyol, Hepsiburada, Amazon, N11, CicekSepeti, PttAVM, Boyner ve Pazarama siparislerinizi tek merkezde toplayin. Cift satis riskini sifirlayin, satislarinizi hizla buyutun.',
+                'Trendyol, Hepsiburada, Amazon, N11, ÇiçekSepeti, PttAVM, Boyner, Sahibinden ve Pazarama siparişlerinizi tek merkezde toplayın. Çift satış riskini sıfırlayın, satışlarınızı hızla büyütün.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(color: Colors.white60, fontSize: 16, height: 1.6),
               ),
@@ -175,13 +175,13 @@ class _LandingScreenState extends State<LandingScreen> {
                 ElevatedButton.icon(
                   onPressed: () => context.go('/login'),
                   icon: const Icon(Icons.rocket_launch, size: 18),
-                  label: Text('14 Gun Ucretsiz Basla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                  label: Text('14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => context.go('/login'),
                   icon: const Icon(Icons.login, size: 18),
-                  label: Text('Magazama Giris Yap', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                  label: Text('Mağazama Giriş Yap', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
                   style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white24), padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                 ),
               ],
@@ -193,8 +193,8 @@ class _LandingScreenState extends State<LandingScreen> {
               alignment: WrapAlignment.center,
               children: [
                 _microTrustItem('90 Saniyede Kurulum'),
-                _microTrustItem('Kredi Karti Gerekmez'),
-                _microTrustItem('%100 Cift Satis Korumasi'),
+                _microTrustItem('Kredi Kartı Gerekmez'),
+                _microTrustItem('%100 Çift Satış Koruması'),
                 _microTrustItem('7/24 Kesintisiz Destek'),
               ],
             ),
@@ -217,14 +217,15 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildMarketplacesSection({required GlobalKey key}) {
     final marketplaces = [
-      {'name': 'Trendyol', 'color': const Color(0xFFF27A1A), 'desc': 'V2 Urun, Stok & Siparis'},
+      {'name': 'Trendyol', 'color': const Color(0xFFF27A1A), 'desc': 'V2 Ürün, Stok & Sipariş'},
       {'name': 'Hepsiburada', 'color': const Color(0xFFFF6000), 'desc': 'MPOP, Listing & OMS'},
       {'name': 'Amazon', 'color': const Color(0xFFFF9900), 'desc': 'SP-API Global & TR'},
       {'name': 'N11', 'color': const Color(0xFF5E2E91), 'desc': 'SOAP & REST Entegrasyon'},
-      {'name': 'Pazarama', 'color': const Color(0xFF0066FF), 'desc': 'OAuth2 & Anlik Stok'},
-      {'name': 'CicekSepeti', 'color': const Color(0xFFE91E63), 'desc': 'Bayi & Marketplace API'},
+      {'name': 'Pazarama', 'color': const Color(0xFF0066FF), 'desc': 'OAuth2 & Anlık Stok'},
+      {'name': 'ÇiçekSepeti', 'color': const Color(0xFFE91E63), 'desc': 'Bayi & Marketplace API'},
       {'name': 'PttAVM', 'color': const Color(0xFFFFB300), 'desc': 'REST & PTT Kargo'},
       {'name': 'Boyner', 'color': const Color(0xFF00897B), 'desc': 'Mirakl Seller API'},
+      {'name': 'Sahibinden', 'color': const Color(0xFFFFE600), 'desc': 'Veri Transferi & İlanlar'},
     ];
 
     final isWide = MediaQuery.of(context).size.width > 800;
@@ -238,13 +239,13 @@ class _LandingScreenState extends State<LandingScreen> {
           children: [
             Text('DESTEKLENEN KANALLAR', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
             const SizedBox(height: 12),
-            Text('Turkiye\'nin En Buyuk Pazaryerleri ile Tam Entegre', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            Text('Türkiye\'nin En Büyük Pazaryerleri ile Tam Entegre', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 36),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isWide ? 4 : 2,
+                crossAxisCount: isWide ? 3 : 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 childAspectRatio: 2.2,
@@ -283,10 +284,10 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildFeaturesSection({required GlobalKey key}) {
     final features = [
-      {'icon': Icons.flash_on, 'color': Colors.blueAccent, 'title': 'Isik Hizinda Stok Senkronizasyonu', 'desc': 'Bir pazaryerinde satis gerceklestigi an, kalan tum magazalarinizdaki stok 1.2 saniye icinde otomatik esitlenir. Cift satis ve ceza puanina son.'},
-      {'icon': Icons.calculate_outlined, 'color': Colors.orangeAccent, 'title': 'Akilli Komisyon & Fiyatlandirma', 'desc': 'Her pazaryerinin komisyon oranini ve kargo baremlerini otomatik hesaplayin. Maliyetinizi girin, sistem en karl� satis fiyatini belirlesin.'},
-      {'icon': Icons.receipt_long_outlined, 'color': Colors.greenAccent, 'title': 'Tek Tikla Toplu E-Fatura & Barkod', 'desc': 'Yuzlerce farkli siparis icin tek tek fatura kesmeyin. Pazaryeri kargo barkodlarini ve e-faturalarinizi tek tusla yazdirin.'},
-      {'icon': Icons.analytics_outlined, 'color': Colors.purpleAccent, 'title': 'Gercek Zamanli Finans Analitigi', 'desc': 'Hangi urun ne kadar net kar birakti? Detayli finans paneli ile isletmenizin gercek net karliligini anlik izleyin.'},
+      {'icon': Icons.flash_on, 'color': Colors.blueAccent, 'title': 'Işık Hızında Stok Senkronizasyonu', 'desc': 'Bir pazaryerinde satış gerçekleştiği an, kalan tüm mağazalarınızdaki stok 1.2 saniye içinde otomatik eşitlenir. Çift satış ve ceza puanına son.'},
+      {'icon': Icons.calculate_outlined, 'color': Colors.orangeAccent, 'title': 'Akıllı Komisyon & Fiyatlandırma', 'desc': 'Her pazaryerinin komisyon oranını ve kargo baremlerini otomatik hesaplayın. Maliyetinizi girin, sistem en kârlı satış fiyatını belirlesin.'},
+      {'icon': Icons.receipt_long_outlined, 'color': Colors.greenAccent, 'title': 'Tek Tıkla Toplu E-Fatura & Barkod', 'desc': 'Yüzlerce farklı sipariş için tek tek fatura kesmeyin. Pazaryeri kargo barkodlarını ve e-faturalarınızı tek tuşla yazdırın.'},
+      {'icon': Icons.analytics_outlined, 'color': Colors.purpleAccent, 'title': 'Gerçek Zamanlı Finans Analitiği', 'desc': 'Hangi ürün ne kadar net kâr bıraktı? Detaylı finans paneli ile işletmenizin gerçek net kârlılığını anlık izleyin.'},
     ];
 
     final isDesktop = MediaQuery.of(context).size.width > 750;
@@ -298,9 +299,9 @@ class _LandingScreenState extends State<LandingScreen> {
         constraints: const BoxConstraints(maxWidth: 1100),
         child: Column(
           children: [
-            Text('NEDEN BIZ?', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+            Text('NEDEN BİZ?', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
             const SizedBox(height: 12),
-            Text('Satislarinizi Buyutecek 4 Cekirdek Guc Modulu', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            Text('Satışlarınızı Büyütecek 4 Çekirdek Güç Modülü', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 36),
             GridView.builder(
               shrinkWrap: true,
@@ -339,9 +340,9 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildHowItWorksSection({required GlobalKey key}) {
     final steps = [
-      {'step': '01', 'title': 'Magazalarini Bagla', 'desc': 'API anahtarlarinizi girerek Trendyol, Hepsiburada ve diger magazalarinizi 90 saniyede ekleyin.'},
-      {'step': '02', 'title': 'Urunlerini Eslestir', 'desc': 'Stok ve fiyatlarinizi tek tikla merkezi katalogunuzla eslestirin veya ice aktarin.'},
-      {'step': '03', 'title': 'Arkaniza Yaslanin', 'desc': 'Siparisler geldikce stoklar tum kanallarda otomatik esitlensin, kargolar hazir olsun.'},
+      {'step': '01', 'title': 'Mağazalarını Bağla', 'desc': 'API anahtarlarınızı girerek Trendyol, Hepsiburada ve diğer mağazalarınızı 90 saniyede ekleyin.'},
+      {'step': '02', 'title': 'Ürünlerini Eşleştir', 'desc': 'Stok ve fiyatlarınızı tek tıkla merkezi kataloğunuzla eşleştirin veya içe aktarın.'},
+      {'step': '03', 'title': 'Arkanıza Yaslanın', 'desc': 'Siparişler geldikçe stoklar tüm kanallarda otomatik eşitlensin, kargolar hazır olsun.'},
     ];
 
     final isWide = MediaQuery.of(context).size.width > 750;
@@ -355,7 +356,7 @@ class _LandingScreenState extends State<LandingScreen> {
           children: [
             Text('KOLAY KURULUM', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
             const SizedBox(height: 12),
-            Text('3 Adimda Pazaryeri Satislarinizi Otomatize Edin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            Text('3 Adımda Pazaryeri Satışlarınızı Otomatize Edin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 36),
             isWide
                 ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: steps.map((s) => Expanded(child: _stepCard(s))).toList())
@@ -393,16 +394,16 @@ class _LandingScreenState extends State<LandingScreen> {
         constraints: const BoxConstraints(maxWidth: 1100),
         child: Column(
           children: [
-            Text('SEFFAF FIYATLANDIRMA', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+            Text('ŞEFFAF FİYATLANDIRMA', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
             const SizedBox(height: 12),
-            Text('Isletmenizin Olcegine Uygun Plani Secin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            Text('İşletmenizin Ölçeğine Uygun Planı Seçin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Aylik', style: GoogleFonts.inter(color: !_isAnnualPricing ? Colors.white : Colors.white60)),
+                Text('Aylık Ödeme', style: GoogleFonts.inter(color: !_isAnnualPricing ? Colors.white : Colors.white60)),
                 Switch(value: _isAnnualPricing, activeColor: Colors.blueAccent, onChanged: (val) => setState(() => _isAnnualPricing = val)),
-                Text('Yillik (%30 Indirim)', style: GoogleFonts.inter(color: _isAnnualPricing ? Colors.greenAccent : Colors.white60, fontWeight: FontWeight.bold)),
+                Text('Yıllık Ödeme (%30 İndirim)', style: GoogleFonts.inter(color: _isAnnualPricing ? Colors.greenAccent : Colors.white60, fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 36),
@@ -410,20 +411,20 @@ class _LandingScreenState extends State<LandingScreen> {
                 ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _pricingCard(title: 'Starter', price: _isAnnualPricing ? '499 TL' : '699 TL', desc: 'Yeni baslayan e-ticaret saticilari icin', features: ['3 Pazaryeri Baglantisi', 'Aylik 500 Siparis', 'Anlik Stok Senkronu', 'E-Posta Destegi'], isPopular: false)),
+                      Expanded(child: _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: 'Yeni başlayan e-ticaret satıcıları için', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
                       const SizedBox(width: 16),
-                      Expanded(child: _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '1.199 TL' : '1.599 TL', desc: 'Hizli buyuyen ve cok kanalli magazalar icin', features: ['Tum Pazaryerleri (Sinirsiz)', 'Sinirsiz Siparis & Urun', 'Otomatik E-Fatura & Barkod', 'Akilli Fiyatlandirma Robotu', 'Oncelikli WhatsApp Destegi'], isPopular: true)),
+                      Expanded(child: _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '₺1.199' : '₺1.599', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['Tüm Pazaryerleri (Sınırsız)', 'Sınırsız Sipariş & Ürün', 'Otomatik E-Fatura & Barkod', 'Akıllı Fiyatlandırma Robotu', 'Öncelikli WhatsApp Desteği'], isPopular: true)),
                       const SizedBox(width: 16),
-                      Expanded(child: _pricingCard(title: 'Enterprise', price: _isAnnualPricing ? '2.799 TL' : '3.699 TL', desc: 'Yuksek hacimli markalar ve depolar', features: ['Sinirsiz Kanal & Coklu Depo', 'Logo / Mikro / SAP Entegrasyonu', 'Ozel Musteri Temsilcisi', '7/24 Telefon Hatti'], isPopular: false)),
+                      Expanded(child: _pricingCard(title: 'Enterprise', price: _isAnnualPricing ? '₺2.799' : '₺3.699', desc: 'Yüksek hacimli markalar ve depolar', features: ['Sınırsız Kanal & Çoklu Depo', 'Logo / Mikro / SAP Entegrasyonu', 'Özel Müşteri Temsilcisi', '7/24 Telefon Hattı'], isPopular: false)),
                     ],
                   )
                 : Column(
                     children: [
-                      _pricingCard(title: 'Starter', price: _isAnnualPricing ? '499 TL' : '699 TL', desc: 'Yeni baslayan e-ticaret saticilari icin', features: ['3 Pazaryeri Baglantisi', 'Aylik 500 Siparis', 'Anlik Stok Senkronu', 'E-Posta Destegi'], isPopular: false),
+                      _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: 'Yeni başlayan e-ticaret satıcıları için', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
                       const SizedBox(height: 16),
-                      _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '1.199 TL' : '1.599 TL', desc: 'Hizli buyuyen ve cok kanalli magazalar icin', features: ['Tum Pazaryerleri (Sinirsiz)', 'Sinirsiz Siparis & Urun', 'Otomatik E-Fatura & Barkod', 'Akilli Fiyatlandirma Robotu', 'Oncelikli WhatsApp Destegi'], isPopular: true),
+                      _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '₺1.199' : '₺1.599', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['Tüm Pazaryerleri (Sınırsız)', 'Sınırsız Sipariş & Ürün', 'Otomatik E-Fatura & Barkod', 'Akıllı Fiyatlandırma Robotu', 'Öncelikli WhatsApp Desteği'], isPopular: true),
                       const SizedBox(height: 16),
-                      _pricingCard(title: 'Enterprise', price: _isAnnualPricing ? '2.799 TL' : '3.699 TL', desc: 'Yuksek hacimli markalar ve depolar', features: ['Sinirsiz Kanal & Coklu Depo', 'Logo / Mikro / SAP Entegrasyonu', 'Ozel Musteri Temsilcisi', '7/24 Telefon Hatti'], isPopular: false),
+                      _pricingCard(title: 'Enterprise', price: _isAnnualPricing ? '₺2.799' : '₺3.699', desc: 'Yüksek hacimli markalar ve depolar', features: ['Sınırsız Kanal & Çoklu Depo', 'Logo / Mikro / SAP Entegrasyonu', 'Özel Müşteri Temsilcisi', '7/24 Telefon Hattı'], isPopular: false),
                     ],
                   ),
           ],
@@ -444,13 +445,20 @@ class _LandingScreenState extends State<LandingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isPopular)
-            Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(8)), child: Text('EN COK TERCIH EDILEN', style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
+            Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(8)), child: Text('EN ÇOK TERCİH EDİLEN', style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
           const SizedBox(height: 12),
           Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
           const SizedBox(height: 6),
           Text(desc, style: GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
           const SizedBox(height: 20),
-          Text(price, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(price, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
+              Text(' / ay', style: GoogleFonts.inter(color: Colors.white54, fontSize: 14)),
+            ],
+          ),
           const SizedBox(height: 24),
           const Divider(color: Colors.white10),
           const SizedBox(height: 16),
@@ -464,7 +472,7 @@ class _LandingScreenState extends State<LandingScreen> {
             child: ElevatedButton(
               onPressed: () => context.go('/login'),
               style: ElevatedButton.styleFrom(backgroundColor: isPopular ? Colors.blueAccent : Colors.white12, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              child: Text('14 Gun Ucretsiz Basla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              child: Text('14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -474,10 +482,10 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildFaqSection({required GlobalKey key}) {
     final faqs = [
-      {'q': 'Kurulum ne kadar surer? Teknik bilgiye ihtiyacim var mi?', 'a': 'Hayir, hicbir kodlama veya teknik bilgi gerekmez. Pazaryerlerinizden aldiginiz API anahtarlarini panelimize girerek magazalarinizi 90 saniye icinde baglayabilirsiniz.'},
-      {'q': 'Gercekten cift satis (overselling) riskini engelliyor musunuz?', 'a': 'Evet. Gelismis Sync-Engine altyapimiz, bir kanaldan siparis dustugu anda milisaniyeler seviyesinde diger tum platformlardaki stok miktarini gunceller ve ceza puanini engeller.'},
-      {'q': '14 gunluk ucretsiz deneme suresinde kredi karti girmem gerekir mi?', 'a': 'Kesinlikle hayir. Kredi karti bilginizi almadan tum Pro ozellikleri 14 gun boyunca sinirsiz deneyebilirsiniz.'},
-      {'q': 'Kullandigim muhasebe ve ERP programlari ile entegre olabilir mi?', 'a': 'Platformumuz Parasut, Bizmu, Logo, Mikro, Zirve gibi tum populer on muhasebe ve ERP yazilimlariyla tam entegre calismaktadir.'},
+      {'q': 'Kurulum ne kadar sürer? Teknik bilgiye ihtiyacım var mı?', 'a': 'Hayır, hiçbir kodlama veya teknik bilgi gerekmez. Pazaryerlerinizden aldığınız API anahtarlarını panelimize girerek mağazalarınızı 90 saniye içinde bağlayabilirsiniz.'},
+      {'q': 'Gerçekten çift satış (overselling) riskini engelliyor musunuz?', 'a': 'Evet. Gelişmiş Sync-Engine altyapımız, bir kanaldan sipariş düştüğü anda milisaniyeler seviyesinde diğer tüm platformlardaki stok miktarını günceller ve ceza puanı almanızı engeller.'},
+      {'q': '14 günlük ücretsiz deneme süresinde kredi kartı girmem gerekir mi?', 'a': 'Kesinlikle hayır. Kredi kartı bilginizi almadan tüm Pro özellikleri 14 gün boyunca sınırsız deneyebilirsiniz.'},
+      {'q': 'Kullandığım muhasebe ve ERP programları ile entegre olabilir mi?', 'a': 'Platformumuz Paraşüt, Bizmu, Logo, Mikro, Zirve gibi tüm popüler ön muhasebe ve ERP yazılımlarıyla tam entegre çalışmaktadır.'},
     ];
 
     return Padding(
@@ -487,9 +495,9 @@ class _LandingScreenState extends State<LandingScreen> {
         constraints: const BoxConstraints(maxWidth: 850),
         child: Column(
           children: [
-            Text('SIKCA SORULAN SORULAR', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+            Text('SIKÇA SORULAN SORULAR', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
             const SizedBox(height: 12),
-            Text('Akliniza Takilan Tum Sorularin Cevaplari', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            Text('Aklınıza Takılan Tüm Soruların Cevapları', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 36),
             ...faqs.map((faq) => Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -521,14 +529,14 @@ class _LandingScreenState extends State<LandingScreen> {
         ),
         child: Column(
           children: [
-            Text('Bugun Baslayin, Ilk Satisinizi 10 Dakika Icinde Otomatize Edin.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
+            Text('Bugün Başlayın, İlk Satışınızı 10 Dakika İçinde Otomatize Edin.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
             const SizedBox(height: 16),
-            Text('14 gun boyunca kredi kartsiz ucretsiz deneyin. E-ticaret operasyonunuzu sifir hata ile buyutun.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
+            Text('14 gün boyunca kredi kartsız ücretsiz deneyin. E-ticaret operasyonunuzu sıfır hata ile büyütün.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
             const SizedBox(height: 28),
             ElevatedButton(
               onPressed: () => context.go('/login'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blueAccent, padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text('Hemen 14 Gun Ucretsiz Basla', style: GoogleFonts.inter(fontWeight: FontWeight.w900, fontSize: 16)),
+              child: Text('Hemen 14 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.w900, fontSize: 16)),
             ),
           ],
         ),
@@ -547,11 +555,11 @@ class _LandingScreenState extends State<LandingScreen> {
             children: [
               const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 20),
               const SizedBox(width: 8),
-              Text('PazaryeriSaaS (c) 2026 Tum Haklari Saklidir.', style: GoogleFonts.inter(color: Colors.white54, fontSize: 13)),
+              Text('PazaryeriSaaS © 2026 Tüm Hakları Saklıdır.', style: GoogleFonts.inter(color: Colors.white54, fontSize: 13)),
             ],
           ),
           const SizedBox(height: 8),
-          Text('256-Bit SSL Guvenli Altyapi - KVKK Uyumlu', style: GoogleFonts.inter(color: Colors.white30, fontSize: 11)),
+          Text('256-Bit SSL Güvenli Altyapı • KVKK Uyumlu', style: GoogleFonts.inter(color: Colors.white30, fontSize: 11)),
         ],
       ),
     );
