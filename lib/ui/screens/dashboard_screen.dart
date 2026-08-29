@@ -53,6 +53,87 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     if (mounted) context.go('/');
   }
 
+  // --- KAMPANYA SEÇİCİ VE CANLI HESAPLAMA WIDGET'I ---
+  Widget _buildCampaignSelector({
+    required int currentType,
+    required double basePrice,
+    required Function(int newType, String name) onChanged,
+  }) {
+    final campaigns = [
+      {'type': 0, 'name': 'Standart Satış (Kampanyasız)', 'desc': 'Sabit fiyattan satılır.', 'badge': 'Standart'},
+      {'type': 1, 'name': '🔥 2 Al 1 Öde (BOGO)', 'desc': '2 ürün sepete eklendiğinde 1 ürün bedava olur (Birim: ₺${(basePrice / 2).toStringAsFixed(2)}).', 'badge': '2 Al 1 Öde'},
+      {'type': 2, 'name': '🎁 3 Al 2 Öde', 'desc': '3 ürün sepete eklendiğinde 2 ürün fiyatı ödenir (Birim: ₺${((basePrice * 2) / 3).toStringAsFixed(2)}).', 'badge': '3 Al 2 Öde'},
+      {'type': 3, 'name': '⚡ 2. Ürüne %50 İndirim', 'desc': 'İkinci ürün %50 indirimli ₺${(basePrice * 0.5).toStringAsFixed(2)} olur (2li sepet: ₺${(basePrice * 1.5).toStringAsFixed(2)}).', 'badge': '2. Ürün %50'},
+      {'type': 4, 'name': '🛒 Sepette %10 İndirim', 'desc': 'Sepette anında ₺${(basePrice * 0.9).toStringAsFixed(2)} fiyata düşer.', 'badge': 'Sepette %10'},
+      {'type': 5, 'name': '🛒 Sepette %20 İndirim', 'desc': 'Sepette anında ₺${(basePrice * 0.8).toStringAsFixed(2)} fiyata düşer.', 'badge': 'Sepette %20'},
+      {'type': 6, 'name': '📦 Çok Al Az Öde (Adet Baremi)', 'desc': '3+ adet alımlarda %15 ek indirim uygulanır.', 'badge': 'Çok Al Az Öde'},
+      {'type': 7, 'name': '⚡ Flaş İndirim', 'desc': '24 saatlik sınırlı süreli flaş indirim.', 'badge': 'Flaş İndirim'},
+    ];
+
+    final cur = campaigns.firstWhere((c) => c['type'] == currentType, orElse: () => campaigns[0]);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amberAccent.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.amberAccent.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.local_offer, color: Colors.amberAccent, size: 18),
+              const SizedBox(width: 8),
+              Text('Pazaryeri Kampanyası & Promosyon Kurgusu', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<int>(
+            value: currentType,
+            dropdownColor: const Color(0xFF1E293B),
+            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white.withOpacity(0.05),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            items: campaigns.map((c) {
+              return DropdownMenuItem<int>(
+                value: c['type'] as int,
+                child: Text(c['name'] as String, style: GoogleFonts.inter(color: Colors.white)),
+              );
+            }).toList(),
+            onChanged: (val) {
+              final selected = campaigns.firstWhere((c) => c['type'] == val, orElse: () => campaigns[0]);
+              onChanged(val ?? 0, selected['name'] as String);
+            },
+          ),
+          const SizedBox(height: 8),
+          // Canlı Hesaplama Özeti
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(8)),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Colors.amberAccent, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    cur['desc'] as String,
+                    style: GoogleFonts.inter(color: Colors.white70, fontSize: 11),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // --- SADE & KULLANIŞLI ÜRÜN EKLEME MODALI ---
   void _showSimplifiedAddProductDialog() {
     final titleController = TextEditingController();
@@ -69,6 +150,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       "https://cdn.dsmcdn.com/ty1687/prod/QC_PREP/20250603/18/c2992fcf-6771-3257-8743-e1c6731041fd/1_org_zoom.jpg",
       "https://cdn.dsmcdn.com/ty1686/prod/QC_PREP/20250603/18/53f6bf86-2c9f-3e2c-87c1-206a47e4ad34/1_org_zoom.jpg"
     ];
+    int selectedCampaignType = 1; // Default to 2 Al 1 Öde
+    String selectedCampaignName = "🔥 2 Al 1 Öde (BOGO)";
     bool isUploadingImage = false;
     bool showAdvancedOptions = false;
     bool autoCreateVariants = true;
@@ -108,6 +191,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             });
           }
 
+          final currentPrice = double.tryParse(priceController.text) ?? 1083.90;
+
           return AlertDialog(
             backgroundColor: const Color(0xFF0F172A),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.white24)),
@@ -123,8 +208,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Hızlı & Kolay Ürün Ekle', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                      Text('Ürün bilgilerinizi ve fotoğraflarınızı tek ekranda pratikçe ekleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                      Text('Hızlı Ürün & Kampanya Tanımla', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text('Fotoğraflarınızı yükleyin ve 2 Al 1 Öde gibi pazaryeri kampanyalarını seçin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -132,8 +217,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ],
             ),
             content: SizedBox(
-              width: 780,
-              height: 540,
+              width: 820,
+              height: 580,
               child: SingleChildScrollView(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,12 +231,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         children: [
                           Text('📸 Ürün Görselleri', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                           const SizedBox(height: 8),
-                          // Büyük Yükleme Butonu (Dropzone)
                           InkWell(
                             onTap: pickAndUploadImage,
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              height: 140,
+                              height: 130,
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 color: Colors.blueAccent.withOpacity(0.08),
@@ -163,16 +247,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   : Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.cloud_upload_outlined, color: Colors.blueAccent, size: 38),
-                                        const SizedBox(height: 8),
+                                        const Icon(Icons.cloud_upload_outlined, color: Colors.blueAccent, size: 36),
+                                        const SizedBox(height: 6),
                                         Text('Fotoğraf Seç / Yükle', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                                        Text('Bilgisayarınızdan resim seçin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                                        Text('Bilgisayardan veya galeriden', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
                                       ],
                                     ),
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // Alternatif URL Yapıştır
                           Row(
                             children: [
                               Expanded(
@@ -205,7 +288,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ],
                           ),
                           const SizedBox(height: 12),
-                          // Yüklenen Resimlerin Önizleme Listesi
                           if (uploadedImages.isNotEmpty) ...[
                             Text('Eklenen Resimler (${uploadedImages.length}):', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 8),
@@ -245,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       ),
                     ),
                     const SizedBox(width: 24),
-                    // SAĞ KOLON: TEMİZ & FERAH BİLGİ ALANLARI
+                    // SAĞ KOLON: TEMEL BİLGİLER + KAMPANYA SEÇİCİ
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,13 +353,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 child: TextField(
                                   controller: brandController,
                                   style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-                                  decoration: InputDecoration(
-                                    labelText: 'Marka',
-                                    labelStyle: GoogleFonts.inter(color: Colors.white70),
-                                    filled: true,
-                                    fillColor: Colors.white.withOpacity(0.05),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                  ),
+                                  decoration: InputDecoration(labelText: 'Marka', labelStyle: GoogleFonts.inter(color: Colors.white70), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -285,13 +361,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 child: TextField(
                                   controller: categoryController,
                                   style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-                                  decoration: InputDecoration(
-                                    labelText: 'Kategori',
-                                    labelStyle: GoogleFonts.inter(color: Colors.white70),
-                                    filled: true,
-                                    fillColor: Colors.white.withOpacity(0.05),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                  ),
+                                  decoration: InputDecoration(labelText: 'Kategori', labelStyle: GoogleFonts.inter(color: Colors.white70), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                                 ),
                               ),
                             ],
@@ -304,15 +374,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   controller: priceController,
                                   keyboardType: TextInputType.number,
                                   style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14),
-                                  decoration: InputDecoration(
-                                    labelText: 'Satış Fiyatı (₺) *',
-                                    prefixText: '₺ ',
-                                    prefixStyle: GoogleFonts.inter(color: Colors.greenAccent),
-                                    labelStyle: GoogleFonts.inter(color: Colors.white70),
-                                    filled: true,
-                                    fillColor: Colors.white.withOpacity(0.05),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                  ),
+                                  decoration: InputDecoration(labelText: 'Satış Fiyatı (₺) *', prefixText: '₺ ', prefixStyle: GoogleFonts.inter(color: Colors.greenAccent), labelStyle: GoogleFonts.inter(color: Colors.white70), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                                  onChanged: (_) => setDlgState(() {}),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -321,17 +384,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   controller: stockController,
                                   keyboardType: TextInputType.number,
                                   style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
-                                  decoration: InputDecoration(
-                                    labelText: 'Toplam Stok *',
-                                    suffixText: 'Adet',
-                                    labelStyle: GoogleFonts.inter(color: Colors.white70),
-                                    filled: true,
-                                    fillColor: Colors.white.withOpacity(0.05),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                  ),
+                                  decoration: InputDecoration(labelText: 'Toplam Stok *', suffixText: 'Adet', labelStyle: GoogleFonts.inter(color: Colors.white70), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 14),
+                          // KAMPANYA SEÇİCİ
+                          _buildCampaignSelector(
+                            currentType: selectedCampaignType,
+                            basePrice: currentPrice,
+                            onChanged: (newType, name) {
+                              setDlgState(() {
+                                selectedCampaignType = newType;
+                                selectedCampaignName = name;
+                              });
+                            },
                           ),
                           const SizedBox(height: 12),
                           // Otomatik Beden Dağıtımı Toggle
@@ -462,10 +530,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           'deliveryDuration': 2,
                           'description': titleController.text,
                           'images': uploadedImages,
+                          'campaignType': selectedCampaignType,
+                          'campaignName': selectedCampaignName,
                           'attributes': {
                             'Kalıp': 'Slim Fit',
                             'Kategori': categoryController.text,
-                            'Marka': brandController.text
+                            'Marka': brandController.text,
+                            'Kampanya': selectedCampaignName
                           },
                           'variants': variants
                         };
@@ -475,7 +546,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
                         if (res != null && mounted) {
                           Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün ve fotoğrafları başarıyla kaydedildi! 🚀'), backgroundColor: Colors.green));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün ve kampanyası başarıyla kaydedildi! 🚀'), backgroundColor: Colors.green));
                           _loadData();
                         } else if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün eklenirken bir hata oluştu!'), backgroundColor: Colors.red));
@@ -774,6 +845,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final images = (details['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
     final attributes = (details['attributes'] as Map<String, dynamic>?) ?? {};
     final variants = (details['variants'] as List<dynamic>?) ?? [];
+    final campaignName = details['campaignName'] ?? 'Standart Satış';
 
     showDialog(
       context: context,
@@ -863,6 +935,24 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Active Campaign Banner
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(colors: [Colors.orange.shade900, Colors.deepOrange]),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.local_fire_department, color: Colors.white, size: 18),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text('Aktif Kampanya: $campaignName', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
                               Container(
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
@@ -1333,14 +1423,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Ürün Kataloğu & Varyantlar', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text('Ürün Kataloğu & Kampanya Yönetimi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
             Row(
               children: [
                 ElevatedButton.icon(
                   onPressed: _showSimplifiedAddProductDialog,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                   icon: const Icon(Icons.add_photo_alternate, size: 18),
-                  label: Text('+ Yeni Ürün & Fotoğraf Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                  label: Text('+ Yeni Ürün & Kampanya Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
@@ -1357,7 +1447,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         ),
         const SizedBox(height: 16),
         _products == null || _products!.isEmpty
-            ? _buildEmptyState('Henüz ürün eklenmemiş. Yukarıdaki "+ Yeni Ürün & Fotoğraf Ekle" butonuyla kolayca ürün ekleyebilirsiniz.', Icons.inventory_2_outlined)
+            ? _buildEmptyState('Henüz ürün eklenmemiş. Yukarıdaki "+ Yeni Ürün & Kampanya Ekle" butonuyla kolayca ürün ekleyebilirsiniz.', Icons.inventory_2_outlined)
             : ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -1378,6 +1468,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final desi = p['dimensionalWeight'] ?? 1.0;
     final listPrice = p['listPrice'];
     final productId = p['id'].toString();
+    final campaignName = p['campaignName'] ?? 'Standart Satış';
+    final campaignType = p['campaignType'] ?? 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1390,8 +1482,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 65,
-                  height: 65,
+                  width: 70,
+                  height: 70,
                   decoration: BoxDecoration(
                     color: Colors.blueAccent.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
@@ -1406,7 +1498,19 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(p['title'] ?? p['name'] ?? 'İsimsiz Ürün', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(p['title'] ?? p['name'] ?? 'İsimsiz Ürün', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                          ),
+                          if (campaignType > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(color: Colors.orange.shade900, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.orangeAccent)),
+                              child: Text(campaignName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+                            ),
+                        ],
+                      ),
                       const SizedBox(height: 4),
                       Wrap(
                         spacing: 6,
@@ -1425,6 +1529,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     ],
                   ),
                 ),
+                const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -1451,12 +1556,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               const Spacer(),
               ElevatedButton.icon(
                 onPressed: () async {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trendyol v2 Ürün Oluşturma API isteği gönderiliyor...'), backgroundColor: Colors.orange));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trendyol v2 Ürün & Kampanya API isteği gönderiliyor...'), backgroundColor: Colors.orange));
                   final res = await _apiService.uploadProductToTrendyol(productId);
                   if (mounted) {
                     final isOk = res?['isSuccess'] == true;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(isOk ? 'Ürün Trendyol kataloğuna başarıyla aktarıldı!' : (res?['errorMessage'] ?? 'Trendyol aktarımında hata!')), backgroundColor: isOk ? Colors.green : Colors.orange),
+                      SnackBar(content: Text(isOk ? 'Ürün ve promosyon kurgusu Trendyol kataloğuna aktarıldı!' : (res?['errorMessage'] ?? 'Trendyol aktarımında hata!')), backgroundColor: isOk ? Colors.green : Colors.orange),
                     );
                   }
                 },
