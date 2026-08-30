@@ -2480,10 +2480,21 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  void _showPricingCalculatorDialog() {
-    final costController = TextEditingController(text: '150');
+  void _showPricingCalculatorDialog({Map<String, dynamic>? initialProduct}) {
+    final products = _products ?? [];
+    String? selectedProductId = initialProduct?['id']?.toString();
+
+    final costController = TextEditingController(
+      text: initialProduct != null
+          ? ((initialProduct['costPrice'] ?? (initialProduct['price'] != null ? (initialProduct['price'] as num) * 0.70 : 150)).toString())
+          : '150',
+    );
     final profitController = TextEditingController(text: '25');
-    final shippingController = TextEditingController(text: '45');
+    final shippingController = TextEditingController(
+      text: initialProduct != null
+          ? (((initialProduct['dimensionalWeight'] ?? 1.5) as num) * 30.0).toStringAsFixed(0)
+          : '45',
+    );
     List<dynamic>? calculatedResults;
     bool isCalculating = false;
 
@@ -2519,15 +2530,73 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   child: const Icon(Icons.calculate_outlined, color: Colors.orangeAccent),
                 ),
                 const SizedBox(width: 12),
-                Text('Akıllı Komisyon & Fiyat Robotu', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Akıllı Komisyon & Fiyat Robotu', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text('Pazaryeri komisyonlarına göre karlı satış fiyatı ve net kazanç simülatörü', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                    ],
+                  ),
+                ),
               ],
             ),
             content: SizedBox(
-              width: 650,
+              width: 720,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Ürün Seçim Kutusu
+                    if (products.isNotEmpty) ...[
+                      DropdownButtonFormField<String?>(
+                        value: selectedProductId,
+                        dropdownColor: const Color(0xFF1E293B),
+                        style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          labelText: '📦 Kataloğunuzdan Bir Ürün Seçin (İsteğe Bağlı)',
+                          labelStyle: GoogleFonts.inter(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 12),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.05),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        items: [
+                          const DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text('⚙️ Manuel Değerler ile Serbest Hesaplama'),
+                          ),
+                          ...products.map((p) {
+                            final pid = p['id'].toString();
+                            final title = p['title'] ?? 'Ürün';
+                            final price = p['price'] ?? 0;
+                            return DropdownMenuItem<String?>(
+                              value: pid,
+                              child: Text('$title (Mevcut Satış: ${formatTL(price)})', maxLines: 1, overflow: TextOverflow.ellipsis),
+                            );
+                          }),
+                        ],
+                        onChanged: (val) {
+                          setDlgState(() {
+                            selectedProductId = val;
+                            if (val != null) {
+                              final p = products.firstWhere((item) => item['id'].toString() == val, orElse: () => null);
+                              if (p != null) {
+                                final priceNum = (p['price'] as num?)?.toDouble() ?? 100.0;
+                                final costNum = (p['costPrice'] as num?)?.toDouble() ?? (priceNum * 0.70);
+                                final desi = (p['dimensionalWeight'] as num?)?.toDouble() ?? 1.5;
+                                costController.text = costNum.toStringAsFixed(0);
+                                shippingController.text = (desi * 30.0).toStringAsFixed(0);
+                                profitController.text = '25';
+                              }
+                            }
+                          });
+                          doCalculate();
+                        },
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
                     Row(
                       children: [
                         Expanded(
@@ -2544,7 +2613,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: TextField(
                             controller: profitController,
@@ -2559,7 +2628,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: TextField(
                             controller: shippingController,
@@ -2577,38 +2646,69 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         const SizedBox(width: 8),
                         IconButton(
                           icon: const Icon(Icons.refresh, color: Colors.blueAccent),
+                          tooltip: 'Yeniden Hesapla',
                           onPressed: doCalculate,
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     if (isCalculating)
-                      const Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: Colors.orangeAccent))
+                      const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: Colors.orangeAccent)))
                     else if (calculatedResults != null)
                       Column(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(8)),
                             child: Row(
                               children: [
                                 Expanded(flex: 3, child: Text('Pazaryeri', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
                                 Expanded(flex: 2, child: Text('Komisyon', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
-                                Expanded(flex: 3, child: Text('Önerilen Fiyat', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
-                                Expanded(flex: 2, child: Text('Net Kâr', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                Expanded(flex: 3, child: Text('Önerilen Satış Fiyatı', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
+                                Expanded(flex: 2, child: Text('Komisyon Tutarı', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                                Expanded(flex: 2, child: Text('Net Kâr', style: GoogleFonts.inter(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 12))),
                               ],
                             ),
                           ),
                           const SizedBox(height: 6),
                           ...calculatedResults!.map((item) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            final mpName = (item['marketplaceName'] ?? item['marketplace'] ?? _getMarketplaceDisplayName(item['marketplaceType'])).toString();
+                            final commRate = item['commissionPercent'] ?? item['commissionRate'] ?? 18.0;
+                            final recPrice = item['recommendedSalePrice'] ?? 0.0;
+                            final netProfit = item['netProfitAmount'] ?? item['targetProfitAmount'] ?? 0.0;
+                            final commAmount = item['commissionAmount'] ?? (recPrice * (commRate / 100.0));
+
+                            return Container(
+                              margin: const EdgeInsets.symmetric(vertical: 2),
+                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.02),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: Colors.white10),
+                              ),
                               child: Row(
                                 children: [
-                                  Expanded(flex: 3, child: Text(item['marketplace'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13))),
-                                  Expanded(flex: 2, child: Text('%${item['commissionRate']}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12))),
-                                  Expanded(flex: 3, child: Text(formatTL(item['recommendedSalePrice']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14))),
-                                  Expanded(flex: 2, child: Text(formatTL(item['targetProfitAmount']), style: GoogleFonts.inter(color: Colors.white70, fontSize: 12))),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Row(
+                                      children: [
+                                        _getMarketplaceIconMini(mpName),
+                                        const SizedBox(width: 8),
+                                        Text(mpName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(color: Colors.orange.withOpacity(0.15), borderRadius: BorderRadius.circular(4)),
+                                      child: Text('%$commRate', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                                    ),
+                                  ),
+                                  Expanded(flex: 3, child: Text(formatTL(recPrice), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14))),
+                                  Expanded(flex: 2, child: Text(formatTL(commAmount), style: GoogleFonts.inter(color: Colors.white60, fontSize: 12))),
+                                  Expanded(flex: 2, child: Text(formatTL(netProfit), style: GoogleFonts.inter(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 13))),
                                 ],
                               ),
                             );
@@ -2626,6 +2726,18 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         },
       ),
     );
+  }
+
+  Widget _getMarketplaceIconMini(String name) {
+    if (name.contains('Trendyol')) return const Icon(Icons.circle, color: Colors.orange, size: 10);
+    if (name.contains('Hepsiburada')) return const Icon(Icons.circle, color: Colors.deepOrange, size: 10);
+    if (name.contains('Amazon')) return const Icon(Icons.circle, color: Colors.amber, size: 10);
+    if (name.contains('N11')) return const Icon(Icons.circle, color: Colors.redAccent, size: 10);
+    if (name.contains('Pazarama')) return const Icon(Icons.circle, color: Colors.purpleAccent, size: 10);
+    if (name.contains('Ciceksepeti') || name.contains('Çiçek')) return const Icon(Icons.circle, color: Colors.pinkAccent, size: 10);
+    if (name.contains('Ptt')) return const Icon(Icons.circle, color: Colors.yellow, size: 10);
+    if (name.contains('Boyner')) return const Icon(Icons.circle, color: Colors.blueAccent, size: 10);
+    return const Icon(Icons.circle, color: Colors.white38, size: 10);
   }
 
   void _showAddMarketplaceDialog() {
@@ -3838,7 +3950,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         else if (isPaid)
                           Text('$plan • $daysLeft Gün Kaldı • Sınırsız Senkronizasyon', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.w500))
                         else
-                          Text('$daysLeft Gün Kaldı • 50.000 ₺ Ücretsiz Deneme Paketi', style: GoogleFonts.inter(color: daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w500)),
+                          Text('$daysLeft Gün Kaldı • Ücretsiz Deneme (3 Pazaryeri • 50 Ürün)', style: GoogleFonts.inter(color: daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w500)),
                       ],
                     ),
                     const Spacer(),
