@@ -28,7 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   String? _selectedSubCategoryFilter;
   String _productSearchQuery = '';
   final TextEditingController _productSearchController = TextEditingController();
-  final Set<String> _expandedCategoryIds = {'Giyim', 'Bilgisayar'};
+  final Set<String> _expandedCategoryIds = {'Elektronik', 'Moda'};
 
   final List<Map<String, dynamic>> _catalogCategories = [
     {
@@ -39,52 +39,141 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       'subCategories': <String>[],
     },
     {
-      'id': 'Giyim',
-      'title': 'Giyim & Tekstil',
+      'id': 'Elektronik',
+      'title': 'Elektronik',
+      'icon': Icons.devices,
+      'color': Colors.blueAccent,
+      'allLabel': 'Tüm Elektronik Ürünleri',
+      'subCategories': [
+        'Bilgisayar / Tablet',
+        'Telefon & Aksesuarlar',
+        'TV, Görüntü & Ses',
+        'Beyaz Eşya',
+        'Küçük Ev Aletleri',
+        'Foto & Kamera',
+        'Oyun & Oyun Konsolları',
+      ],
+    },
+    {
+      'id': 'Moda',
+      'title': 'Moda',
       'icon': Icons.checkroom,
-      'color': Colors.orangeAccent,
-      'allLabel': 'Tüm Giyim Ürünleri',
-      'subCategories': ['Tişört & Polo Yaka', 'Gömlek', 'Pantolon & Jean', 'Ceket & Mont', 'Elbise & Etek', 'Ayakkabı'],
-    },
-    {
-      'id': 'Bilgisayar',
-      'title': 'Laptop & Bilgisayar',
-      'icon': Icons.laptop_mac,
-      'color': Colors.tealAccent,
-      'allLabel': 'Tüm Bilgisayar Ürünleri',
-      'subCategories': ['Dizüstü Bilgisayar (Laptop)', 'Masaüstü & Monitör', 'Tablet & Çevre Birimleri', 'Bilgisayar Bileşenleri'],
-    },
-    {
-      'id': 'Telefon',
-      'title': 'Telefon & Aksesuar',
-      'icon': Icons.smartphone,
-      'color': Colors.purpleAccent,
-      'allLabel': 'Tüm Telefon Ürünleri',
-      'subCategories': ['Akıllı Telefonlar', 'Kılıf & Koruyucu', 'Şarj & Kablo', 'Akıllı Saat & Bileklik'],
-    },
-    {
-      'id': 'Ev',
-      'title': 'Ev & Yaşam',
-      'icon': Icons.home,
-      'color': Colors.greenAccent,
-      'allLabel': 'Tüm Ev & Yaşam Ürünleri',
-      'subCategories': ['Küçük Ev Aletleri', 'Mutfak & Sofra', 'Mobilya & Dekorasyon', 'Ev Tekstili'],
-    },
-    {
-      'id': 'Oyun',
-      'title': 'Oyun & Hobi',
-      'icon': Icons.sports_esports,
       'color': Colors.pinkAccent,
-      'allLabel': 'Tüm Oyun & Hobi Ürünleri',
-      'subCategories': ['Oyun Konsolları', 'Konsol Oyunları', 'Gaming Aksesuar', 'Hobi & Maket'],
+      'allLabel': 'Tüm Moda & Giyim Ürünleri',
+      'subCategories': [
+        'Kadın Giyim',
+        'Kadın Ayakkabı',
+        'Erkek Giyim (Tişört, Gömlek, Pantolon)',
+        'Erkek Ayakkabı',
+        'Çanta & Aksesuar',
+        'İç Giyim & Pijama',
+        'Saat & Takı',
+      ],
     },
     {
-      'id': 'Araç',
-      'title': 'Oto & Yapı Market',
-      'icon': Icons.build,
+      'id': 'EvYasam',
+      'title': 'Ev, Yaşam, Kırtasiye, Ofis',
+      'icon': Icons.chair,
       'color': Colors.amberAccent,
-      'allLabel': 'Tüm Yapı Market Ürünleri',
-      'subCategories': ['Elektrikli El Aletleri', 'Oto Aksesuar', 'Hırdavat & Boya', 'Bahçe Ekipmanları'],
+      'allLabel': 'Tüm Ev, Yaşam & Ofis',
+      'subCategories': [
+        'Sofra & Mutfak',
+        'Ev Tekstili',
+        'Mobilya & Dekorasyon',
+        'Aydınlatma',
+        'Banyo & Ev Gereçleri',
+        'Ofis & Kırtasiye',
+      ],
+    },
+    {
+      'id': 'OtoYapiBahce',
+      'title': 'Oto, Bahçe, Yapı Market',
+      'icon': Icons.build_circle,
+      'color': Colors.tealAccent,
+      'allLabel': 'Tüm Oto & Yapı Market',
+      'subCategories': [
+        'Oto Aksesuar & Elektroniği',
+        'Motosiklet Ekipmanları',
+        'Elektrikli El Aletleri',
+        'Hırdavat & Nalbur',
+        'Boya & Kimyasallar',
+        'Bahçe & Çim Bakımı',
+      ],
+    },
+    {
+      'id': 'AnneBebek',
+      'title': 'Anne, Bebek, Oyuncak',
+      'icon': Icons.child_care,
+      'color': Colors.purpleAccent,
+      'allLabel': 'Tüm Anne & Bebek Ürünleri',
+      'subCategories': [
+        'Bebek Arabası & Oto Koltuğu',
+        'Bebek Bezi & Islak Mendil',
+        'Bebek Beslenme & Emzirme',
+        'Bebek Giyim & Bakım',
+        'Eğitici Ahşap Oyuncaklar',
+        'Figür, Bebek & Araçlar',
+      ],
+    },
+    {
+      'id': 'SporOutdoor',
+      'title': 'Spor, Outdoor',
+      'icon': Icons.fitness_center,
+      'color': Colors.greenAccent,
+      'allLabel': 'Tüm Spor & Outdoor',
+      'subCategories': [
+        'Fitness & Kondisyon',
+        'Spor Giyim & Ayakkabı',
+        'Outdoor & Kamp Ekipmanları',
+        'Bisiklet & Scooter',
+        'Top Sporları (Futbol/Basketbol)',
+        'Su Sporları & Yüzme',
+      ],
+    },
+    {
+      'id': 'Kozmetik',
+      'title': 'Kozmetik, Kişisel Bakım',
+      'icon': Icons.face,
+      'color': Colors.deepOrangeAccent,
+      'allLabel': 'Tüm Kozmetik & Bakım',
+      'subCategories': [
+        'Parfüm & Deodorant',
+        'Makyaj Ürünleri',
+        'Cilt & Yüz Bakımı',
+        'Saç Bakımı & Şekillendirme',
+        'Tıraş & Epilasyon',
+        'Ağız & Diş Sağlığı',
+      ],
+    },
+    {
+      'id': 'SupermarketPetShop',
+      'title': 'Süpermarket, Pet Shop',
+      'icon': Icons.shopping_basket,
+      'color': Colors.lightGreenAccent,
+      'allLabel': 'Tüm Süpermarket & Pet',
+      'subCategories': [
+        'Deterjan & Temizlik',
+        'Gıda & Temel Mutfak',
+        'İçecekler (Çay, Kahve)',
+        'Kağıt Ürünleri',
+        'Kedi Maması & Kumu',
+        'Köpek Maması & Aksesuar',
+      ],
+    },
+    {
+      'id': 'KitapHobi',
+      'title': 'Kitap, Müzik, Film, Hobi',
+      'icon': Icons.menu_book,
+      'color': Colors.indigoAccent,
+      'allLabel': 'Tüm Kitap & Hobi',
+      'subCategories': [
+        'Edebiyat & Roman',
+        'Kişisel Gelişim & Psikoloji',
+        'Çocuk & Gençlik Kitapları',
+        'Sınav & Ders Kitapları',
+        'Müzik Aletleri & Enstrüman',
+        'Hobi, Maket & Kutu Oyunları',
+      ],
     },
   ];
 
@@ -644,12 +733,16 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
     // Kategori şablonları
     final categoryTemplates = {
-      '💻 Laptop & Bilgisayar': ['İşlemci', 'RAM (Sistem Belleği)', 'SSD Kapasitesi', 'Ekran Boyutu', 'İşletim Sistemi', 'Ekran Kartı', 'Çözünürlük', 'Renk', 'Ağırlık', 'Garanti Süresi'],
-      '📱 Telefon & Tablet': ['Dahili Hafıza', 'RAM', 'Renk', 'Ekran Boyutu', 'Kamera Çözünürlüğü', 'Pil Gücü', 'İşletim Sistemi', 'Garanti'],
-      '👕 Giyim & Tekstil': ['Kalıp', 'Kumaş', 'Yaka', 'Renk', 'Cinsiyet', 'Sezon', 'Paket'],
-      '🏠 Ev & Yaşam': ['Malzeme', 'Güç', 'Kapasite', 'Renk', 'Boyut', 'Garanti'],
-      '🎮 Oyun & Konsol': ['Platform', 'Depolama', 'Kapasite', 'Renk', 'Garanti'],
-      '🔧 Araç & Gereç': ['Güç', 'Voltaj', 'Kapasite', 'Ölçü', 'Garanti'],
+      '💻 Elektronik & Bilgisayar': ['İşlemci', 'RAM (Bellek)', 'SSD / Depolama Kapasitesi', 'Ekran Boyutu', 'Ekran Kartı', 'İşletim Sistemi', 'Çözünürlük', 'Renk', 'Garanti Süresi'],
+      '📱 Telefon & Aksesuar': ['Dahili Hafıza', 'RAM', 'Renk', 'Ekran Boyutu', 'Kamera Çözünürlüğü', 'Pil Gücü', 'İşletim Sistemi', 'Garanti'],
+      '👗 Moda (Kadın/Erkek/Çanta)': ['Beden', 'Kalıp', 'Kumaş Tipi', 'Yaka Tipi', 'Renk', 'Cinsiyet', 'Sezon', 'Paket İçeriği'],
+      '🏠 Ev, Yaşam, Kırtasiye, Ofis': ['Malzeme', 'Kapasite / Boyut', 'Renk', 'Ağırlık', 'Kullanım Alanı', 'Garanti'],
+      '🔧 Oto, Bahçe, Yapı Market': ['Güç (Watt/Volt)', 'Kapasite', 'Uyumlu Araç / Model', 'Ölçü / Ebat', 'Garanti'],
+      '👶 Anne, Bebek, Oyuncak': ['Yaş Grubu', 'Cinsiyet', 'Malzeme / Materyal', 'Taşıma Kapasitesi', 'Renk'],
+      '⚽ Spor, Outdoor': ['Spor Branşı', 'Beden / Numara', 'Malzeme', 'Kullanım Alanı', 'Renk'],
+      '💄 Kozmetik, Kişisel Bakım': ['Hacim (ml/gr)', 'Cilt Tipi', 'Koku / Aroma', 'Kullanım Amacı', 'Form'],
+      '🛒 Süpermarket, Pet Shop': ['Miktar / Ağırlık', 'Paket Tipi', 'Pet Türü (Kedi/Köpek)', 'İçerik / Aroma'],
+      '📚 Kitap, Müzik, Film, Hobi': ['Yazar / Sanatçı', 'Yayınevi / Marka', 'Sayfa Sayısı / Tür', 'Basım Yılı', 'Dil'],
     };
 
     List<String> uploadedImages = [
@@ -1554,12 +1647,16 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     Map<String, String> productAttributes = rawAttrs?.map((k, v) => MapEntry(k, v.toString())) ?? {};
 
     final categoryTemplates = {
-      '📱 Telefon / Elektronik': ['RAM', 'Depolama', 'Renk', 'Ekran Boyutu', 'İşlemci', 'Batarya', 'Kamera'],
-      '💻 Bilgisayar': ['İşlemci', 'RAM', 'Depolama', 'Ekran', 'GPU', 'İşletim Sistemi', 'Ağırlık'],
-      '👕 Giyim & Tekstil': ['Renk', 'Kumaş', 'Kalıp', 'Cinsiyet', 'Sezon'],
-      '🏠 Ev & Yaşam': ['Malzeme', 'Boyut', 'Renk', 'Ağırlık', 'Garanti'],
-      '🎮 Oyun & Hobi': ['Platform', 'Tür', 'Oyuncu Sayısı', 'Yaş Sınırı', 'Dil'],
-      '🔧 Araç & Gereç': ['Güç', 'Voltaj', 'Kapasite', 'Ölçü', 'Garanti'],
+      '💻 Elektronik & Bilgisayar': ['İşlemci', 'RAM (Bellek)', 'SSD / Depolama Kapasitesi', 'Ekran Boyutu', 'Ekran Kartı', 'İşletim Sistemi', 'Çözünürlük', 'Renk', 'Garanti Süresi'],
+      '📱 Telefon & Aksesuar': ['Dahili Hafıza', 'RAM', 'Renk', 'Ekran Boyutu', 'Kamera Çözünürlüğü', 'Pil Gücü', 'İşletim Sistemi', 'Garanti'],
+      '👗 Moda (Kadın/Erkek/Çanta)': ['Beden', 'Kalıp', 'Kumaş Tipi', 'Yaka Tipi', 'Renk', 'Cinsiyet', 'Sezon', 'Paket İçeriği'],
+      '🏠 Ev, Yaşam, Kırtasiye, Ofis': ['Malzeme', 'Kapasite / Boyut', 'Renk', 'Ağırlık', 'Kullanım Alanı', 'Garanti'],
+      '🔧 Oto, Bahçe, Yapı Market': ['Güç (Watt/Volt)', 'Kapasite', 'Uyumlu Araç / Model', 'Ölçü / Ebat', 'Garanti'],
+      '👶 Anne, Bebek, Oyuncak': ['Yaş Grubu', 'Cinsiyet', 'Malzeme / Materyal', 'Taşıma Kapasitesi', 'Renk'],
+      '⚽ Spor, Outdoor': ['Spor Branşı', 'Beden / Numara', 'Malzeme', 'Kullanım Alanı', 'Renk'],
+      '💄 Kozmetik, Kişisel Bakım': ['Hacim (ml/gr)', 'Cilt Tipi', 'Koku / Aroma', 'Kullanım Amacı', 'Form'],
+      '🛒 Süpermarket, Pet Shop': ['Miktar / Ağırlık', 'Paket Tipi', 'Pet Türü (Kedi/Köpek)', 'İçerik / Aroma'],
+      '📚 Kitap, Müzik, Film, Hobi': ['Yazar / Sanatçı', 'Yayınevi / Marka', 'Sayfa Sayısı / Tür', 'Basım Yılı', 'Dil'],
     };
 
     List<String> uploadedImages = List<String>.from(product['images'] ?? []);
@@ -3210,76 +3307,118 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
     if (catId == 'ALL') return true;
 
-    if (catId == 'Giyim') {
-      final isGiyim = catName.contains('giyim') || catName.contains('tişört') || catName.contains('polo') ||
-                      catName.contains('gömlek') || catName.contains('tekstil') || catName.contains('pantolon') ||
-                      brand.contains('tudors') || title.contains('tişört') || title.contains('polo') || title.contains('gömlek') || title.contains('pantolon') || title.contains('pike');
-      if (!isGiyim) return false;
+    if (catId == 'Elektronik') {
+      final isElek = catName.contains('elektronik') || catName.contains('bilgisayar') || catName.contains('laptop') ||
+                     catName.contains('dizüstü') || catName.contains('telefon') || catName.contains('tablet') ||
+                     catName.contains('tv') || catName.contains('ses') || catName.contains('kamera') ||
+                     brand.contains('lenovo') || brand.contains('apple') || brand.contains('samsung') ||
+                     brand.contains('asus') || brand.contains('dell') || brand.contains('hp') || brand.contains('xiaomi') ||
+                     title.contains('laptop') || title.contains('ideapad') || title.contains('notebook') ||
+                     title.contains('iphone') || title.contains('bilgisayar') || title.contains('telefon');
+      if (!isElek) return false;
 
       if (subCat != null && subCat.isNotEmpty && !subCat.startsWith('ALL_')) {
-        if (subCat == 'Tişört & Polo Yaka') {
-          return catName.contains('tişört') || catName.contains('polo') || title.contains('tişört') || title.contains('polo') || title.contains('pike');
-        } else if (subCat == 'Gömlek') {
-          return catName.contains('gömlek') || title.contains('gömlek');
-        } else if (subCat == 'Pantolon & Jean') {
-          return catName.contains('pantolon') || catName.contains('jean') || title.contains('pantolon');
-        } else if (subCat == 'Ceket & Mont') {
-          return catName.contains('ceket') || catName.contains('mont') || title.contains('ceket') || title.contains('mont');
-        } else if (subCat == 'Elbise & Etek') {
-          return catName.contains('elbise') || catName.contains('etek') || title.contains('elbise');
-        } else if (subCat == 'Ayakkabı') {
-          return catName.contains('ayakkabı') || title.contains('ayakkabı');
+        if (subCat == 'Bilgisayar / Tablet') {
+          return catName.contains('bilgisayar') || catName.contains('laptop') || catName.contains('dizüstü') || catName.contains('tablet') ||
+                 title.contains('laptop') || title.contains('ideapad') || title.contains('notebook') || title.contains('bilgisayar') || title.contains('tablet');
+        } else if (subCat == 'Telefon & Aksesuarlar') {
+          return catName.contains('telefon') || catName.contains('kılıf') || catName.contains('şarj') ||
+                 title.contains('iphone') || title.contains('telefon') || title.contains('galaxy') || title.contains('kılıf');
+        } else if (subCat == 'TV, Görüntü & Ses') {
+          return catName.contains('tv') || catName.contains('televizyon') || catName.contains('ses') || catName.contains('kulaklık') || title.contains('kulaklık') || title.contains('tv');
+        } else if (subCat == 'Beyaz Eşya') {
+          return catName.contains('buzdolabı') || catName.contains('çamaşır') || catName.contains('bulaşık') || catName.contains('fırın');
+        } else if (subCat == 'Küçük Ev Aletleri') {
+          return catName.contains('süpürge') || catName.contains('kahve') || catName.contains('ütü') || catName.contains('airfryer') || catName.contains('fritöz');
+        } else if (subCat == 'Foto & Kamera') {
+          return catName.contains('foto') || catName.contains('kamera') || catName.contains('drone') || title.contains('kamera');
+        } else if (subCat == 'Oyun & Oyun Konsolları') {
+          return catName.contains('oyun') || catName.contains('konsol') || catName.contains('playstation') || catName.contains('xbox') || title.contains('ps5') || title.contains('playstation');
         }
       }
       return true;
     }
 
-    if (catId == 'Bilgisayar') {
-      final isPC = catName.contains('bilgisayar') || catName.contains('laptop') || catName.contains('dizüstü') ||
-                   title.contains('laptop') || title.contains('ideapad') || title.contains('notebook') || title.contains('bilgisayar') || brand.contains('lenovo') || brand.contains('asus') || brand.contains('dell') || brand.contains('hp');
-      if (!isPC) return false;
+    if (catId == 'Moda') {
+      final isModa = catName.contains('moda') || catName.contains('giyim') || catName.contains('tişört') ||
+                     catName.contains('polo') || catName.contains('gömlek') || catName.contains('tekstil') ||
+                     catName.contains('pantolon') || catName.contains('ayakkabı') || catName.contains('elbise') ||
+                     catName.contains('etek') || catName.contains('ceket') || catName.contains('mont') ||
+                     brand.contains('tudors') || title.contains('tişört') || title.contains('polo') ||
+                     title.contains('gömlek') || title.contains('pantolon') || title.contains('pike') || title.contains('elbise');
+      if (!isModa) return false;
 
       if (subCat != null && subCat.isNotEmpty && !subCat.startsWith('ALL_')) {
-        if (subCat == 'Dizüstü Bilgisayar (Laptop)') {
-          return catName.contains('laptop') || catName.contains('dizüstü') || title.contains('laptop') || title.contains('ideapad') || title.contains('notebook') || title.contains('taşınabilir');
-        } else if (subCat == 'Masaüstü & Monitör') {
-          return catName.contains('masaüstü') || catName.contains('monitör') || title.contains('monitör') || title.contains('desktop');
-        } else if (subCat == 'Tablet & Çevre Birimleri') {
-          return catName.contains('tablet') || catName.contains('mouse') || catName.contains('klavye') || title.contains('tablet');
+        if (subCat.contains('Erkek Giyim')) {
+          return catName.contains('tişört') || catName.contains('polo') || catName.contains('gömlek') ||
+                 catName.contains('pantolon') || brand.contains('tudors') || title.contains('tişört') || title.contains('polo') || title.contains('gömlek');
+        } else if (subCat == 'Kadın Giyim') {
+          return catName.contains('elbise') || catName.contains('etek') || catName.contains('bluz') || title.contains('elbise') || title.contains('etek');
+        } else if (subCat == 'Kadın Ayakkabı' || subCat == 'Erkek Ayakkabı') {
+          return catName.contains('ayakkabı') || title.contains('ayakkabı') || title.contains('sneaker') || title.contains('bot');
+        } else if (subCat == 'Çanta & Aksesuar') {
+          return catName.contains('çanta') || catName.contains('cüzdan') || catName.contains('kemer') || title.contains('çanta');
+        } else if (subCat == 'İç Giyim & Pijama') {
+          return catName.contains('pijama') || catName.contains('çorap') || catName.contains('iç giyim');
+        } else if (subCat == 'Saat & Takı') {
+          return catName.contains('saat') || catName.contains('takı') || catName.contains('kolye') || catName.contains('bileklik');
         }
       }
       return true;
     }
 
-    if (catId == 'Telefon') {
-      final isPhone = catName.contains('telefon') || catName.contains('tablet') || title.contains('iphone') || title.contains('telefon') || title.contains('samsung') || title.contains('xiaomi');
-      if (!isPhone) return false;
-
-      if (subCat != null && subCat.isNotEmpty && !subCat.startsWith('ALL_')) {
-        if (subCat == 'Akıllı Telefonlar') {
-          return catName.contains('telefon') || title.contains('iphone') || title.contains('galaxy') || title.contains('telefon');
-        } else if (subCat == 'Kılıf & Koruyucu') {
-          return catName.contains('kılıf') || catName.contains('koruyucu') || title.contains('kılıf');
-        }
-      }
-      return true;
-    }
-
-    if (catId == 'Ev') {
-      final isEv = catName.contains('ev') || catName.contains('yaşam') || catName.contains('mobilya') || catName.contains('mutfak') || title.contains('mobilya') || title.contains('süpürge');
+    if (catId == 'EvYasam') {
+      final isEv = catName.contains('ev') || catName.contains('yaşam') || catName.contains('kırtasiye') ||
+                   catName.contains('ofis') || catName.contains('mobilya') || catName.contains('mutfak') ||
+                   catName.contains('sofra') || catName.contains('tekstil') || catName.contains('aydınlatma') ||
+                   catName.contains('banyo') || catName.contains('dekorasyon');
       if (!isEv) return false;
       return true;
     }
 
-    if (catId == 'Oyun') {
-      final isOyun = catName.contains('oyun') || catName.contains('gaming') || catName.contains('hobi') || catName.contains('ps5') || title.contains('playstation') || title.contains('xbox');
-      if (!isOyun) return false;
+    if (catId == 'OtoYapiBahce') {
+      final isOto = catName.contains('oto') || catName.contains('bahçe') || catName.contains('yapı') ||
+                    catName.contains('market') || catName.contains('hırdavat') || catName.contains('alet') ||
+                    catName.contains('matkap') || catName.contains('boya') || catName.contains('motor');
+      if (!isOto) return false;
       return true;
     }
 
-    if (catId == 'Araç') {
-      final isArac = catName.contains('araç') || catName.contains('yapı') || catName.contains('hırdavat') || catName.contains('oto') || title.contains('matkap') || title.contains('akü');
-      if (!isArac) return false;
+    if (catId == 'AnneBebek') {
+      final isBebek = catName.contains('anne') || catName.contains('bebek') || catName.contains('oyuncak') ||
+                      catName.contains('puset') || catName.contains('mama') || catName.contains('lego');
+      if (!isBebek) return false;
+      return true;
+    }
+
+    if (catId == 'SporOutdoor') {
+      final isSpor = catName.contains('spor') || catName.contains('outdoor') || catName.contains('fitness') ||
+                     catName.contains('kamp') || catName.contains('bisiklet') || catName.contains('koşu');
+      if (!isSpor) return false;
+      return true;
+    }
+
+    if (catId == 'Kozmetik') {
+      final isKozmetik = catName.contains('kozmetik') || catName.contains('kişisel') || catName.contains('bakım') ||
+                         catName.contains('parfüm') || catName.contains('makyaj') || catName.contains('cilt') ||
+                         catName.contains('saç') || catName.contains('tıraş');
+      if (!isKozmetik) return false;
+      return true;
+    }
+
+    if (catId == 'SupermarketPetShop') {
+      final isMarket = catName.contains('süpermarket') || catName.contains('market') || catName.contains('pet') ||
+                       catName.contains('shop') || catName.contains('kedi') || catName.contains('köpek') ||
+                       catName.contains('mama') || catName.contains('deterjan') || catName.contains('gıda');
+      if (!isMarket) return false;
+      return true;
+    }
+
+    if (catId == 'KitapHobi') {
+      final isKitap = catName.contains('kitap') || catName.contains('müzik') || catName.contains('film') ||
+                      catName.contains('hobi') || catName.contains('roman') || catName.contains('gitar') ||
+                      catName.contains('enstrüman') || catName.contains('maket');
+      if (!isKitap) return false;
       return true;
     }
 
