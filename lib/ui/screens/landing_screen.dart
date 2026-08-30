@@ -669,11 +669,16 @@ class _LandingScreenState extends State<LandingScreen> {
     final marketplaces = [
       {'name': 'Trendyol', 'color': const Color(0xFFF27A1A), 'logoUrl': 'https://logo.clearbit.com/trendyol.com', 'initials': 'TY'},
       {'name': 'Hepsiburada', 'color': const Color(0xFFFF6000), 'logoUrl': 'https://logo.clearbit.com/hepsiburada.com', 'initials': 'HB'},
-      {'name': 'Amazon TR', 'color': const Color(0xFFFF9900), 'logoUrl': 'https://logo.clearbit.com/amazon.com.tr', 'initials': 'AMZ'},
-      {'name': 'N11 & N11Pro', 'color': const Color(0xFFE31E24), 'logoUrl': 'https://logo.clearbit.com/n11.com', 'initials': 'N11'},
-      {'name': 'Pazarama', 'color': const Color(0xFF0066FF), 'logoUrl': 'https://logo.clearbit.com/pazarama.com', 'initials': 'PZ'},
+      {'name': 'N11', 'color': const Color(0xFF5E17EB), 'logoUrl': 'https://logo.clearbit.com/n11.com', 'initials': 'N11'},
+      {'name': 'Amazon', 'color': const Color(0xFFFF9900), 'logoUrl': 'https://logo.clearbit.com/amazon.com.tr', 'initials': 'AMZ'},
       {'name': 'ÇiçekSepeti', 'color': const Color(0xFFE91E63), 'logoUrl': 'https://logo.clearbit.com/ciceksepeti.com', 'initials': 'ÇS'},
+      {'name': 'Pazarama', 'color': const Color(0xFF0066FF), 'logoUrl': 'https://logo.clearbit.com/pazarama.com', 'initials': 'PZ'},
       {'name': 'PttAVM', 'color': const Color(0xFFFFCC00), 'logoUrl': 'https://logo.clearbit.com/pttavm.com', 'initials': 'PTT'},
+      {'name': 'Akakçe', 'color': const Color(0xFF00A3E0), 'logoUrl': 'https://logo.clearbit.com/akakce.com', 'initials': 'AKK'},
+      {'name': 'IdeaSoft', 'color': const Color(0xFF00A859), 'logoUrl': 'https://logo.clearbit.com/ideasoft.com.tr', 'initials': 'IDS'},
+      {'name': 'T-Soft', 'color': const Color(0xFFE53935), 'logoUrl': 'https://logo.clearbit.com/tsoft.com.tr', 'initials': 'TSF'},
+      {'name': 'Etsy', 'color': const Color(0xFFF56400), 'logoUrl': 'https://logo.clearbit.com/etsy.com', 'initials': 'ETSY'},
+      {'name': 'Ozon', 'color': const Color(0xFF005BFF), 'logoUrl': 'https://logo.clearbit.com/ozon.ru', 'initials': 'OZN'},
       {'name': 'Teknosa', 'color': const Color(0xFF0055A5), 'logoUrl': 'https://logo.clearbit.com/teknosa.com', 'initials': 'TKN'},
       {'name': 'Koçtaş', 'color': const Color(0xFFFF6600), 'logoUrl': 'https://logo.clearbit.com/koctas.com.tr', 'initials': 'KÇT'},
       {'name': 'MediaMarkt', 'color': const Color(0xFFDF0000), 'logoUrl': 'https://logo.clearbit.com/mediamarkt.com.tr', 'initials': 'MM'},
@@ -683,7 +688,6 @@ class _LandingScreenState extends State<LandingScreen> {
       {'name': 'İdefix', 'color': const Color(0xFF0088CC), 'logoUrl': 'https://logo.clearbit.com/idefix.com', 'initials': 'İDF'},
       {'name': 'Vodafone', 'color': const Color(0xFFE60000), 'logoUrl': 'https://logo.clearbit.com/vodafone.com.tr', 'initials': 'VF'},
       {'name': 'Beymen', 'color': const Color(0xFF9E9E9E), 'logoUrl': 'https://logo.clearbit.com/beymen.com', 'initials': 'BYM'},
-      {'name': 'Akakçe', 'color': const Color(0xFF00A3E0), 'logoUrl': 'https://logo.clearbit.com/akakce.com', 'initials': 'AKK'},
       {'name': 'LC Waikiki', 'color': const Color(0xFF003399), 'logoUrl': 'https://logo.clearbit.com/lcwaikiki.com', 'initials': 'LCW'},
       {'name': 'Boyner', 'color': const Color(0xFF00897B), 'logoUrl': 'https://logo.clearbit.com/boyner.com.tr', 'initials': 'BYN'},
       {'name': 'Sahibinden', 'color': const Color(0xFFFFD200), 'logoUrl': 'https://logo.clearbit.com/sahibinden.com', 'initials': 'SHB'},
@@ -692,7 +696,7 @@ class _LandingScreenState extends State<LandingScreen> {
     ];
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final int crossAxisCount = screenWidth > 1100 ? 4 : (screenWidth > 750 ? 3 : 2);
+    final int crossAxisCount = screenWidth > 1150 ? 3 : (screenWidth > 720 ? 2 : 1);
 
     return Padding(
       key: key,
@@ -701,20 +705,49 @@ class _LandingScreenState extends State<LandingScreen> {
         constraints: const BoxConstraints(maxWidth: 1200),
         child: Column(
           children: [
-            Text('DESTEKLENEN KANALLAR', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
-            const SizedBox(height: 12),
-            Text('22 Büyük Pazaryeri ile Tam Otomatik Entegrasyon', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Text('Tüm mağazalarınızın stok, fiyat ve siparişlerini tek bir merkezden eşitleyin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white60, fontSize: 15)),
-            const SizedBox(height: 36),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+              ),
+              child: Text(
+                'PAZARYERİ VE E-TİCARET ENTEGRASYONLARI',
+                style: GoogleFonts.inter(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Tüm Satış Kanallarınızla Tam Otomatik Entegrasyon',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Tek tıkla bağlanın, stoklarınızı ve siparişlerinizi ışık hızında yönetin',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: Colors.white60, fontSize: 15),
+            ),
+            const SizedBox(height: 40),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: 2.5,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 18,
+                childAspectRatio: screenWidth > 1150 ? 2.8 : (screenWidth > 720 ? 2.6 : 2.5),
               ),
               itemCount: marketplaces.length,
               itemBuilder: (context, index) {
@@ -725,91 +758,58 @@ class _LandingScreenState extends State<LandingScreen> {
                 final initials = m['initials'] as String;
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A).withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: color.withOpacity(0.35), width: 1.2),
+                    color: const Color(0xFF0F172A).withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withOpacity(0.08),
-                        blurRadius: 10,
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      // Brand Logo Container
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                      // Sol Taraf: Marka Adı ve ENTEGRASYONU (Referans Görsel Birebir Tasarım)
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              name.toUpperCase(),
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16,
+                                letterSpacing: 0.8,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'ENTEGRASYONU',
+                              style: GoogleFonts.inter(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                                letterSpacing: 1.2,
+                              ),
                             ),
                           ],
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        padding: const EdgeInsets.all(4),
-                        child: Image.network(
-                          logoUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: color.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  initials,
-                                  style: GoogleFonts.inter(
-                                    color: color,
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
                         ),
                       ),
                       const SizedBox(width: 14),
-                      // Brand Name
-                      Expanded(
-                        child: Text(
-                          name,
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            letterSpacing: -0.2,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      // Verified Live Indicator
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: color.withOpacity(0.6),
-                              blurRadius: 6,
-                              spreadRadius: 1,
-                            ),
-                          ],
-                        ),
+                      // Sağ Taraf: 3D Kıvrımlı Sticker Logo Rozeti (Peeled Sticker Badge)
+                      _PeeledStickerBadge(
+                        logoUrl: logoUrl,
+                        initials: initials,
+                        brandColor: color,
+                        size: 64,
                       ),
                     ],
                   ),
@@ -821,6 +821,7 @@ class _LandingScreenState extends State<LandingScreen> {
       ),
     );
   }
+
 
 
   Widget _buildFeaturesSection({required GlobalKey key}) {
@@ -1597,3 +1598,144 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 }
+
+class _PeeledStickerBadge extends StatelessWidget {
+  final String logoUrl;
+  final String initials;
+  final Color brandColor;
+  final double size;
+
+  const _PeeledStickerBadge({
+    required this.logoUrl,
+    required this.initials,
+    required this.brandColor,
+    this.size = 64,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Ana Dairesel Etiket (Metallic 3D Gradient & Shadow)
+          Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const RadialGradient(
+                center: Alignment(-0.25, -0.3),
+                radius: 0.85,
+                colors: [
+                  Color(0xFFFFFFFF),
+                  Color(0xFFF8FAFC),
+                  Color(0xFFE2E8F0),
+                  Color(0xFFCBD5E1),
+                ],
+                stops: [0.0, 0.45, 0.8, 1.0],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.38),
+                  blurRadius: 10,
+                  offset: const Offset(3, 5),
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.9),
+                  blurRadius: 4,
+                  offset: const Offset(-1, -1),
+                ),
+              ],
+              border: Border.all(color: const Color(0xFFCBD5E1), width: 1.2),
+            ),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(9),
+                child: Image.network(
+                  logoUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(
+                      child: Text(
+                        initials,
+                        style: GoogleFonts.inter(
+                          color: brandColor,
+                          fontWeight: FontWeight.w900,
+                          fontSize: size * 0.26,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          // Sağ Üst Kıvrık Köşe Efekti (Peeled / Folded Corner)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: CustomPaint(
+              size: Size(size * 0.38, size * 0.38),
+              painter: _StickerPeelPainter(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StickerPeelPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Kıvrım altındaki gölge
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.28)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5);
+
+    final shadowPath = Path()
+      ..moveTo(size.width * 0.15, 0)
+      ..quadraticBezierTo(size.width * 0.55, size.height * 0.45, size.width, size.height * 0.85)
+      ..lineTo(size.width * 0.75, size.height)
+      ..quadraticBezierTo(size.width * 0.25, size.height * 0.65, 0, size.height * 0.15)
+      ..close();
+    canvas.drawPath(shadowPath, shadowPaint);
+
+    // Kıvrılmış Etiket Arka Yüzeyi (Gümüş/Metalik Degradeli)
+    final peelPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0xFFF1F5F9),
+          Color(0xFFE2E8F0),
+          Color(0xFF94A3B8),
+          Color(0xFF64748B),
+        ],
+        stops: [0.0, 0.3, 0.7, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    final peelPath = Path()
+      ..moveTo(0, 0)
+      ..quadraticBezierTo(size.width * 0.4, size.height * 0.2, size.width * 0.9, size.height)
+      ..quadraticBezierTo(size.width * 0.7, size.height * 0.45, size.width, 0)
+      ..close();
+
+    canvas.drawPath(peelPath, peelPaint);
+
+    // Kıvrım Işıltı Çizgisi
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+    canvas.drawPath(peelPath, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
