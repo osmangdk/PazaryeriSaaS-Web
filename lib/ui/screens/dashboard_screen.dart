@@ -3005,6 +3005,736 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  void _showBatchSyncApprovalDialog({String? initialScope, String? initialProductId}) {
+    if (_isSubscriptionExpired()) {
+      _showSubscriptionExpiredDialog(customActionTitle: 'Pazaryeri senkronizasyonu yapabilmek için lütfen üyeliğinizi başlatın veya paketinizi yükseltin.');
+      return;
+    }
+
+    final products = _products ?? [];
+    final activeConnections = _connections?.where((c) => c['isActive'] == true).toList() ?? [];
+
+    String selectedScope = initialScope ?? (initialProductId != null ? 'product' : 'all');
+
+    final selectedProductIds = <String>{};
+    if (initialProductId != null) {
+      selectedProductIds.add(initialProductId);
+    } else {
+      for (final p in products) {
+        selectedProductIds.add(p['id'].toString());
+      }
+    }
+
+    final allCategories = <String>{};
+    for (final p in products) {
+      final cat = (p['categoryName'] ?? p['category'] ?? 'Genel').toString();
+      allCategories.add(cat);
+    }
+    final selectedCategories = Set<String>.from(allCategories);
+
+    bool isSyncing = false;
+    double syncProgress = 0.0;
+    List<Map<String, dynamic>> syncLogs = [];
+    Map<String, dynamic>? syncSummary;
+
+    showDialog(
+      context: context,
+      barrierDismissible: !isSyncing,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          int targetProductCount = 0;
+          if (selectedScope == 'all') {
+            targetProductCount = products.length;
+          } else if (selectedScope == 'category') {
+            targetProductCount = products.where((p) => selectedCategories.contains((p['categoryName'] ?? p['category'] ?? 'Genel').toString())).length;
+          } else {
+            targetProductCount = selectedProductIds.length;
+          }
+
+          final targetMarketplaceCount = activeConnections.isNotEmpty ? activeConnections.length : 1;
+
+          Future<void> runSync() async {
+            setDlgState(() {
+              isSyncing = true;
+              syncProgress = 0.15;
+              syncLogs = [
+                {
+                  'timestamp': DateTime.now().toIso8601String(),
+                  'marketplace': 'Sistem',
+                  'status': 'Info',
+                  'message': 'Senkronizasyon motoru başlatıldı. Hedef: $targetProductCount ürün, $targetMarketplaceCount pazaryeri...',
+                }
+              ];
+            });
+
+            List<String>? prodIds;
+            List<String>? catNames;
+            if (selectedScope == 'product') {
+              prodIds = selectedProductIds.toList();
+            } else if (selectedScope == 'category') {
+              catNames = selectedCategories.toList();
+            }
+
+            final res = await _apiService.batchSyncAll(
+              scope: selectedScope,
+              productIds: prodIds,
+              categoryNames: catNames,
+            );
+
+            if (res != null) {
+              final rawLogs = res['logs'] as List<dynamic>? ?? [];
+              final mappedLogs = rawLogs.map((l) => Map<String, dynamic>.from(l as Map)).toList();
+
+              setDlgState(() {
+                syncProgress = 1.0;
+                syncLogs = mappedLogs;
+                syncSummary = res;
+                isSyncing = false;
+              });
+              _loadData();
+            } else {
+              setDlgState(() {
+                syncProgress = 1.0;
+                syncLogs.add({
+                  'timestamp': DateTime.now().toIso8601String(),
+                  'marketplace': 'Hata',
+                  'status': 'Failed',
+                  'message': 'Pazaryerleri ile iletişim kurulurken bir ağ hatası oluştu.',
+                });
+                isSyncing = false;
+              });
+            }
+          }
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Colors.blueAccent, width: 1.5)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.indigoAccent]),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.sync_alt, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Çoklu Pazaryeri Dağıtım & Senkronizasyon Merkezi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
+                      Text('Değişiklikleri tüm entegre pazaryerlerine canlı iletin ve anlık izleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                if (!isSyncing)
+                  IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 900,
+              height: 600,
+              child: isSyncing || syncSummary != null
+                  ? _buildSyncLiveConsole(isSyncing, syncProgress, syncLogs, syncSummary, ctx)
+                  : SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Soru Başlığı Kartı
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.help_outline, color: Colors.amberAccent, size: 24),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Ürün bazlı değişiklikler ve senkronizasyon bilgileri ekrana getirilmiştir.',
+                                        style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Değişiklikleri pazaryerlerine nasıl onaylayıp göndermek istersiniz? Lütfen aşağıdan bir onay kapsamı seçin:',
+                                        style: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // 3 Kapsam Seçim Kartı
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildScopeSelectionCard(
+                                  scopeId: 'all',
+                                  title: '🌟 Tümünü Onayla (Hepsi)',
+                                  subtitle: 'Tüm (${products.length}) ürünün değişikliklerini tek tıkla onaylayıp tüm pazaryerlerine dağıtır.',
+                                  icon: Icons.all_inclusive,
+                                  color: Colors.greenAccent,
+                                  isSelected: selectedScope == 'all',
+                                  onTap: () => setDlgState(() => selectedScope = 'all'),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _buildScopeSelectionCard(
+                                  scopeId: 'category',
+                                  title: '📂 Kategori Bazlı Onayla',
+                                  subtitle: 'Sadece seçeceğiniz kategorilerdeki ürünlerin güncellemelerini pazaryerlerine aktarır.',
+                                  icon: Icons.category,
+                                  color: Colors.blueAccent,
+                                  isSelected: selectedScope == 'category',
+                                  onTap: () => setDlgState(() => selectedScope = 'category'),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _buildScopeSelectionCard(
+                                  scopeId: 'product',
+                                  title: '🎯 Ürün Bazlı Onayla (Tek Tek)',
+                                  subtitle: 'Listeden seçeceğiniz ürünlerin değişikliklerini tek tek onaylayıp gönderir.',
+                                  icon: Icons.checklist,
+                                  color: Colors.orangeAccent,
+                                  isSelected: selectedScope == 'product',
+                                  onTap: () => setDlgState(() => selectedScope = 'product'),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+
+                          // Kapsama Göre Dinamik İçerik Görünümü
+                          if (selectedScope == 'all')
+                            _buildScopeAllView(products, activeConnections)
+                          else if (selectedScope == 'category')
+                            _buildScopeCategoryView(products, allCategories, selectedCategories, (newCats) => setDlgState(() {}))
+                          else
+                            _buildScopeProductView(products, selectedProductIds, (newIds) => setDlgState(() {})),
+                        ],
+                      ),
+                    ),
+            ),
+            actions: [
+              if (syncSummary != null)
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.check, size: 18),
+                  label: Text('Tamamlandı • Kapat', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                )
+              else if (!isSyncing) ...[
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60)),
+                ),
+                ElevatedButton.icon(
+                  onPressed: targetProductCount == 0 ? null : runSync,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amberAccent,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.rocket_launch, size: 18, color: Colors.black),
+                  label: Text(
+                    '🚀 Onayla ve Pazaryerlerine Dağıt ($targetProductCount Ürün • $targetMarketplaceCount Pazaryeri)',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildScopeSelectionCard({
+    required String scopeId,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.12) : Colors.white.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? color : Colors.white12,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [BoxShadow(color: color.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 2))]
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: isSelected ? color.withOpacity(0.25) : Colors.white10,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: isSelected ? color : Colors.white70, size: 18),
+                ),
+                const Spacer(),
+                if (isSelected)
+                  Icon(Icons.check_circle, color: color, size: 18)
+                else
+                  const Icon(Icons.radio_button_unchecked, color: Colors.white24, size: 18),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+            const SizedBox(height: 4),
+            Text(subtitle, style: GoogleFonts.inter(color: Colors.white60, fontSize: 11, height: 1.3)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScopeAllView(List<dynamic> products, List<dynamic> connections) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: Colors.greenAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.greenAccent)),
+                child: Text('TÜM KATALOG ONAYLANDI', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 11)),
+              ),
+              const SizedBox(width: 10),
+              Text('Toplam ${products.length} Ürün • Canlı Eşitlemeye Hazır', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text('Aktif Hedef Pazaryerleri:', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: connections.isEmpty
+                ? [
+                    _tagBadge('🟠 Trendyol', Colors.orange),
+                    _tagBadge('🟠 Hepsiburada', Colors.deepOrange),
+                    _tagBadge('🔴 N11', Colors.redAccent),
+                    _tagBadge('🟣 Pazarama', Colors.purpleAccent),
+                  ]
+                : connections.map((c) {
+                    final type = c['marketplaceType'] ?? 1;
+                    return _tagBadge('🔗 ${_getMarketplaceDisplayName(type)} (${c['storeName'] ?? 'Mağaza'})', Colors.blueAccent);
+                  }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Text('Eşitlenecek Ürün Listesi Önizlemesi:', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+          const SizedBox(height: 6),
+          Container(
+            height: 150,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: ListView.separated(
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
+              itemBuilder: (ctx, i) {
+                final p = products[i];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
+                    children: [
+                      _buildSafeImageWidget(
+                        p['firstImage'] ?? (p['images'] != null && (p['images'] as List).isNotEmpty ? (p['images'] as List)[0] : null),
+                        width: 32,
+                        height: 32,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p['title'] ?? 'Ürün', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text('SKU: ${p['sku']} • Kategori: ${p['categoryName'] ?? 'Genel'}', style: GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                      Text(formatTL(p['price']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                        child: Text('${p['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 10)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScopeCategoryView(
+    List<dynamic> products,
+    Set<String> allCategories,
+    Set<String> selectedCategories,
+    Function(Set<String>) onSelectionChanged,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Onaylanacak Kategorileri Seçin (${selectedCategories.length} / ${allCategories.length} seçildi):',
+                style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      selectedCategories.addAll(allCategories);
+                      onSelectionChanged(selectedCategories);
+                    },
+                    child: Text('Tümünü Seç', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      selectedCategories.clear();
+                      onSelectionChanged(selectedCategories);
+                    },
+                    child: Text('Temizle', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: allCategories.map((cat) {
+              final isChecked = selectedCategories.contains(cat);
+              final count = products.where((p) => (p['categoryName'] ?? p['category'] ?? 'Genel').toString() == cat).length;
+              return FilterChip(
+                label: Text('$cat ($count Ürün)', style: GoogleFonts.inter(color: isChecked ? Colors.black : Colors.white, fontWeight: isChecked ? FontWeight.bold : FontWeight.normal, fontSize: 12)),
+                selected: isChecked,
+                selectedColor: Colors.blueAccent,
+                backgroundColor: Colors.white.withOpacity(0.06),
+                checkmarkColor: Colors.black,
+                onSelected: (val) {
+                  if (val) {
+                    selectedCategories.add(cat);
+                  } else {
+                    selectedCategories.remove(cat);
+                  }
+                  onSelectionChanged(selectedCategories);
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScopeProductView(
+    List<dynamic> products,
+    Set<String> selectedProductIds,
+    Function(Set<String>) onSelectionChanged,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Onaylanacak Ürünleri Seçin (${selectedProductIds.length} / ${products.length} seçildi):',
+                style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      for (final p in products) {
+                        selectedProductIds.add(p['id'].toString());
+                      }
+                      onSelectionChanged(selectedProductIds);
+                    },
+                    child: Text('Tümünü Seç', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      selectedProductIds.clear();
+                      onSelectionChanged(selectedProductIds);
+                    },
+                    child: Text('Temizle', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: ListView.separated(
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
+              itemBuilder: (ctx, i) {
+                final p = products[i];
+                final pid = p['id'].toString();
+                final isChecked = selectedProductIds.contains(pid);
+                return CheckboxListTile(
+                  value: isChecked,
+                  activeColor: Colors.orangeAccent,
+                  checkColor: Colors.black,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  onChanged: (val) {
+                    if (val == true) {
+                      selectedProductIds.add(pid);
+                    } else {
+                      selectedProductIds.remove(pid);
+                    }
+                    onSelectionChanged(selectedProductIds);
+                  },
+                  secondary: _buildSafeImageWidget(
+                    p['firstImage'] ?? (p['images'] != null && (p['images'] as List).isNotEmpty ? (p['images'] as List)[0] : null),
+                    width: 36,
+                    height: 36,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  title: Text(p['title'] ?? 'Ürün', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  subtitle: Text('SKU: ${p['sku']} • ${p['categoryName'] ?? 'Genel'} • Fiyat: ${formatTL(p['price'])} • Stok: ${p['stockQuantity']}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSyncLiveConsole(
+    bool isSyncing,
+    double progress,
+    List<Map<String, dynamic>> logs,
+    Map<String, dynamic>? summary,
+    BuildContext dialogCtx,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            if (isSyncing) ...[
+              const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.amberAccent)),
+              const SizedBox(width: 10),
+              Text('Canlı Pazaryeri Dağıtımı Sürüyor...', style: GoogleFonts.inter(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+            ] else ...[
+              const Icon(Icons.check_circle, color: Colors.greenAccent, size: 22),
+              const SizedBox(width: 10),
+              Text('Dağıtım Tamamlandı! ✅', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 15)),
+            ],
+            const Spacer(),
+            if (summary != null)
+              Text(
+                'Toplam: ${summary['totalProducts']} Ürün • ${summary['totalMarketplaces']} Pazaryeri • ${summary['durationSeconds']}s',
+                style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: isSyncing ? null : 1.0,
+            backgroundColor: Colors.white12,
+            valueColor: AlwaysStoppedAnimation<Color>(isSyncing ? Colors.amberAccent : Colors.greenAccent),
+            minHeight: 6,
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF030712),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white24),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 10, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(width: 10, height: 10, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                    const SizedBox(width: 6),
+                    Container(width: 10, height: 10, decoration: const BoxDecoration(color: Colors.amberAccent, shape: BoxShape.circle)),
+                    const SizedBox(width: 6),
+                    Container(width: 10, height: 10, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
+                    const SizedBox(width: 12),
+                    Text('CANLI SENKRONİZASYON TERMİNALİ', style: GoogleFonts.firaCode(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+                    const Spacer(),
+                    Text('${logs.length} İşlem Kaydı', style: GoogleFonts.firaCode(color: Colors.white38, fontSize: 10)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Divider(color: Colors.white12, height: 1),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: logs.isEmpty
+                      ? Center(child: Text('Senkronizasyon işlemi başlatılıyor...', style: GoogleFonts.firaCode(color: Colors.white38, fontSize: 12)))
+                      : ListView.separated(
+                          itemCount: logs.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 6),
+                          itemBuilder: (ctx, i) {
+                            final log = logs[i];
+                            final isSuccess = log['status'] == 'Success';
+                            final isInfo = log['status'] == 'Info';
+                            final marketplace = log['marketplace'] ?? log['marketplaceName'] ?? 'API';
+                            final msg = log['message'] ?? '';
+                            final title = log['productTitle'] ?? '';
+                            final sku = log['sku'] != null && (log['sku'] as String).isNotEmpty ? '[${log['sku']}]' : '';
+
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isSuccess
+                                    ? Colors.greenAccent.withOpacity(0.06)
+                                    : (isInfo ? Colors.blueAccent.withOpacity(0.06) : Colors.redAccent.withOpacity(0.08)),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: isSuccess
+                                      ? Colors.greenAccent.withOpacity(0.2)
+                                      : (isInfo ? Colors.blueAccent.withOpacity(0.2) : Colors.redAccent.withOpacity(0.3)),
+                                ),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    isSuccess ? '✅' : (isInfo ? 'ℹ️' : '❌'),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(marketplace.toString(), style: GoogleFonts.firaCode(color: Colors.amberAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: GoogleFonts.firaCode(fontSize: 11, color: Colors.white70),
+                                        children: [
+                                          if (title.isNotEmpty)
+                                            TextSpan(text: '$title $sku: ', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                          TextSpan(text: msg, style: TextStyle(color: isSuccess ? Colors.greenAccent : (isInfo ? Colors.white70 : Colors.redAccent))),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getMarketplaceDisplayName(dynamic type) {
+    final t = int.tryParse(type.toString()) ?? 1;
+    switch (t) {
+      case 1: return 'Trendyol';
+      case 2: return 'Hepsiburada';
+      case 3: return 'Amazon TR';
+      case 4: return 'N11';
+      case 5: return 'Pazarama';
+      case 6: return 'ÇiçekSepeti';
+      case 7: return 'PttAVM';
+      default: return 'Pazaryeri';
+    }
+  }
+
   Widget _specRow(String label, String val) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -4062,12 +4792,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
-                  onPressed: () async {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tüm ürünlerin stokları aktif pazaryerlerine dağıtılıyor... (1.2s)'), backgroundColor: Colors.blueAccent));
-                  },
+                  onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'all'),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  icon: const Icon(Icons.flash_on, size: 18),
-                  label: Text('⚡ Hızlı Stok Dağıt', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  icon: const Icon(Icons.sync_alt, size: 18),
+                  label: Text('⚡ Tüm Pazaryerlerine Senkronize Et', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -4425,17 +5153,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ),
               const SizedBox(width: 8),
               OutlinedButton.icon(
-                onPressed: () async {
-                  final res = await _apiService.broadcastStock(productId, p['stockQuantity']);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(res?['isSuccess'] == true ? 'Stok 1.2 saniyede tüm pazaryerlerine eşitlendi!' : 'Stok dağıtımında hata!'), backgroundColor: Colors.blueAccent),
-                    );
-                  }
-                },
+                onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'product', initialProductId: productId),
                 style: OutlinedButton.styleFrom(foregroundColor: Colors.blueAccent, side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                icon: const Icon(Icons.flash_on, size: 16),
-                label: Text('Stok Dağıt (1.2s)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                icon: const Icon(Icons.sync_alt, size: 16),
+                label: Text('Pazaryerlerine Dağıt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
               ),
               const SizedBox(width: 8),
               IconButton(

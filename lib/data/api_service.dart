@@ -142,6 +142,25 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> batchSyncAll({
+    required String scope,
+    List<String>? productIds,
+    List<String>? categoryNames,
+    String? syncOperation = 'all',
+  }) async {
+    try {
+      final response = await _dio.post('/products/batch-sync-all', data: {
+        'scope': scope,
+        'productIds': productIds,
+        'categoryNames': categoryNames,
+        'syncOperation': syncOperation,
+      });
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<bool> deleteProduct(String productId) async {
     try {
       final response = await _dio.delete('/products/$productId');
