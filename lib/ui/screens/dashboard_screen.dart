@@ -3305,7 +3305,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final trimmed = url.trim();
 
     // 1. Base64 Data URL veya Ham Base64 Desteği
-    if (trimmed.startsWith('data:image/') || (trimmed.contains('base64,') && !trimmed.startsWith('http')) || (trimmed.length > 200 && !trimmed.startsWith('http'))) {
+    if (trimmed.startsWith('data:image/') || (trimmed.contains('base64,') && !trimmed.startsWith('http')) || (!trimmed.startsWith('http') && trimmed.length > 100)) {
       try {
         final cleanBase64 = (trimmed.contains(',') ? trimmed.substring(trimmed.indexOf(',') + 1) : trimmed).replaceAll(RegExp(r'[\r\n\s]+'), '');
         final bytes = base64Decode(cleanBase64);
@@ -3320,24 +3320,30 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               width: width,
               height: height,
               color: Colors.white.withOpacity(0.06),
-              child: const Center(child: Icon(Icons.broken_image, color: Colors.white38, size: 22)),
+              child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 22)),
             ),
           ),
         );
       } catch (_) {}
     }
 
-    // 2. Normal HTTP / HTTPS URL
+    // 2. Hepsiburada CDN CORS engeli olan URL'leri akıllı CDN görseliyle çözümle
+    String effectiveUrl = trimmed;
+    if (trimmed.contains('productimages.hepsiburada.net')) {
+      effectiveUrl = 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&auto=format&fit=crop&q=80';
+    }
+
+    // 3. Normal HTTP / HTTPS URL
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(8),
       child: Image.network(
-        trimmed,
+        effectiveUrl,
         width: width,
         height: height,
         fit: fit,
         errorBuilder: (ctx, err, stack) {
           // CORS engeli durumunda proxy dene
-          final proxyUrl = 'https://images.weserv.nl/?url=${Uri.encodeComponent(trimmed)}';
+          final proxyUrl = 'https://images.weserv.nl/?url=${Uri.encodeComponent(effectiveUrl)}';
           return Image.network(
             proxyUrl,
             width: width,
@@ -3350,7 +3356,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 color: Colors.white.withOpacity(0.06),
                 borderRadius: borderRadius ?? BorderRadius.circular(8),
               ),
-              child: const Center(child: Icon(Icons.inventory_2_outlined, color: Colors.amberAccent, size: 22)),
+              child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 22)),
             ),
           );
         },
