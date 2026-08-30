@@ -2735,7 +2735,40 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Tüm Pazaryeri Siparişleri', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Tüm Pazaryeri Siparişleri', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            if (_orders != null && _orders!.isNotEmpty)
+              Row(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      final firstOrderId = _orders!.first['orderId'] ?? 'ORD-001';
+                      final url = _apiService.getInvoiceUrl(firstOrderId);
+                      html.window.open(url, '_blank');
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tüm siparişler için toplu GİB E-Fatura yazdırma sayfası açıldı! 📑'), backgroundColor: Colors.blueAccent));
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                    icon: const Icon(Icons.receipt_long, size: 16),
+                    label: Text('📑 Toplu E-Fatura Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      final firstOrderId = _orders!.first['orderId'] ?? 'ORD-001';
+                      final url = _apiService.getShippingLabelUrl(firstOrderId);
+                      html.window.open(url, '_blank');
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tüm siparişler için toplu Kargo Barkodları yazdırma sayfası açıldı! 🏷️'), backgroundColor: Colors.orange));
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                    icon: const Icon(Icons.qr_code_2, size: 16),
+                    label: Text('🏷️ Toplu Barkod Bas', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ),
+                ],
+              ),
+          ],
+        ),
         const SizedBox(height: 16),
         _orders == null || _orders!.isEmpty
             ? _buildEmptyState('Henüz sipariş bulunmuyor.', Icons.shopping_bag_outlined)
