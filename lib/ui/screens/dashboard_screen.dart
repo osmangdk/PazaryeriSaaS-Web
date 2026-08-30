@@ -594,6 +594,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     int selectedCampaignType = 1;
     String selectedCampaignName = "🔥 2 Al 1 Öde (BOGO)";
     int variantTemplateType = 0; // 0=Tekstil, 1=Laptop, 2=Telefon
+    String? selectedCategoryChip;
     bool isUploadingImage = false;
     bool showAdvancedOptions = false;
     bool showAttributesSection = true;
@@ -1098,25 +1099,39 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               spacing: 6,
                               runSpacing: 6,
                               children: categoryTemplates.entries.map((entry) {
+                                final isSelected = selectedCategoryChip == entry.key;
                                 return InkWell(
                                   onTap: () {
                                     setDlgState(() {
+                                      selectedCategoryChip = entry.key;
+                                      // Önceki kategorinin özelliklerini temizle, sadece seçilen kategorinin alanlarını getir
+                                      productAttributes.clear();
                                       for (final key in entry.value) {
-                                        if (!productAttributes.containsKey(key)) {
-                                          productAttributes[key] = '';
-                                        }
+                                        productAttributes[key] = '';
+                                      }
+                                      // Kategori adı kutusunu da otomatik güncelle
+                                      final cleanCatName = entry.key.replaceAll(RegExp(r'[^\w\s&ĞÜŞİÖÇğüşıöç]'), '').trim();
+                                      if (cleanCatName.isNotEmpty && (categoryController.text.isEmpty || categoryController.text == 'Giyim')) {
+                                        categoryController.text = cleanCatName;
                                       }
                                     });
                                   },
                                   borderRadius: BorderRadius.circular(6),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                     decoration: BoxDecoration(
-                                      color: Colors.indigo.withOpacity(0.12),
+                                      color: isSelected ? Colors.indigoAccent : Colors.indigo.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: Colors.indigoAccent.withOpacity(0.3)),
+                                      border: Border.all(color: isSelected ? Colors.white : Colors.indigoAccent.withOpacity(0.35), width: isSelected ? 1.5 : 1.0),
                                     ),
-                                    child: Text(entry.key, style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 11, fontWeight: FontWeight.w600)),
+                                    child: Text(
+                                      entry.key,
+                                      style: GoogleFonts.inter(
+                                        color: isSelected ? Colors.white : Colors.indigoAccent,
+                                        fontSize: 11,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                 );
                               }).toList(),
@@ -1422,6 +1437,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     List<String> uploadedImages = List<String>.from(product['images'] ?? []);
     int selectedCampaignType = product['campaignType'] ?? 1;
     String selectedCampaignName = product['campaignName'] ?? '🔥 2 Al 1 Öde (BOGO)';
+    String? selectedCategoryChip;
     bool isSaving = false;
     bool isUploadingImage = false;
     bool showAdvancedOptions = false;
@@ -1762,19 +1778,38 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               spacing: 6,
                               runSpacing: 6,
                               children: categoryTemplates.entries.map((entry) {
+                                final isSelected = selectedCategoryChip == entry.key;
                                 return InkWell(
                                   onTap: () {
                                     setDlgState(() {
+                                      selectedCategoryChip = entry.key;
+                                      // Önceki özellikleri temizle, sadece seçilen kategorinin alanlarını getir
+                                      productAttributes.clear();
                                       for (final key in entry.value) {
-                                        if (!productAttributes.containsKey(key)) productAttributes[key] = '';
+                                        productAttributes[key] = '';
+                                      }
+                                      final cleanCatName = entry.key.replaceAll(RegExp(r'[^\w\s&ĞÜŞİÖÇğüşıöç]'), '').trim();
+                                      if (cleanCatName.isNotEmpty) {
+                                        categoryController.text = cleanCatName;
                                       }
                                     });
                                   },
                                   borderRadius: BorderRadius.circular(6),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(color: Colors.indigo.withOpacity(0.12), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.indigoAccent.withOpacity(0.3))),
-                                    child: Text(entry.key, style: GoogleFonts.inter(color: Colors.indigoAccent, fontSize: 11, fontWeight: FontWeight.w600)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? Colors.indigoAccent : Colors.indigo.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: isSelected ? Colors.white : Colors.indigoAccent.withOpacity(0.35), width: isSelected ? 1.5 : 1.0),
+                                    ),
+                                    child: Text(
+                                      entry.key,
+                                      style: GoogleFonts.inter(
+                                        color: isSelected ? Colors.white : Colors.indigoAccent,
+                                        fontSize: 11,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                 );
                               }).toList(),
