@@ -3768,22 +3768,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             ),
             Row(
               children: [
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hepsiburada Lenovo Laptop demo ürünü ekleniyor...'), backgroundColor: Colors.orange));
-                    final res = await _apiService.seedDemoProducts();
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(res?['message'] ?? 'Lenovo IdeaPad Laptop kataloğa eklendi!'), backgroundColor: Colors.green),
-                      );
-                      _loadData();
-                    }
-                  },
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.tealAccent, side: const BorderSide(color: Colors.tealAccent), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  icon: const Icon(Icons.laptop_chromebook, size: 18),
-                  label: Text('💻 + Lenovo Laptop Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: _showSimplifiedAddProductDialog,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
