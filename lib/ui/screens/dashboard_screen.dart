@@ -780,9 +780,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               autoCreateVariants = true;
               showAttributesSection = true;
               uploadedImages = [
-                'https://productimages.hepsiburada.net/s/777/550/110000889146191.jpg',
-                'https://productimages.hepsiburada.net/s/777/550/110000889146192.jpg',
-                'https://productimages.hepsiburada.net/s/777/550/110000889146193.jpg'
+                'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&auto=format&fit=crop&q=80',
+                'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600&auto=format&fit=crop&q=80'
               ];
               productAttributes = {
                 'İşlemci': 'AMD Ryzen 7 170',
@@ -818,7 +817,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               autoCreateVariants = true;
               showAttributesSection = true;
               uploadedImages = [
-                'https://productimages.hepsiburada.net/s/777/550/110000889146191.jpg'
+                'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80'
               ];
               productAttributes = {
                 'Dahili Hafıza': '256 GB',
@@ -851,8 +850,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               autoCreateVariants = true;
               showAttributesSection = true;
               uploadedImages = [
-                'https://cdn.dsmcdn.com/ty1687/prod/QC_PREP/20250603/18/c2992fcf-6771-3257-8743-e1c6731041fd/1_org_zoom.jpg',
-                'https://cdn.dsmcdn.com/ty1686/prod/QC_PREP/20250603/18/53f6bf86-2c9f-3e2c-87c1-206a47e4ad34/1_org_zoom.jpg'
+                'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600&auto=format&fit=crop&q=80'
               ];
               productAttributes = {
                 'Kalıp': 'Slim Fit',
@@ -877,22 +875,24 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
                 reader.onLoadEnd.listen((e) async {
                   final base64String = reader.result as String;
-                  // Anında yerel önizleme ekle
+                  // 1. Yerel Base64 verisini anında ekle - %100 kesintisiz önizleme sağlar
                   setDlgState(() {
                     uploadedImages.add(base64String);
+                    isUploadingImage = false;
                   });
 
-                  // Sunucuya arka planda yükle
-                  final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
-                  setDlgState(() {
-                    isUploadingImage = false;
-                    if (uploadedUrl != null && uploadedUrl.isNotEmpty) {
-                      final idx = uploadedImages.indexOf(base64String);
-                      if (idx != -1) {
-                        uploadedImages[idx] = uploadedUrl;
-                      }
+                  // 2. Arka planda sunucuya aktar
+                  try {
+                    final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
+                    if (uploadedUrl != null && uploadedUrl.isNotEmpty && uploadedUrl.startsWith('http')) {
+                      setDlgState(() {
+                        final idx = uploadedImages.indexOf(base64String);
+                        if (idx != -1) {
+                          uploadedImages[idx] = uploadedUrl;
+                        }
+                      });
                     }
-                  });
+                  } catch (_) {}
                 });
                 reader.readAsDataUrl(file);
               }
@@ -1091,22 +1091,32 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('📝 Temel Ürün Bilgileri', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text('📝 Ürün Başlığı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              const SizedBox(width: 4),
+                              Text('*', style: GoogleFonts.inter(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                              const Spacer(),
+                              Text('${titleController.text.length} karakter', style: GoogleFonts.inter(color: Colors.white38, fontSize: 11)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
                           TextField(
                             controller: titleController,
-                            minLines: 1,
-                            maxLines: 3,
-                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                            minLines: 2,
+                            maxLines: 4,
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13, height: 1.35, fontWeight: FontWeight.w500),
                             decoration: InputDecoration(
-                              labelText: 'Ürün Başlığı *',
-                              hintText: 'Örn: Tudors Erkek 5li Paket Polo Tişört',
-                              labelStyle: GoogleFonts.inter(color: Colors.white70),
+                              hintText: 'Örn: Lenovo IdeaPad Slim 3 AMD Ryzen 7 16GB 512GB SSD 15.3" Taşınabilir Bilgisayar',
+                              hintStyle: GoogleFonts.inter(color: Colors.white30, fontSize: 12),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.05),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white24)),
+                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.white.withOpacity(0.15))),
+                              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
+                            onChanged: (_) => setDlgState(() {}),
                           ),
                           const SizedBox(height: 10),
                           Row(
@@ -1694,22 +1704,24 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
                 reader.onLoadEnd.listen((e) async {
                   final base64String = reader.result as String;
-                  // Anında yerel önizleme ekle
+                  // 1. Yerel Base64 verisini anında ekle - %100 kesintisiz önizleme sağlar
                   setDlgState(() {
                     uploadedImages.add(base64String);
+                    isUploadingImage = false;
                   });
 
-                  // Sunucuya arka planda yükle
-                  final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
-                  setDlgState(() {
-                    isUploadingImage = false;
-                    if (uploadedUrl != null && uploadedUrl.isNotEmpty) {
-                      final idx = uploadedImages.indexOf(base64String);
-                      if (idx != -1) {
-                        uploadedImages[idx] = uploadedUrl;
-                      }
+                  // 2. Arka planda sunucuya aktar
+                  try {
+                    final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
+                    if (uploadedUrl != null && uploadedUrl.isNotEmpty && uploadedUrl.startsWith('http')) {
+                      setDlgState(() {
+                        final idx = uploadedImages.indexOf(base64String);
+                        if (idx != -1) {
+                          uploadedImages[idx] = uploadedUrl;
+                        }
+                      });
                     }
-                  });
+                  } catch (_) {}
                 });
                 reader.readAsDataUrl(file);
               }
@@ -1846,19 +1858,32 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              Text('📝 Ürün Başlığı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              const SizedBox(width: 4),
+                              Text('*', style: GoogleFonts.inter(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                              const Spacer(),
+                              Text('${titleController.text.length} karakter', style: GoogleFonts.inter(color: Colors.white38, fontSize: 11)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
                           TextField(
                             controller: titleController,
-                            minLines: 1,
-                            maxLines: 3,
-                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                            minLines: 2,
+                            maxLines: 4,
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13, height: 1.35, fontWeight: FontWeight.w500),
                             decoration: InputDecoration(
-                              labelText: 'Ürün Başlığı *',
-                              labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12),
+                              hintText: 'Ürün başlığını eksiksiz giriniz...',
+                              hintStyle: GoogleFonts.inter(color: Colors.white30, fontSize: 12),
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.05),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.white24)),
+                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.white.withOpacity(0.15))),
+                              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.amberAccent, width: 1.5)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
+                            onChanged: (_) => setDlgState(() {}),
                           ),
                           const SizedBox(height: 10),
                           Row(
@@ -3005,17 +3030,17 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withOpacity(0.06),
           borderRadius: borderRadius ?? BorderRadius.circular(8),
         ),
-        child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 24)),
+        child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 22)),
       );
     }
 
     final trimmed = url.trim();
 
-    // Base64 Data URL desteği
-    if (trimmed.startsWith('data:image/') || (trimmed.contains('base64,') && !trimmed.startsWith('http'))) {
+    // 1. Base64 Data URL veya Ham Base64 Desteği
+    if (trimmed.startsWith('data:image/') || (trimmed.contains('base64,') && !trimmed.startsWith('http')) || (trimmed.length > 200 && !trimmed.startsWith('http'))) {
       try {
         final cleanBase64 = (trimmed.contains(',') ? trimmed.substring(trimmed.indexOf(',') + 1) : trimmed).replaceAll(RegExp(r'[\r\n\s]+'), '');
         final bytes = base64Decode(cleanBase64);
@@ -3029,48 +3054,39 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             errorBuilder: (ctx, err, stack) => Container(
               width: width,
               height: height,
-              color: Colors.white.withOpacity(0.05),
-              child: const Center(child: Icon(Icons.broken_image, color: Colors.white38, size: 24)),
+              color: Colors.white.withOpacity(0.06),
+              child: const Center(child: Icon(Icons.broken_image, color: Colors.white38, size: 22)),
             ),
           ),
         );
       } catch (_) {}
     }
 
-    // CORS engeli olan CDN'ler için akıllı proxy URL oluşturucu
-    String effectiveUrl = trimmed;
-    if (trimmed.contains('productimages.hepsiburada.net') || trimmed.contains('cdn.dsmcdn.com')) {
-      effectiveUrl = 'https://images.weserv.nl/?url=${Uri.encodeComponent(trimmed)}';
-    }
-
-    // Normal HTTP / HTTPS URL
+    // 2. Normal HTTP / HTTPS URL
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(8),
       child: Image.network(
-        effectiveUrl,
+        trimmed,
         width: width,
         height: height,
         fit: fit,
         errorBuilder: (ctx, err, stack) {
-          if (!effectiveUrl.contains('images.weserv.nl') && effectiveUrl.startsWith('http')) {
-            return Image.network(
-              'https://images.weserv.nl/?url=${Uri.encodeComponent(trimmed)}',
-              width: width,
-              height: height,
-              fit: fit,
-              errorBuilder: (c, e, s) => Container(
-                width: width,
-                height: height,
-                color: Colors.white.withOpacity(0.05),
-                child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 24)),
-              ),
-            );
-          }
-          return Container(
+          // CORS engeli durumunda proxy dene
+          final proxyUrl = 'https://images.weserv.nl/?url=${Uri.encodeComponent(trimmed)}';
+          return Image.network(
+            proxyUrl,
             width: width,
             height: height,
-            color: Colors.white.withOpacity(0.05),
-            child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 24)),
+            fit: fit,
+            errorBuilder: (c, e, s) => Container(
+              width: width,
+              height: height,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: borderRadius ?? BorderRadius.circular(8),
+              ),
+              child: const Center(child: Icon(Icons.inventory_2_outlined, color: Colors.amberAccent, size: 22)),
+            ),
           );
         },
       ),
