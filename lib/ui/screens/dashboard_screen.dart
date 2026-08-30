@@ -491,11 +491,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   }) {
     final campaigns = [
       {'type': 0, 'name': 'Standart Satış (Kampanyasız)', 'desc': 'Sabit fiyattan satılır.', 'badge': 'Standart'},
-      {'type': 1, 'name': '🔥 2 Al 1 Öde (BOGO)', 'desc': '2 ürün sepete eklendiğinde 1 ürün bedava olur (Birim: ₺${(basePrice / 2).toStringAsFixed(2)}).', 'badge': '2 Al 1 Öde'},
-      {'type': 2, 'name': '🎁 3 Al 2 Öde', 'desc': '3 ürün sepete eklendiğinde 2 ürün fiyatı ödenir (Birim: ₺${((basePrice * 2) / 3).toStringAsFixed(2)}).', 'badge': '3 Al 2 Öde'},
-      {'type': 3, 'name': '⚡ 2. Ürüne %50 İndirim', 'desc': 'İkinci ürün %50 indirimli ₺${(basePrice * 0.5).toStringAsFixed(2)} olur (2li sepet: ₺${(basePrice * 1.5).toStringAsFixed(2)}).', 'badge': '2. Ürün %50'},
-      {'type': 4, 'name': '🛒 Sepette %10 İndirim', 'desc': 'Sepette anında ₺${(basePrice * 0.9).toStringAsFixed(2)} fiyata düşer.', 'badge': 'Sepette %10'},
-      {'type': 5, 'name': '🛒 Sepette %20 İndirim', 'desc': 'Sepette anında ₺${(basePrice * 0.8).toStringAsFixed(2)} fiyata düşer.', 'badge': 'Sepette %20'},
+      {'type': 1, 'name': '🔥 2 Al 1 Öde (BOGO)', 'desc': '2 ürün sepete eklendiğinde 1 ürün bedava olur (Birim: ${formatTL(basePrice / 2)}).', 'badge': '2 Al 1 Öde'},
+      {'type': 2, 'name': '🎁 3 Al 2 Öde', 'desc': '3 ürün sepete eklendiğinde 2 ürün fiyatı ödenir (Birim: ${formatTL((basePrice * 2) / 3)}).', 'badge': '3 Al 2 Öde'},
+      {'type': 3, 'name': '⚡ 2. Ürüne %50 İndirim', 'desc': 'İkinci ürün %50 indirimli ${formatTL(basePrice * 0.5)} olur (2li sepet: ${formatTL(basePrice * 1.5)}).', 'badge': '2. Ürün %50'},
+      {'type': 4, 'name': '🛒 Sepette %10 İndirim', 'desc': 'Sepette anında ${formatTL(basePrice * 0.9)} fiyata düşer.', 'badge': 'Sepette %10'},
+      {'type': 5, 'name': '🛒 Sepette %20 İndirim', 'desc': 'Sepette anında ${formatTL(basePrice * 0.8)} fiyata düşer.', 'badge': 'Sepette %20'},
       {'type': 6, 'name': '📦 Çok Al Az Öde (Adet Baremi)', 'desc': '3+ adet alımlarda %15 ek indirim uygulanır.', 'badge': 'Çok Al Az Öde'},
       {'type': 7, 'name': '⚡ Flaş İndirim', 'desc': '24 saatlik sınırlı süreli flaş indirim.', 'badge': 'Flaş İndirim'},
     ];
@@ -719,14 +719,20 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
                 reader.onLoadEnd.listen((e) async {
                   final base64String = reader.result as String;
-                  final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
+                  // Anında yerel önizleme ekle
+                  setDlgState(() {
+                    uploadedImages.add(base64String);
+                  });
 
+                  // Sunucuya arka planda yükle
+                  final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
                   setDlgState(() {
                     isUploadingImage = false;
-                    if (uploadedUrl != null) {
-                      uploadedImages.add(uploadedUrl);
-                    } else {
-                      uploadedImages.add(base64String);
+                    if (uploadedUrl != null && uploadedUrl.isNotEmpty) {
+                      final idx = uploadedImages.indexOf(base64String);
+                      if (idx != -1) {
+                        uploadedImages[idx] = uploadedUrl;
+                      }
                     }
                   });
                 });
@@ -1410,9 +1416,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final titleController = TextEditingController(text: product['title'] ?? '');
     final brandController = TextEditingController(text: product['brand'] ?? '');
     final categoryController = TextEditingController(text: product['categoryName'] ?? '');
-    final priceController = TextEditingController(text: (product['price'] ?? '').toString());
+    final priceVal = double.tryParse((product['price'] ?? '').toString()) ?? 0.0;
+    final listPriceVal = double.tryParse((product['listPrice'] ?? '').toString());
+    final priceController = TextEditingController(text: priceVal > 0 ? priceVal.toStringAsFixed(2) : '');
     final stockController = TextEditingController(text: (product['stockQuantity'] ?? '').toString());
-    final listPriceController = TextEditingController(text: (product['listPrice'] ?? '').toString());
+    final listPriceController = TextEditingController(text: listPriceVal != null && listPriceVal > 0 ? listPriceVal.toStringAsFixed(2) : '');
     final desiController = TextEditingController(text: (product['dimensionalWeight'] ?? '1.5').toString());
     final skuController = TextEditingController(text: product['sku'] ?? '');
     final barcodeController = TextEditingController(text: product['barcode'] ?? '');
@@ -1469,10 +1477,21 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
                 reader.onLoadEnd.listen((e) async {
                   final base64String = reader.result as String;
+                  // Anında yerel önizleme ekle
+                  setDlgState(() {
+                    uploadedImages.add(base64String);
+                  });
+
+                  // Sunucuya arka planda yükle
                   final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
                   setDlgState(() {
                     isUploadingImage = false;
-                    uploadedImages.add(uploadedUrl ?? base64String);
+                    if (uploadedUrl != null && uploadedUrl.isNotEmpty) {
+                      final idx = uploadedImages.indexOf(base64String);
+                      if (idx != -1) {
+                        uploadedImages[idx] = uploadedUrl;
+                      }
+                    }
                   });
                 });
                 reader.readAsDataUrl(file);
@@ -2092,8 +2111,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 children: [
                                   Expanded(flex: 3, child: Text(item['marketplace'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13))),
                                   Expanded(flex: 2, child: Text('%${item['commissionRate']}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12))),
-                                  Expanded(flex: 3, child: Text('₺${item['recommendedSalePrice']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14))),
-                                  Expanded(flex: 2, child: Text('₺${item['targetProfitAmount']}', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12))),
+                                  Expanded(flex: 3, child: Text(formatTL(item['recommendedSalePrice']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14))),
+                                  Expanded(flex: 2, child: Text(formatTL(item['targetProfitAmount']), style: GoogleFonts.inter(color: Colors.white70, fontSize: 12))),
                                 ],
                               ),
                             );
@@ -2367,7 +2386,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text('Satış Fiyatı', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                                        Text('₺${details['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 22)),
+                                        Text(formatTL(details['price']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 22)),
                                       ],
                                     ),
                                     const SizedBox(width: 24),
@@ -2376,7 +2395,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text('Liste Fiyatı', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                                          Text('₺${details['listPrice']}', style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 16)),
+                                          Text(formatTL(details['listPrice']), style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 16)),
                                         ],
                                       ),
                                     const Spacer(),
@@ -2460,7 +2479,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                       Expanded(flex: 2, child: Text(v['size'] ?? '-', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13))),
                                       Expanded(flex: 3, child: Text(v['color'] ?? '-', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12))),
                                       Expanded(flex: 4, child: Text('${v['sku']} • ${v['barcode'] ?? '-'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11))),
-                                      Expanded(flex: 2, child: Text('₺${v['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13))),
+                                      Expanded(flex: 2, child: Text(formatTL(v['price']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13))),
                                       Expanded(flex: 2, child: Text('${v['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white, fontSize: 12))),
                                     ],
                                   ),
@@ -2693,7 +2712,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     // Base64 Data URL desteği
     if (trimmed.startsWith('data:image/') || (trimmed.contains('base64,') && !trimmed.startsWith('http'))) {
       try {
-        final cleanBase64 = trimmed.contains(',') ? trimmed.substring(trimmed.indexOf(',') + 1) : trimmed;
+        final cleanBase64 = (trimmed.contains(',') ? trimmed.substring(trimmed.indexOf(',') + 1) : trimmed).replaceAll(RegExp(r'[\r\n\s]+'), '');
         final bytes = base64Decode(cleanBase64);
         return ClipRRect(
           borderRadius: borderRadius ?? BorderRadius.circular(8),
@@ -2713,15 +2732,35 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       } catch (_) {}
     }
 
+    // CORS engeli olan CDN'ler için akıllı proxy URL oluşturucu
+    String effectiveUrl = trimmed;
+    if (trimmed.contains('productimages.hepsiburada.net') || trimmed.contains('cdn.dsmcdn.com')) {
+      effectiveUrl = 'https://images.weserv.nl/?url=${Uri.encodeComponent(trimmed)}';
+    }
+
     // Normal HTTP / HTTPS URL
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(8),
       child: Image.network(
-        trimmed,
+        effectiveUrl,
         width: width,
         height: height,
         fit: fit,
         errorBuilder: (ctx, err, stack) {
+          if (!effectiveUrl.contains('images.weserv.nl') && effectiveUrl.startsWith('http')) {
+            return Image.network(
+              'https://images.weserv.nl/?url=${Uri.encodeComponent(trimmed)}',
+              width: width,
+              height: height,
+              fit: fit,
+              errorBuilder: (c, e, s) => Container(
+                width: width,
+                height: height,
+                color: Colors.white.withOpacity(0.05),
+                child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 24)),
+              ),
+            );
+          }
           return Container(
             width: width,
             height: height,
@@ -2731,6 +2770,28 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         },
       ),
     );
+  }
+
+  String formatTL(dynamic value) {
+    if (value == null) return '0,00 ₺';
+    double numVal = 0.0;
+    if (value is num) {
+      numVal = value.toDouble();
+    } else {
+      final str = value.toString().replaceAll('₺', '').replaceAll(' ', '').trim();
+      if (str.contains(',') && str.contains('.')) {
+        numVal = double.tryParse(str.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
+      } else if (str.contains(',')) {
+        numVal = double.tryParse(str.replaceAll(',', '.')) ?? 0.0;
+      } else {
+        numVal = double.tryParse(str) ?? 0.0;
+      }
+    }
+    final fixed = numVal.toStringAsFixed(2);
+    final parts = fixed.split('.');
+    final intPart = parts[0].replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+    final decPart = parts[1];
+    return '$intPart,$decPart ₺';
   }
 
   Widget _buildLimitStat(String label, String val, IconData icon, Color color) {
@@ -2888,7 +2949,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 ],
                               ),
                             ),
-                            Text('₺${o['totalPrice']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text(formatTL(o['totalPrice']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -3096,9 +3157,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('₺${p['price']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 17)),
+                    Text(formatTL(p['price']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 17)),
                     if (listPrice != null)
-                      Text('₺$listPrice', style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 12)),
+                      Text(formatTL(listPrice), style: GoogleFonts.inter(color: Colors.white38, decoration: TextDecoration.lineThrough, fontSize: 12)),
                     Text('Stok: ${p['stockQuantity']} Adet', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
                   ],
                 ),
@@ -3214,13 +3275,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(child: _finCard('Toplam Brüt Ciro', '₺${gross}', Icons.monetization_on, Colors.blueAccent)),
+            Expanded(child: _finCard('Toplam Brüt Ciro', formatTL(gross), Icons.monetization_on, Colors.blueAccent)),
             const SizedBox(width: 12),
-            Expanded(child: _finCard('Komisyon Kesintileri', '₺${commission}', Icons.percent, Colors.orangeAccent)),
+            Expanded(child: _finCard('Komisyon Kesintileri', formatTL(commission), Icons.percent, Colors.orangeAccent)),
             const SizedBox(width: 12),
-            Expanded(child: _finCard('Tahmini Kargo Gideri', '₺${cargo}', Icons.local_shipping, Colors.purpleAccent)),
+            Expanded(child: _finCard('Tahmini Kargo Gideri', formatTL(cargo), Icons.local_shipping, Colors.purpleAccent)),
             const SizedBox(width: 12),
-            Expanded(child: _finCard('Net Kâr Marjı (%$margin)', '₺${netProfit}', Icons.trending_up, Colors.greenAccent)),
+            Expanded(child: _finCard('Net Kâr Marjı (%$margin)', formatTL(netProfit), Icons.trending_up, Colors.greenAccent)),
           ],
         ),
         const SizedBox(height: 24),
@@ -3252,9 +3313,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         children: [
                           Expanded(flex: 3, child: Text(b['marketplace'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold))),
                           Expanded(flex: 2, child: Text('${b['orderCount']} Adet', style: GoogleFonts.inter(color: Colors.white70))),
-                          Expanded(flex: 2, child: Text('₺${b['grossSales']}', style: GoogleFonts.inter(color: Colors.white))),
-                          Expanded(flex: 2, child: Text('₺${b['commissionDeducted']}', style: GoogleFonts.inter(color: Colors.orangeAccent))),
-                          Expanded(flex: 2, child: Text('₺${b['netProfit']}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold))),
+                          Expanded(flex: 2, child: Text(formatTL(b['grossSales']), style: GoogleFonts.inter(color: Colors.white))),
+                          Expanded(flex: 2, child: Text(formatTL(b['commissionDeducted']), style: GoogleFonts.inter(color: Colors.orangeAccent))),
+                          Expanded(flex: 2, child: Text(formatTL(b['netProfit']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold))),
                         ],
                       ),
                     )),
