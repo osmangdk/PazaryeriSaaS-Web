@@ -154,34 +154,54 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Logo veya İkon
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.rocket_launch, size: 48, color: Colors.blueAccent),
+                      // RoaTech Logo & Türkçe Açıklama
+                      Image.asset(
+                        'assets/images/roatech_emblem.png',
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.hub, size: 52, color: Colors.blueAccent),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Roatech',
+                        style: GoogleFonts.inter(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF0A2540),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Pazaryeri Entegrasyon & API',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF0284C7),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       
                       // Başlık
                       Text(
-                        _isLogin ? 'Hoşgeldiniz' : 'Yeni Kayıt Ol',
+                        _isLogin ? 'Hoş Geldiniz' : 'Yeni Kayıt Ol',
                         style: GoogleFonts.inter(
-                          fontSize: 28,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF1E293B),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
-                        _isLogin ? 'Hesabınıza giriş yapın' : '30 gün ücretsiz deneyin',
+                        _isLogin ? 'Hesabınıza güvenle giriş yapın' : '30 gün ücretsiz kredi kartsız deneyin',
                         style: GoogleFonts.inter(
-                          fontSize: 15,
+                          fontSize: 14,
                           color: Colors.grey[600],
                         ),
                       ),
+
                       const SizedBox(height: 32),
 
                       // Form Alanları

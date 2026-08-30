@@ -4063,11 +4063,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             children: [
                               Row(
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
-                                    child: const Icon(Icons.storefront, color: Colors.blueAccent, size: 22),
+                                  Image.asset(
+                                    'assets/images/roatech_emblem.png',
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 24),
                                   ),
+
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
@@ -4169,11 +4172,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           )
                         : Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
-                                child: const Icon(Icons.storefront, color: Colors.blueAccent, size: 24),
+                              Image.asset(
+                                'assets/images/roatech_emblem.png',
+                                width: 38,
+                                height: 38,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 28),
                               ),
+
                               const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

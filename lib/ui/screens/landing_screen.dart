@@ -526,20 +526,51 @@ class _LandingScreenState extends State<LandingScreen> {
             onTap: () => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.blueAccent.withOpacity(0.4)),
+                Image.asset(
+                  'assets/images/roatech_emblem.png',
+                  width: 38,
+                  height: 38,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 22),
                   ),
-                  child: const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 22),
                 ),
                 const SizedBox(width: 10),
-                Text('RoaTech', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Roatech',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                        height: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Pazaryeri Entegrasyon & API',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF38BDF8),
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
+
           const Spacer(),
           if (isDesktop) ...[
             _navButton('Özellikler', () => _scrollTo(_featuresKey)),
@@ -1323,15 +1354,24 @@ class _LandingScreenState extends State<LandingScreen> {
                         children: [
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(8)),
-                                child: const Icon(Icons.rocket_launch, color: Colors.white, size: 14),
+                              Image.asset(
+                                'assets/images/roatech_emblem.png',
+                                width: 22,
+                                height: 22,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 18),
                               ),
-                              const SizedBox(width: 8),
-                              Text('RoaTech', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              const SizedBox(width: 6),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Roatech', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12, height: 1.0)),
+                                  Text('Pazaryeri Entegrasyon', style: GoogleFonts.inter(color: const Color(0xFF38BDF8), fontSize: 7.5, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
                             ],
                           ),
+
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(color: Colors.greenAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
@@ -1779,27 +1819,49 @@ class _LandingScreenState extends State<LandingScreen> {
       children: [
         Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blueAccent.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.blueAccent.withOpacity(0.4)),
+            Image.asset(
+              'assets/images/roatech_emblem.png',
+              width: 44,
+              height: 44,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 24),
               ),
-              child: const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 22),
             ),
-            const SizedBox(width: 10),
-            Text(
-              'RoaTech',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
-              ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Roatech',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                    height: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Pazaryeri Entegrasyon & API',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF38BDF8),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
+
         const SizedBox(height: 16),
         Text(
           'RoaTech, pazaryerlerindeki mağazalarınız, e-Ticaret siteniz ve ERP/Muhasebe yazılımınızı birbirine bağlayan, tüm e-Ticaretinizi tek ekrandan yönetmenizi sağlayan bulut tabanlı bir entegrasyon yazılımıdır.',
