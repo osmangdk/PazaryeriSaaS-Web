@@ -45,7 +45,7 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isBiometricLoading = true);
     try {
       final authenticated = await BiometricService.authenticate(
-        reason: 'PazaryeriSaaS hesabınıza giriş yapmak için doğrulayın',
+        reason: 'RoaTech hesabınıza giriş yapmak için doğrulayın',
       );
       if (authenticated && mounted) {
         context.go('/dashboard');

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,7 +41,7 @@ class BiometricService {
   /// Kullanıcıyı biyometrik olarak doğrula.
   /// [reason] — ekranda gösterilecek açıklama metni
   static Future<bool> authenticate({
-    String reason = 'PazaryeriSaaS uygulamasına giriş yapmak için doğrulayın',
+    String reason = 'RoaTech uygulamasına giriş yapmak için doğrulayın',
   }) async {
     if (kIsWeb) return false;
     try {

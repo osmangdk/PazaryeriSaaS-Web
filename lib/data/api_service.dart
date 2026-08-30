@@ -233,7 +233,7 @@ class ApiService {
       };
     } else if (msg.contains('ücretsiz') || msg.contains('fiyat') || msg.contains('deneme') || msg.contains('paket') || msg.contains('kapsıyor')) {
       return {
-        'reply': '🎁 30 Gün Boyunca Kredi Kartsız %100 Ücretsiz Deneme!\n\nPazaryeriSaaS\'ı kredi kartı girmeden hemen deneyebilirsiniz:\n* 30 Gün Ücretsiz Kullanım\n* 3 Aktif Pazaryeri Bağlantısı (Trendyol, Hepsiburada, Amazon TR vb.)\n* 50 Ürün Kotası & Sınırsız Senkronizasyon\n* 1.2s Gerçek Zamanlı Stok Eşitleme\n* GİB E-Fatura & Kargo Barkodu Basımı',
+        'reply': '🎁 30 Gün Boyunca Kredi Kartsız %100 Ücretsiz Deneme!\n\nRoaTech\'i kredi kartı girmeden hemen deneyebilirsiniz:\n* 30 Gün Ücretsiz Kullanım\n* 3 Aktif Pazaryeri Bağlantısı (Trendyol, Hepsiburada, Amazon TR vb.)\n* 50 Ürün Kotası & Sınırsız Senkronizasyon\n* 1.2s Gerçek Zamanlı Stok Eşitleme\n* GİB E-Fatura & Kargo Barkodu Basımı',
         'suggestedActions': [
           {'label': '🚀 30 Gün Ücretsiz Başla', 'actionType': 'go_register'},
           {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}

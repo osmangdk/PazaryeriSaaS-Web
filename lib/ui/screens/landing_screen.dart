@@ -43,7 +43,7 @@ class _LandingScreenState extends State<LandingScreen> {
     if (_aiMessages.isEmpty) {
       _aiMessages.add({
         'role': 'assistant',
-        'content': 'Merhaba! Ben sizin **AI Pazaryeri Danışmanınızım**. 🤖\n\nPazaryeri SaaS\'ın 30 gün ücretsiz deneme imkanı (3 pazaryeri ve 50 ürün kotası), 1.2s anlık stok eşitleme, 2 Al 1 Öde kampanya kurguları ve Trendyol/Hepsiburada entegrasyonu hakkında merak ettiğiniz her şeyi bana sorabilirsiniz.',
+        'content': 'Merhaba! Ben sizin **RoaTech AI Danışmanınızım**. 🤖\n\nRoaTech\'in 30 gün ücretsiz deneme imkanı (3 pazaryeri ve 50 ürün kotası), 1.2s anlık stok eşitleme, 2 Al 1 Öde kampanya kurguları ve Trendyol/Hepsiburada entegrasyonu hakkında merak ettiğiniz her şeyi bana sorabilirsiniz.',
         'actions': [
           {'label': '🎁 1 Ay Ücretsiz Deneme Nedir?', 'action': 'ask', 'prompt': '1 Ay ücretsiz deneme paketi neleri kapsıyor?'},
           {'label': '🔥 2 Al 1 Öde Nasıl Çalışır?', 'action': 'ask', 'prompt': '2 Al 1 Öde kampanyaları nasıl çalışıyor?'},
@@ -88,8 +88,9 @@ class _LandingScreenState extends State<LandingScreen> {
             children: [
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
+                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
                 },
+
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.all(14),
@@ -158,7 +159,7 @@ class _LandingScreenState extends State<LandingScreen> {
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('mailto:destek@pazaryeri.com?subject=PazaryeriSaaS%20Destek%20Talebi');
+                  _launchSafeUrl('mailto:destek@roatech.com?subject=RoaTech%20Destek%20Talebi');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -181,7 +182,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('E-Posta Destek Talebi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text('destek@pazaryeri.com (Maks. 15 dk dönüş)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                            Text('destek@roatech.com (Maks. 15 dk dönüş)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
                           ],
                         ),
                       ),
@@ -261,11 +262,12 @@ class _LandingScreenState extends State<LandingScreen> {
             } else if (actionType == 'open_support_channels') {
               _showCustomerSupportDialog();
             } else if (actionType == 'open_whatsapp_support') {
-              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
+              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
             } else if (act['prompt'] != null && act['prompt'].toString().isNotEmpty) {
               sendMessage(act['prompt']);
             }
           }
+
 
           return AlertDialog(
             backgroundColor: const Color(0xFF0F172A),
@@ -534,7 +536,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   child: const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 22),
                 ),
                 const SizedBox(width: 10),
-                Text('PazaryeriSaaS', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+                Text('RoaTech', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
               ],
             ),
           ),
@@ -885,9 +887,10 @@ class _LandingScreenState extends State<LandingScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                'PazaryeriSaaS ile $name mağazanızı 90 saniyede bağlayabilir, 30 gün boyunca tamamen ücretsiz deneyebilirsiniz.',
+                'RoaTech ile $name mağazanızı 90 saniyede bağlayabilir, 30 gün boyunca tamamen ücretsiz deneyebilirsiniz.',
                 style: GoogleFonts.inter(color: Colors.white70, fontSize: 13, height: 1.4),
               ),
+
             ),
           ],
         ),
@@ -1077,9 +1080,10 @@ class _LandingScreenState extends State<LandingScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Depoda ürün ararken, yoldayken veya tatildeyken bilgisayara bağlı kalmayın. PazaryeriSaaS mobil uygulaması ile 22 pazaryerindeki tüm satışlarınız, siparişleriniz ve kargolarınız parmaklarınızın ucunda.',
+          'Depoda ürün ararken, yoldayken veya tatildeyken bilgisayara bağlı kalmayın. RoaTech mobil uygulaması ile 22 pazaryerindeki tüm satışlarınız, siparişleriniz ve kargolarınız parmaklarınızın ucunda.',
           style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.6),
         ),
+
         const SizedBox(height: 28),
 
         // 4 Mobil Güç Özelliği
@@ -1325,7 +1329,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                 child: const Icon(Icons.rocket_launch, color: Colors.white, size: 14),
                               ),
                               const SizedBox(width: 8),
-                              Text('PazaryeriSaaS', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text('RoaTech', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                             ],
                           ),
                           Container(
@@ -1736,7 +1740,7 @@ class _LandingScreenState extends State<LandingScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'PazaryeriSaaS © 2026 Tüm Hakları Saklıdır. Türkiye\'nin En Gelişmiş Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.',
+                    'RoaTech © 2026 Tüm Hakları Saklıdır. Türkiye\'nin En Gelişmiş Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.',
                     style: GoogleFonts.inter(color: Colors.white38, fontSize: 12, height: 1.4),
                   ),
                 ),
@@ -1762,6 +1766,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 ),
               ],
             ),
+
           ],
         ),
       ),
@@ -1785,7 +1790,7 @@ class _LandingScreenState extends State<LandingScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              'PazaryeriSaaS',
+              'RoaTech',
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontSize: 22,
@@ -1797,7 +1802,7 @@ class _LandingScreenState extends State<LandingScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'PazaryeriSaaS, pazaryerlerindeki mağazalarınız, e-Ticaret siteniz ve ERP/Muhasebe yazılımınızı birbirine bağlayan, tüm e-Ticaretinizi tek ekrandan yönetmenizi sağlayan bulut tabanlı bir entegrasyon yazılımıdır.',
+          'RoaTech, pazaryerlerindeki mağazalarınız, e-Ticaret siteniz ve ERP/Muhasebe yazılımınızı birbirine bağlayan, tüm e-Ticaretinizi tek ekrandan yönetmenizi sağlayan bulut tabanlı bir entegrasyon yazılımıdır.',
           style: GoogleFonts.inter(color: Colors.white60, fontSize: 13, height: 1.6),
         ),
         const SizedBox(height: 20),
@@ -1836,7 +1841,7 @@ class _LandingScreenState extends State<LandingScreen> {
         _buildFooterLink('Gizlilik ve Çerez Politikası', () => _showLegalDialog('Gizlilik Politikası', _privacyPolicyText)),
         _buildFooterLink('KVKK Aydınlatma Metni', () => _showLegalDialog('KVKK Aydınlatma Metni', _kvkkText)),
         _buildFooterLink('Sık Sorulan Sorular', () => _scrollTo(_faqKey)),
-        _buildFooterLink('Hakkımızda & Ekibimiz', () => _showLegalDialog('Hakkımızda', 'PazaryeriSaaS, Türkiye ve global e-ticaret satıcılarının operasyonel yükünü sıfırlamak amacıyla geliştirilmiş yeni nesil çoklu kanal entegrasyon platformudur.')),
+        _buildFooterLink('Hakkımızda & Ekibimiz', () => _showLegalDialog('Hakkımızda', 'RoaTech, Türkiye ve global e-ticaret satıcılarının operasyonel yükünü sıfırlamak amacıyla geliştirilmiş yeni nesil çoklu kanal entegrasyon platformudur.')),
         _buildFooterLink('İletişim & Canlı AI Destek', () => _showAiConsultantDialog()),
       ],
     );
@@ -1874,7 +1879,6 @@ class _LandingScreenState extends State<LandingScreen> {
       ],
     );
   }
-
 
   Widget _buildFooterLink(String label, VoidCallback onTap) {
     return Padding(
@@ -1916,8 +1920,8 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   static const String _userAgreementText = '''
-PazaryeriSaaS Kullanıcı Sözleşmesi:
-1. Hizmet Kapsamı: PazaryeriSaaS, kullanıcıların birden fazla e-ticaret pazaryerindeki ürün, stok, fiyat ve sipariş verilerini senkronize etmelerini sağlar.
+RoaTech Kullanıcı Sözleşmesi:
+1. Hizmet Kapsamı: RoaTech, kullanıcıların birden fazla e-ticaret pazaryerindeki ürün, stok, fiyat ve sipariş verilerini senkronize etmelerini sağlar.
 2. Veri Güvenliği: Kullanıcının girdiği API anahtarları 256-bit AES şifreleme standardı ile korunur ve üçüncü taraflarla paylaşılmaz.
 3. 30 Gün Ücretsiz Deneme: Tüm yeni kayıtlar 30 gün boyunca kredi kartsız ücretsiz deneme hakkına sahiptir.
 4. Hizmet Kesintisizliği: Sistem %99.9 çalışma süresi (uptime) hedefiyle bulut mimarisinde barındırılmaktadır.
@@ -1925,16 +1929,17 @@ PazaryeriSaaS Kullanıcı Sözleşmesi:
 
   static const String _privacyPolicyText = '''
 Gizlilik ve Çerez Politikası:
-1. PazaryeriSaaS, kullanıcılarının kişisel bilgilerini ve mağaza verilerini en üst düzey şifreleme protokolleriyle muhafaza eder.
+1. RoaTech, kullanıcılarının kişisel bilgilerini ve mağaza verilerini en üst düzey şifreleme protokolleriyle muhafaza eder.
 2. Çerezler yalnızca kullanıcı oturumunu aktif tutmak ve panel performansını artırmak amacıyla kullanılır.
 3. Mağaza satış ve ciro verileriniz kesinlikle üçüncü parti reklam verenlerle paylaşılmaz.
 ''';
 
   static const String _kvkkText = '''
 6698 Sayılı KVKK Kapsamında Aydınlatma Metni:
-Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca, veri sorumlusu sıfatıyla PazaryeriSaaS tarafından; üyelik işlemlerinin yürütülmesi, faturalandırma ve teknik destek hizmetlerinin sağlanması amaçlarıyla sınırlı olarak işlenmektedir.
+Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca, veri sorumlusu sıfatıyla RoaTech tarafından; üyelik işlemlerinin yürütülmesi, faturalandırma ve teknik destek hizmetlerinin sağlanması amaçlarıyla sınırlı olarak işlenmektedir.
 ''';
 }
+
 
 
 class _PeeledStickerBadge extends StatelessWidget {

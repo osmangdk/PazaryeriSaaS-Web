@@ -284,7 +284,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             children: [
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
+                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -354,7 +354,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('mailto:destek@pazaryeri.com?subject=PazaryeriSaaS%20Destek%20Talebi');
+                  _launchSafeUrl('mailto:destek@roatech.com?subject=RoaTech%20Destek%20Talebi');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -369,15 +369,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: const BoxDecoration(color: Colors.purpleAccent, shape: BoxShape.circle),
-                        child: const Icon(Icons.email_outlined, color: Colors.white, size: 20),
+                        child: const Icon(Icons.email, color: Colors.white, size: 20),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('E-Posta Destek Talebi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text('destek@pazaryeri.com (Maks. 15 dk dönüş)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                            Text('E-Posta Destek (destek@roatech.com)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('Ortalama 15 dakika içinde dönüş', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
                           ],
                         ),
                       ),
@@ -484,7 +484,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             } else if (actionType == 'open_support_channels') {
               _showCustomerSupportDialog();
             } else if (actionType == 'open_whatsapp_support') {
-              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
+              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
             } else if (actionType == 'switch_tab_orders') {
               Navigator.pop(ctx);
               setState(() => _currentTabIndex = 1);
