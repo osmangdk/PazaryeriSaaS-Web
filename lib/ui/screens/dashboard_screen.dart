@@ -630,9 +630,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final titleController = TextEditingController();
     final brandController = TextEditingController(text: 'Tudors');
     final categoryController = TextEditingController(text: 'Polo Yaka Tişört');
-    final priceController = TextEditingController(text: '1083.90');
+    final priceController = TextEditingController(text: '1.083,90');
     final stockController = TextEditingController(text: '100');
-    final listPriceController = TextEditingController(text: '1747.80');
+    final listPriceController = TextEditingController(text: '1.747,80');
     final desiController = TextEditingController(text: '1.5');
     final skuController = TextEditingController(text: 'TDR-PL-01');
     final barcodeController = TextEditingController();
@@ -675,8 +675,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               titleController.text = 'Lenovo IdeaPad Slim 3 AMD Ryzen 7 170 16GB 512GB SSD Freedos 15.3" Taşınabilir Bilgisayar 83K700PSTR';
               brandController.text = 'Lenovo';
               categoryController.text = 'Dizüstü Bilgisayar (Laptop)';
-              priceController.text = '31999.00';
-              listPriceController.text = '33683.16';
+              priceController.text = '31.999,00';
+              listPriceController.text = '33.683,16';
               stockController.text = '65';
               desiController.text = '3.5';
               skuController.text = 'LEN-83K700PSTR';
@@ -713,8 +713,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               titleController.text = 'Apple iPhone 17 Pro Max 256 GB Kozmik Turuncu (Apple Türkiye Garantili)';
               brandController.text = 'Apple';
               categoryController.text = 'Akıllı Telefon';
-              priceController.text = '89999.00';
-              listPriceController.text = '94999.00';
+              priceController.text = '89.999,00';
+              listPriceController.text = '94.999,00';
               stockController.text = '40';
               desiController.text = '1.0';
               skuController.text = 'APL-IP17PM-256G';
@@ -746,8 +746,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               titleController.text = "Tudors Erkek 5'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört";
               brandController.text = 'Tudors';
               categoryController.text = 'Polo Yaka Tişört';
-              priceController.text = '1083.90';
-              listPriceController.text = '1747.80';
+              priceController.text = '1.083,90';
+              listPriceController.text = '1.747,80';
               stockController.text = '100';
               desiController.text = '1.5';
               skuController.text = 'TDR-PL-01';
@@ -806,7 +806,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             });
           }
 
-          final currentPrice = double.tryParse(priceController.text) ?? 1083.90;
+          final currentPrice = parseTLInput(priceController.text) > 0 ? parseTLInput(priceController.text) : 1083.90;
 
           return AlertDialog(
             backgroundColor: const Color(0xFF0F172A),
@@ -1002,6 +1002,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           const SizedBox(height: 10),
                           TextField(
                             controller: titleController,
+                            minLines: 1,
+                            maxLines: 3,
                             style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                             decoration: InputDecoration(
                               labelText: 'Ürün Başlığı *',
@@ -1010,6 +1012,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               filled: true,
                               fillColor: Colors.white.withOpacity(0.05),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -1038,9 +1041,21 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               Expanded(
                                 child: TextField(
                                   controller: priceController,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14),
-                                  decoration: InputDecoration(labelText: 'Satış Fiyatı (₺) *', prefixText: '₺ ', prefixStyle: GoogleFonts.inter(color: Colors.greenAccent), labelStyle: GoogleFonts.inter(color: Colors.white70), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                                  decoration: InputDecoration(
+                                    labelText: 'Satış Fiyatı *',
+                                    prefixText: '₺ ',
+                                    suffixText: 'TL',
+                                    hintText: 'Örn: 99.999,99',
+                                    prefixStyle: GoogleFonts.inter(color: Colors.greenAccent),
+                                    suffixStyle: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12),
+                                    labelStyle: GoogleFonts.inter(color: Colors.white70),
+                                    filled: true,
+                                    fillColor: Colors.white.withOpacity(0.05),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  ),
                                   onChanged: (_) => setDlgState(() {}),
                                 ),
                               ),
@@ -1109,11 +1124,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 Expanded(
                                   child: TextField(
                                     controller: listPriceController,
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                                     decoration: InputDecoration(
                                       labelText: 'Üstü Çizili Liste Fiyatı',
                                       prefixText: '₺ ',
+                                      suffixText: 'TL',
+                                      hintText: 'Örn: 109.999,00',
+                                      prefixStyle: GoogleFonts.inter(color: Colors.white60),
+                                      suffixStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
                                       labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
                                       filled: true,
                                       fillColor: Colors.white.withOpacity(0.04),
@@ -1366,8 +1385,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     }
 
                     setDlgState(() => isSaving = true);
-                    final price = double.tryParse(priceController.text) ?? 1083.90;
-                    final listPrice = double.tryParse(listPriceController.text) ?? price * 1.3;
+                    final price = parseTLInput(priceController.text) > 0 ? parseTLInput(priceController.text) : 1083.90;
+                    final listPrice = parseTLInput(listPriceController.text) > 0 ? parseTLInput(listPriceController.text) : price * 1.3;
                     final stock = int.tryParse(stockController.text) ?? 100;
                     final desi = double.tryParse(desiController.text) ?? 1.5;
                     final sku = skuController.text.trim().isNotEmpty ? skuController.text.trim() : 'PRD-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
@@ -1519,9 +1538,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final categoryController = TextEditingController(text: product['categoryName'] ?? '');
     final priceVal = double.tryParse((product['price'] ?? '').toString()) ?? 0.0;
     final listPriceVal = double.tryParse((product['listPrice'] ?? '').toString());
-    final priceController = TextEditingController(text: priceVal > 0 ? priceVal.toStringAsFixed(2) : '');
+    final priceController = TextEditingController(text: priceVal > 0 ? formatNumberTL(priceVal) : '');
     final stockController = TextEditingController(text: (product['stockQuantity'] ?? '').toString());
-    final listPriceController = TextEditingController(text: listPriceVal != null && listPriceVal > 0 ? listPriceVal.toStringAsFixed(2) : '');
+    final listPriceController = TextEditingController(text: listPriceVal != null && listPriceVal > 0 ? formatNumberTL(listPriceVal) : '');
     final desiController = TextEditingController(text: (product['dimensionalWeight'] ?? '1.5').toString());
     final skuController = TextEditingController(text: product['sku'] ?? '');
     final barcodeController = TextEditingController(text: product['barcode'] ?? '');
@@ -1732,8 +1751,17 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         children: [
                           TextField(
                             controller: titleController,
+                            minLines: 1,
+                            maxLines: 3,
                             style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-                            decoration: InputDecoration(labelText: 'Ürün Başlığı *', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                            decoration: InputDecoration(
+                              labelText: 'Ürün Başlığı *',
+                              labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.05),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Row(
@@ -1761,9 +1789,21 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               Expanded(
                                 child: TextField(
                                   controller: priceController,
-                                  keyboardType: TextInputType.number,
-                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-                                  decoration: InputDecoration(labelText: 'Satış Fiyatı *', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                                  decoration: InputDecoration(
+                                    labelText: 'Satış Fiyatı *',
+                                    prefixText: '₺ ',
+                                    suffixText: 'TL',
+                                    hintText: 'Örn: 99.999,99',
+                                    prefixStyle: GoogleFonts.inter(color: Colors.white60),
+                                    suffixStyle: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12),
+                                    labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 12),
+                                    filled: true,
+                                    fillColor: Colors.white.withOpacity(0.05),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -1836,11 +1876,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 Expanded(
                                   child: TextField(
                                     controller: listPriceController,
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                                     decoration: InputDecoration(
                                       labelText: 'Liste Fiyatı (Üstü Çizili)',
                                       prefixText: '₺ ',
+                                      suffixText: 'TL',
+                                      hintText: 'Örn: 109.999,00',
+                                      prefixStyle: GoogleFonts.inter(color: Colors.white60),
+                                      suffixStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
                                       labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
                                       filled: true,
                                       fillColor: Colors.white.withOpacity(0.04),
@@ -2083,8 +2127,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           'title': titleController.text.trim(),
                           'brand': brandController.text.trim(),
                           'categoryName': categoryController.text.trim(),
-                          'price': double.tryParse(priceController.text) ?? 0,
-                          'listPrice': double.tryParse(listPriceController.text),
+                          'price': parseTLInput(priceController.text),
+                          'listPrice': parseTLInput(listPriceController.text) > 0 ? parseTLInput(listPriceController.text) : null,
                           'stockQuantity': int.tryParse(stockController.text) ?? 0,
                           'dimensionalWeight': double.tryParse(desiController.text) ?? 1.5,
                           'sku': skuController.text.trim(),
@@ -2915,7 +2959,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     if (value is num) {
       numVal = value.toDouble();
     } else {
-      final str = value.toString().replaceAll('₺', '').replaceAll(' ', '').trim();
+      final str = value.toString().replaceAll('₺', '').replaceAll('TL', '').replaceAll(' ', '').trim();
       if (str.contains(',') && str.contains('.')) {
         numVal = double.tryParse(str.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
       } else if (str.contains(',')) {
@@ -2929,6 +2973,40 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final intPart = parts[0].replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
     final decPart = parts[1];
     return '$intPart,$decPart ₺';
+  }
+
+  String formatNumberTL(dynamic value) {
+    if (value == null) return '';
+    double numVal = 0.0;
+    if (value is num) {
+      numVal = value.toDouble();
+    } else {
+      final str = value.toString().replaceAll('₺', '').replaceAll('TL', '').replaceAll(' ', '').trim();
+      if (str.contains(',') && str.contains('.')) {
+        numVal = double.tryParse(str.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
+      } else if (str.contains(',')) {
+        numVal = double.tryParse(str.replaceAll(',', '.')) ?? 0.0;
+      } else {
+        numVal = double.tryParse(str) ?? 0.0;
+      }
+    }
+    if (numVal <= 0) return '';
+    final fixed = numVal.toStringAsFixed(2);
+    final parts = fixed.split('.');
+    final intPart = parts[0].replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+    final decPart = parts[1];
+    return '$intPart,$decPart';
+  }
+
+  double parseTLInput(String? text) {
+    if (text == null || text.trim().isEmpty) return 0.0;
+    final clean = text.replaceAll('₺', '').replaceAll('TL', '').replaceAll(' ', '').trim();
+    if (clean.contains(',') && clean.contains('.')) {
+      return double.tryParse(clean.replaceAll('.', '').replaceAll(',', '.')) ?? 0.0;
+    } else if (clean.contains(',')) {
+      return double.tryParse(clean.replaceAll(',', '.')) ?? 0.0;
+    }
+    return double.tryParse(clean) ?? 0.0;
   }
 
   Widget _buildLimitStat(String label, String val, IconData icon, Color color) {
