@@ -767,8 +767,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ],
             ),
             content: SizedBox(
-              width: 820,
-              height: 580,
+              width: 960,
+              height: 640,
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1038,40 +1038,76 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ),
                           ),
                           if (showAdvancedOptions) ...[
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
                             Row(
                               children: [
                                 Expanded(
                                   child: TextField(
                                     controller: listPriceController,
                                     keyboardType: TextInputType.number,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'Üstü Çizili Liste Fiyatı', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'Üstü Çizili Liste Fiyatı',
+                                      prefixText: '₺ ',
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: TextField(
                                     controller: desiController,
                                     keyboardType: TextInputType.number,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'Kargo Desisi', suffixText: 'Desi', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'Kargo Desisi',
+                                      suffixText: 'Desi',
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
                                 Expanded(
                                   child: TextField(
                                     controller: skuController,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'Özel Stok Kodu (SKU)', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'Özel Stok Kodu (SKU)',
+                                      prefixIcon: const Icon(Icons.qr_code_2, size: 18, color: Colors.orangeAccent),
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: TextField(
                                     controller: barcodeController,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'Barkod', prefixIcon: const Icon(Icons.barcode_reader, size: 16, color: Colors.white38), labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'Barkod (EAN / GTIN)',
+                                      prefixIcon: const Icon(Icons.barcode_reader, size: 18, color: Colors.orangeAccent),
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -1523,8 +1559,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ],
             ),
             content: SizedBox(
-              width: 820,
-              height: 580,
+              width: 960,
+              height: 640,
               child: SingleChildScrollView(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1729,40 +1765,76 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ),
                           ),
                           if (showAdvancedOptions) ...[
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
                             Row(
                               children: [
                                 Expanded(
                                   child: TextField(
                                     controller: listPriceController,
                                     keyboardType: TextInputType.number,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'Liste Fiyatı (Üstü Çizili)', prefixText: '₺ ', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'Liste Fiyatı (Üstü Çizili)',
+                                      prefixText: '₺ ',
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: TextField(
                                     controller: desiController,
                                     keyboardType: TextInputType.number,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'Kargo Desisi', suffixText: 'Desi', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'Kargo Desisi',
+                                      suffixText: 'Desi',
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
                                 Expanded(
                                   child: TextField(
                                     controller: skuController,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'SKU Kodu', labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'SKU (Stok Kodu)',
+                                      prefixIcon: const Icon(Icons.qr_code_2, size: 18, color: Colors.amberAccent),
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: TextField(
                                     controller: barcodeController,
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                    decoration: InputDecoration(labelText: 'Barkod', prefixIcon: const Icon(Icons.barcode_reader, size: 16, color: Colors.white38), labelStyle: GoogleFonts.inter(color: Colors.white60, fontSize: 11), filled: true, fillColor: Colors.white.withOpacity(0.04), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      labelText: 'Barkod (EAN / GTIN)',
+                                      prefixIcon: const Icon(Icons.barcode_reader, size: 18, color: Colors.amberAccent),
+                                      labelStyle: GoogleFonts.inter(color: Colors.white70, fontSize: 12),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
                                 ),
                               ],
