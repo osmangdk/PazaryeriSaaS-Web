@@ -23,6 +23,71 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   bool _isLoading = true;
   int _currentTabIndex = 0;
 
+  // Category & Catalog Filter State
+  String _selectedCategoryFilter = 'ALL';
+  String? _selectedSubCategoryFilter;
+  String _productSearchQuery = '';
+  final TextEditingController _productSearchController = TextEditingController();
+  final Set<String> _expandedCategoryIds = {'Giyim', 'Bilgisayar'};
+
+  final List<Map<String, dynamic>> _catalogCategories = [
+    {
+      'id': 'ALL',
+      'title': 'Tüm Ürünleri Listele',
+      'icon': Icons.apps,
+      'color': Colors.blueAccent,
+      'subCategories': <String>[],
+    },
+    {
+      'id': 'Giyim',
+      'title': 'Giyim & Tekstil',
+      'icon': Icons.checkroom,
+      'color': Colors.orangeAccent,
+      'allLabel': 'Tüm Giyim Ürünleri',
+      'subCategories': ['Tişört & Polo Yaka', 'Gömlek', 'Pantolon & Jean', 'Ceket & Mont', 'Elbise & Etek', 'Ayakkabı'],
+    },
+    {
+      'id': 'Bilgisayar',
+      'title': 'Laptop & Bilgisayar',
+      'icon': Icons.laptop_mac,
+      'color': Colors.tealAccent,
+      'allLabel': 'Tüm Bilgisayar Ürünleri',
+      'subCategories': ['Dizüstü Bilgisayar (Laptop)', 'Masaüstü & Monitör', 'Tablet & Çevre Birimleri', 'Bilgisayar Bileşenleri'],
+    },
+    {
+      'id': 'Telefon',
+      'title': 'Telefon & Aksesuar',
+      'icon': Icons.smartphone,
+      'color': Colors.purpleAccent,
+      'allLabel': 'Tüm Telefon Ürünleri',
+      'subCategories': ['Akıllı Telefonlar', 'Kılıf & Koruyucu', 'Şarj & Kablo', 'Akıllı Saat & Bileklik'],
+    },
+    {
+      'id': 'Ev',
+      'title': 'Ev & Yaşam',
+      'icon': Icons.home,
+      'color': Colors.greenAccent,
+      'allLabel': 'Tüm Ev & Yaşam Ürünleri',
+      'subCategories': ['Küçük Ev Aletleri', 'Mutfak & Sofra', 'Mobilya & Dekorasyon', 'Ev Tekstili'],
+    },
+    {
+      'id': 'Oyun',
+      'title': 'Oyun & Hobi',
+      'icon': Icons.sports_esports,
+      'color': Colors.pinkAccent,
+      'allLabel': 'Tüm Oyun & Hobi Ürünleri',
+      'subCategories': ['Oyun Konsolları', 'Konsol Oyunları', 'Gaming Aksesuar', 'Hobi & Maket'],
+    },
+    {
+      'id': 'Araç',
+      'title': 'Oto & Yapı Market',
+      'icon': Icons.build,
+      'color': Colors.amberAccent,
+      'allLabel': 'Tüm Yapı Market Ürünleri',
+      'subCategories': ['Elektrikli El Aletleri', 'Oto Aksesuar', 'Hırdavat & Boya', 'Bahçe Ekipmanları'],
+    },
+  ];
+
   // AI Chat State
   final List<Map<String, dynamic>> _aiMessages = [];
   final Set<String> _askedPrompts = {};
@@ -3060,14 +3125,430 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  bool _productMatchesCategory(dynamic p, String catId, String? subCat) {
+    final title = (p['title'] ?? p['name'] ?? '').toString().toLowerCase();
+    final catName = (p['categoryName'] ?? '').toString().toLowerCase();
+    final brand = (p['brand'] ?? '').toString().toLowerCase();
+
+    if (catId == 'ALL') return true;
+
+    if (catId == 'Giyim') {
+      final isGiyim = catName.contains('giyim') || catName.contains('tişört') || catName.contains('polo') ||
+                      catName.contains('gömlek') || catName.contains('tekstil') || catName.contains('pantolon') ||
+                      brand.contains('tudors') || title.contains('tişört') || title.contains('polo') || title.contains('gömlek') || title.contains('pantolon') || title.contains('pike');
+      if (!isGiyim) return false;
+
+      if (subCat != null && subCat.isNotEmpty && !subCat.startsWith('ALL_')) {
+        if (subCat == 'Tişört & Polo Yaka') {
+          return catName.contains('tişört') || catName.contains('polo') || title.contains('tişört') || title.contains('polo') || title.contains('pike');
+        } else if (subCat == 'Gömlek') {
+          return catName.contains('gömlek') || title.contains('gömlek');
+        } else if (subCat == 'Pantolon & Jean') {
+          return catName.contains('pantolon') || catName.contains('jean') || title.contains('pantolon');
+        } else if (subCat == 'Ceket & Mont') {
+          return catName.contains('ceket') || catName.contains('mont') || title.contains('ceket') || title.contains('mont');
+        } else if (subCat == 'Elbise & Etek') {
+          return catName.contains('elbise') || catName.contains('etek') || title.contains('elbise');
+        } else if (subCat == 'Ayakkabı') {
+          return catName.contains('ayakkabı') || title.contains('ayakkabı');
+        }
+      }
+      return true;
+    }
+
+    if (catId == 'Bilgisayar') {
+      final isPC = catName.contains('bilgisayar') || catName.contains('laptop') || catName.contains('dizüstü') ||
+                   title.contains('laptop') || title.contains('ideapad') || title.contains('notebook') || title.contains('bilgisayar') || brand.contains('lenovo') || brand.contains('asus') || brand.contains('dell') || brand.contains('hp');
+      if (!isPC) return false;
+
+      if (subCat != null && subCat.isNotEmpty && !subCat.startsWith('ALL_')) {
+        if (subCat == 'Dizüstü Bilgisayar (Laptop)') {
+          return catName.contains('laptop') || catName.contains('dizüstü') || title.contains('laptop') || title.contains('ideapad') || title.contains('notebook') || title.contains('taşınabilir');
+        } else if (subCat == 'Masaüstü & Monitör') {
+          return catName.contains('masaüstü') || catName.contains('monitör') || title.contains('monitör') || title.contains('desktop');
+        } else if (subCat == 'Tablet & Çevre Birimleri') {
+          return catName.contains('tablet') || catName.contains('mouse') || catName.contains('klavye') || title.contains('tablet');
+        }
+      }
+      return true;
+    }
+
+    if (catId == 'Telefon') {
+      final isPhone = catName.contains('telefon') || catName.contains('tablet') || title.contains('iphone') || title.contains('telefon') || title.contains('samsung') || title.contains('xiaomi');
+      if (!isPhone) return false;
+
+      if (subCat != null && subCat.isNotEmpty && !subCat.startsWith('ALL_')) {
+        if (subCat == 'Akıllı Telefonlar') {
+          return catName.contains('telefon') || title.contains('iphone') || title.contains('galaxy') || title.contains('telefon');
+        } else if (subCat == 'Kılıf & Koruyucu') {
+          return catName.contains('kılıf') || catName.contains('koruyucu') || title.contains('kılıf');
+        }
+      }
+      return true;
+    }
+
+    if (catId == 'Ev') {
+      final isEv = catName.contains('ev') || catName.contains('yaşam') || catName.contains('mobilya') || catName.contains('mutfak') || title.contains('mobilya') || title.contains('süpürge');
+      if (!isEv) return false;
+      return true;
+    }
+
+    if (catId == 'Oyun') {
+      final isOyun = catName.contains('oyun') || catName.contains('gaming') || catName.contains('hobi') || catName.contains('ps5') || title.contains('playstation') || title.contains('xbox');
+      if (!isOyun) return false;
+      return true;
+    }
+
+    if (catId == 'Araç') {
+      final isArac = catName.contains('araç') || catName.contains('yapı') || catName.contains('hırdavat') || catName.contains('oto') || title.contains('matkap') || title.contains('akü');
+      if (!isArac) return false;
+      return true;
+    }
+
+    return catName.contains(catId.toLowerCase()) || title.contains(catId.toLowerCase());
+  }
+
+  int _getCategoryCount(String catId, {String? subCat}) {
+    if (_products == null) return 0;
+    return _products!.where((p) => _productMatchesCategory(p, catId, subCat)).length;
+  }
+
+  List<dynamic> _getFilteredProducts() {
+    if (_products == null) return [];
+    return _products!.where((p) {
+      if (_productSearchQuery.trim().isNotEmpty) {
+        final q = _productSearchQuery.trim().toLowerCase();
+        final title = (p['title'] ?? p['name'] ?? '').toString().toLowerCase();
+        final catName = (p['categoryName'] ?? '').toString().toLowerCase();
+        final brand = (p['brand'] ?? '').toString().toLowerCase();
+        final sku = (p['sku'] ?? '').toString().toLowerCase();
+        final barcode = (p['barcode'] ?? '').toString().toLowerCase();
+        if (!title.contains(q) && !catName.contains(q) && !brand.contains(q) && !sku.contains(q) && !barcode.contains(q)) {
+          return false;
+        }
+      }
+      return _productMatchesCategory(p, _selectedCategoryFilter, _selectedSubCategoryFilter);
+    }).toList();
+  }
+
+  String _getActiveCategoryLabel() {
+    if (_selectedCategoryFilter == 'ALL') return 'Tüm Ürünler';
+    final mainCat = _catalogCategories.firstWhere((c) => c['id'] == _selectedCategoryFilter, orElse: () => {'title': _selectedCategoryFilter});
+    if (_selectedSubCategoryFilter != null && !_selectedSubCategoryFilter!.startsWith('ALL_')) {
+      return '${mainCat['title']} > $_selectedSubCategoryFilter';
+    }
+    return '${mainCat['title']} (Tüm Alt Kategoriler)';
+  }
+
+  Widget _buildCategorySidebar() {
+    final totalCount = _products?.length ?? 0;
+
+    return Container(
+      width: 270,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A).withOpacity(0.7),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.category_outlined, color: Colors.blueAccent, size: 20),
+              const SizedBox(width: 8),
+              Text('Ürün Kategorileri', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                child: Text('$totalCount Ürün', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: Colors.white12, height: 1),
+          const SizedBox(height: 10),
+
+          // 🌐 Tüm Ürünleri Listele Butonu
+          InkWell(
+            onTap: () {
+              setState(() {
+                _selectedCategoryFilter = 'ALL';
+                _selectedSubCategoryFilter = null;
+              });
+            },
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent.withOpacity(0.22) : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.transparent,
+                  width: 1.2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.apps, color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white70, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '🌐 Tüm Ürünleri Listele',
+                      style: GoogleFonts.inter(
+                        color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white,
+                        fontWeight: _selectedCategoryFilter == 'ALL' ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '$totalCount',
+                      style: GoogleFonts.inter(
+                        color: _selectedCategoryFilter == 'ALL' ? Colors.white : Colors.white60,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Kategori Ağacı Listesi
+          ..._catalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
+            final catId = cat['id'] as String;
+            final catTitle = cat['title'] as String;
+            final icon = cat['icon'] as IconData;
+            final color = cat['color'] as Color;
+            final subCats = cat['subCategories'] as List<String>;
+            final allLabel = (cat['allLabel'] ?? 'Tüm $catTitle Ürünleri') as String;
+            final isExpanded = _expandedCategoryIds.contains(catId);
+            final isMainSelected = _selectedCategoryFilter == catId;
+            final catCount = _getCategoryCount(catId);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              decoration: BoxDecoration(
+                color: isMainSelected ? color.withOpacity(0.08) : Colors.white.withOpacity(0.02),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isMainSelected ? color.withOpacity(0.4) : Colors.white.withOpacity(0.04),
+                  width: isMainSelected ? 1.2 : 1.0,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Kategori Başlık Satırı
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        if (_expandedCategoryIds.contains(catId)) {
+                          _expandedCategoryIds.remove(catId);
+                        } else {
+                          _expandedCategoryIds.add(catId);
+                        }
+                        _selectedCategoryFilter = catId;
+                        _selectedSubCategoryFilter = null;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Row(
+                        children: [
+                          Icon(icon, color: color, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              catTitle,
+                              style: GoogleFonts.inter(
+                                color: isMainSelected ? Colors.white : Colors.white70,
+                                fontWeight: isMainSelected ? FontWeight.bold : FontWeight.w600,
+                                fontSize: 12.5,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: catCount > 0 ? color.withOpacity(0.2) : Colors.white.withOpacity(0.06),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '$catCount',
+                              style: GoogleFonts.inter(
+                                color: catCount > 0 ? color : Colors.white38,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                            color: Colors.white38,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Alt Kategoriler (Açılır Menü)
+                  if (isExpanded) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12, right: 6, bottom: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // "Tüm X Ürünlerini Getir" Butonu
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                _selectedCategoryFilter = catId;
+                                _selectedSubCategoryFilter = 'ALL_$catId';
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(6),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: (isMainSelected && (_selectedSubCategoryFilter == null || _selectedSubCategoryFilter == 'ALL_$catId'))
+                                    ? color.withOpacity(0.2)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.subdirectory_arrow_right, size: 12, color: color),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      allLabel,
+                                      style: GoogleFonts.inter(
+                                        color: (isMainSelected && (_selectedSubCategoryFilter == null || _selectedSubCategoryFilter == 'ALL_$catId'))
+                                            ? Colors.white
+                                            : Colors.white60,
+                                        fontWeight: (isMainSelected && (_selectedSubCategoryFilter == null || _selectedSubCategoryFilter == 'ALL_$catId'))
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        fontSize: 11.5,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '$catCount',
+                                    style: GoogleFonts.inter(
+                                      color: color,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Tekil Alt Kategoriler
+                          ...subCats.map((sub) {
+                            final isSubSelected = isMainSelected && _selectedSubCategoryFilter == sub;
+                            final subCount = _getCategoryCount(catId, subCat: sub);
+
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategoryFilter = catId;
+                                  _selectedSubCategoryFilter = sub;
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 2),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: isSubSelected ? color.withOpacity(0.25) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: isSubSelected ? Border.all(color: color.withOpacity(0.5)) : null,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 4,
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        color: isSubSelected ? color : Colors.white38,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        sub,
+                                        style: GoogleFonts.inter(
+                                          color: isSubSelected ? Colors.white : (subCount > 0 ? Colors.white70 : Colors.white38),
+                                          fontWeight: isSubSelected ? FontWeight.bold : FontWeight.normal,
+                                          fontSize: 11.5,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '$subCount',
+                                      style: GoogleFonts.inter(
+                                        color: isSubSelected ? Colors.white : (subCount > 0 ? Colors.white70 : Colors.white24),
+                                        fontSize: 10,
+                                        fontWeight: subCount > 0 ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
   Widget _buildProductsTab() {
+    final filtered = _getFilteredProducts();
+    final activeCatLabel = _getActiveCategoryLabel();
+    final isFilteringActive = _selectedCategoryFilter != 'ALL' || _productSearchQuery.trim().isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Üst Başlık & Eylem Butonları
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Ürün Kataloğu & Kampanya Yönetimi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Ürün Kataloğu & Kategori Yönetimi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                Text('Kategorilere göre ürünlerinizi filtreleyin, kampanya tanımlayın ve pazaryerlerine eşitleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+              ],
+            ),
             Row(
               children: [
                 OutlinedButton.icon(
@@ -3106,15 +3587,196 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ],
         ),
         const SizedBox(height: 16),
-        _products == null || _products!.isEmpty
-            ? _buildEmptyState('Henüz ürün eklenmemiş. Yukarıdaki "+ Yeni Ürün & Kampanya Ekle" butonuyla kolayca ürün ekleyebilirsiniz.', Icons.inventory_2_outlined)
-            : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _products!.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) => _buildProductCard(_products![index]),
+
+        // Ana İçerik: Sol Kategori Ağacı + Sağ Ürün Kataloğu
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Sol: Kategori Ağacı Menüsü
+            _buildCategorySidebar(),
+            const SizedBox(width: 18),
+
+            // Sağ: Filtrelenmiş Ürün Listesi
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Arama ve Filtre Durum Çubuğu
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A).withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Row(
+                      children: [
+                        // Arama Kutusu
+                        Expanded(
+                          child: TextField(
+                            controller: _productSearchController,
+                            onChanged: (v) => setState(() => _productSearchQuery = v),
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                            decoration: InputDecoration(
+                              hintText: '🔍 Ürün adı, barkod, model kodu veya SKU ara...',
+                              hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.04),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                              prefixIcon: const Icon(Icons.search, color: Colors.white38, size: 18),
+                              suffixIcon: _productSearchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, size: 16, color: Colors.white54),
+                                      onPressed: () {
+                                        _productSearchController.clear();
+                                        setState(() => _productSearchQuery = '');
+                                      },
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Aktif Kategori Göstergesi & Sıfırla Butonu
+                        if (isFilteringActive) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.orangeAccent.withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.filter_alt, size: 14, color: Colors.orangeAccent),
+                                const SizedBox(width: 6),
+                                Text(
+                                  activeCatLabel,
+                                  style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedCategoryFilter = 'ALL';
+                                      _selectedSubCategoryFilter = null;
+                                      _productSearchController.clear();
+                                      _productSearchQuery = '';
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(color: Colors.orangeAccent.withOpacity(0.2), shape: BoxShape.circle),
+                                    child: const Icon(Icons.close, size: 12, color: Colors.orangeAccent),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+
+                        // Tüm Ürünleri Göster Butonu
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedCategoryFilter = 'ALL';
+                              _selectedSubCategoryFilter = null;
+                              _productSearchController.clear();
+                              _productSearchQuery = '';
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white70,
+                            side: BorderSide(color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white24),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          icon: const Icon(Icons.list_alt, size: 16),
+                          label: Text('Tüm Ürünleri Listele (${_products?.length ?? 0})', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Ürün Listesi VEYA Filtre Boş Durumu
+                  if (filtered.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(36),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.inventory_2_outlined, color: Colors.orangeAccent.withOpacity(0.6), size: 48),
+                          const SizedBox(height: 14),
+                          Text(
+                            '"$activeCatLabel" kategorisinde ürün bulunamadı',
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Bu kategoriye yeni ürün tanımlayabilir veya sol menüden tüm ürünleri listeleyebilirsiniz.',
+                            style: GoogleFonts.inter(color: Colors.white60, fontSize: 13),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 18),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: _showSimplifiedAddProductDialog,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange[800],
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                icon: const Icon(Icons.add, size: 16),
+                                label: Text('+ Bu Kategoriye Ürün Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                              ),
+                              const SizedBox(width: 12),
+                              OutlinedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedCategoryFilter = 'ALL';
+                                    _selectedSubCategoryFilter = null;
+                                  });
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.blueAccent,
+                                  side: const BorderSide(color: Colors.blueAccent),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                icon: const Icon(Icons.apps, size: 16),
+                                label: Text('🌐 Tüm Ürünleri Listele', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) => _buildProductCard(filtered[index]),
+                    ),
+                ],
               ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -3133,6 +3795,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final barcode = p['barcode'] as String?;
     final rawAttrs = p['attributes'] as Map<String, dynamic>?;
     final attributes = rawAttrs?.map((k, v) => MapEntry(k, v.toString())) ?? <String, String>{};
+    final firstImg = p['firstImage'] ?? (p['images'] != null && (p['images'] as List).isNotEmpty ? (p['images'] as List)[0] : null);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -3151,8 +3814,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     color: Colors.blueAccent.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: p['firstImage'] != null
-                      ? _buildSafeImageWidget(p['firstImage'], width: 70, height: 70, fit: BoxFit.cover, borderRadius: BorderRadius.circular(10))
+                  child: firstImg != null
+                      ? _buildSafeImageWidget(firstImg, width: 70, height: 70, fit: BoxFit.cover, borderRadius: BorderRadius.circular(10))
                       : const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 28),
                 ),
                 const SizedBox(width: 14),
@@ -3253,7 +3916,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               OutlinedButton.icon(
                 onPressed: () => _showEditProductDialog(productId, p),
                 style: OutlinedButton.styleFrom(foregroundColor: Colors.amberAccent, side: const BorderSide(color: Colors.amberAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                icon: const Icon(Icons.edit_outlined, size: 16),
+                icon: const Icon(Icons.edit, size: 16),
                 label: Text('Düzenle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
               ),
               const Spacer(),
@@ -3266,9 +3929,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(isOk ? 'Ürün ve promosyon kurgusu Trendyol kataloğuna aktarıldı!' : (res?['errorMessage'] ?? 'Trendyol aktarımında hata!')), backgroundColor: isOk ? Colors.green : Colors.orange),
                     );
+                    _loadData();
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                 icon: const Icon(Icons.cloud_upload, size: 16),
                 label: Text('Trendyol a Yükle (v2)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
               ),
@@ -3282,19 +3946,42 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     );
                   }
                 },
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.blueAccent, side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.blueAccent, side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                 icon: const Icon(Icons.flash_on, size: 16),
                 label: Text('Stok Dağıt (1.2s)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
                 tooltip: 'Ürünü Sil',
                 onPressed: () async {
-                  final ok = await _apiService.deleteProduct(productId);
-                  if (ok && mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün silindi.'), backgroundColor: Colors.redAccent));
-                    _loadData();
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      backgroundColor: const Color(0xFF1E293B),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      title: Text('Ürünü Sil?', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                      content: Text('Bu ürünü ve alt varyantlarını silmek istediğinize emin misiniz?', style: GoogleFonts.inter(color: Colors.white70)),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60))),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                          child: Text('Sil', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    final success = await _apiService.deleteProduct(productId);
+                    if (mounted) {
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla silindi.'), backgroundColor: Colors.redAccent));
+                        _loadData();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün silinirken bir hata oluştu.'), backgroundColor: Colors.red));
+                      }
+                    }
                   }
                 },
               ),
