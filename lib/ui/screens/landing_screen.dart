@@ -606,10 +606,11 @@ class _LandingScreenState extends State<LandingScreen> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 780),
               child: Text(
-                'Trendyol, Hepsiburada, Amazon, N11, ÇiçekSepeti, PttAVM, Boyner, Sahibinden ve Pazarama siparişlerinizi tek merkezde toplayın. 30 gün boyunca kredi kartsız tamamen ücretsiz deneyin.',
+                'Trendyol, Hepsiburada, Amazon, N11, Teknosa, Koçtaş, MediaMarkt, FLO, Pasaj ve 22+ büyük pazaryeri siparişlerinizi tek merkezde toplayın. 30 gün boyunca kredi kartsız tamamen ücretsiz deneyin.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(color: Colors.white60, fontSize: 16, height: 1.6),
               ),
+
             ),
             const SizedBox(height: 32),
             Wrap(
