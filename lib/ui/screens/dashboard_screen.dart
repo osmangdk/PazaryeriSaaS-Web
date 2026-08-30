@@ -714,8 +714,224 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  bool _isSubscriptionExpired() {
+    final limits = _metrics?['limits'];
+    final plan = _metrics?['plan'] ?? _metrics?['tenant']?['subscriptionPlan'] ?? 'Free';
+    final isPaid = plan != 'Free' && plan != 'Deneme';
+    if (isPaid) return false;
+
+    if (_metrics?['isExpired'] == true || limits?['isExpired'] == true) return true;
+
+    int daysLeft = 30;
+    if (limits != null && limits['daysLeft'] != null) {
+      daysLeft = int.tryParse(limits['daysLeft'].toString()) ?? 30;
+    } else if (_metrics != null && _metrics!['daysLeft'] != null) {
+      daysLeft = int.tryParse(_metrics!['daysLeft'].toString()) ?? 30;
+    } else {
+      final subEndDateStr = _metrics?['tenant']?['subscriptionEndDate'] ?? _metrics?['subscriptionEndDate'];
+      if (subEndDateStr != null) {
+        final end = DateTime.tryParse(subEndDateStr.toString());
+        if (end != null) {
+          final diff = end.difference(DateTime.now().toUtc());
+          daysLeft = (diff.inHours / 24.0).ceil();
+        }
+      }
+    }
+    return daysLeft <= 0;
+  }
+
+  void _showSubscriptionExpiredDialog({String? customActionTitle}) {
+    int selectedPlanIndex = 1;
+    bool isUpgrading = false;
+
+    final plans = [
+      {
+        'id': 'Başlangıç Paketi',
+        'name': '⚡ Başlangıç Paketi',
+        'price': '199 ₺ / Ay',
+        'desc': '3 Pazaryeri • 250 Ürün • Otomatik Stok & Fiyat Eşitleme',
+        'color': Colors.blueAccent,
+      },
+      {
+        'id': 'Büyüme Paketi',
+        'name': '🚀 Büyüme Paketi (Tavsiye Edilen)',
+        'price': '399 ₺ / Ay',
+        'desc': '8 Pazaryeri • 2.500 Ürün • AI Danışman & Akıllı Fiyat Robotu',
+        'color': Colors.amberAccent,
+        'badge': 'EN POPÜLER'
+      },
+      {
+        'id': 'Profesyonel Paket',
+        'name': '👑 Profesyonel Paket',
+        'price': '799 ₺ / Ay',
+        'desc': 'Sınırsız Pazaryeri & Ürün • E-Fatura Entegrasyonu • 7/24 Destek',
+        'color': Colors.purpleAccent,
+      },
+    ];
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Colors.amberAccent, width: 1.5)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.timer_off_outlined, color: Colors.redAccent, size: 28),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Ücretsiz Deneme Süreniz Sona Erdi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(
+                        customActionTitle ?? 'İşlemlerinize kesintisiz devam etmek için lütfen paketinizi yükseltin.',
+                        style: GoogleFonts.inter(color: Colors.white60, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 580,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.lock_outline, color: Colors.redAccent, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '30 günlük ücretsiz deneme süreniz dolduğu için yeni ürün ekleme, ürün düzenleme ve yeni pazaryeri bağlama kısıtlanmıştır.',
+                            style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, height: 1.35),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Abonelik Paketinizi Seçin:', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 10),
+                  ...plans.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final p = entry.value;
+                    final isSelected = selectedPlanIndex == idx;
+                    return InkWell(
+                      onTap: () => setModalState(() => selectedPlanIndex = idx),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: isSelected ? (p['color'] as Color).withOpacity(0.12) : Colors.white.withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isSelected ? (p['color'] as Color) : Colors.white12, width: isSelected ? 2 : 1),
+                        ),
+                        child: Row(
+                          children: [
+                            Radio<int>(
+                              value: idx,
+                              groupValue: selectedPlanIndex,
+                              activeColor: p['color'] as Color,
+                              onChanged: (val) => setModalState(() => selectedPlanIndex = val ?? 0),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(p['name'] as String, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                                      if (p['badge'] != null) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(color: Colors.amberAccent, borderRadius: BorderRadius.circular(6)),
+                                          child: Text(p['badge'] as String, style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 9)),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(p['desc'] as String, style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                            Text(p['price'] as String, style: GoogleFonts.inter(color: p['color'] as Color, fontWeight: FontWeight.bold, fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('Daha Sonra', style: GoogleFonts.inter(color: Colors.white60)),
+              ),
+              ElevatedButton.icon(
+                onPressed: isUpgrading ? null : () async {
+                  setModalState(() => isUpgrading = true);
+                  final chosen = plans[selectedPlanIndex];
+                  final res = await _apiService.upgradeSubscriptionPlan(chosen['id'] as String);
+                  setModalState(() => isUpgrading = false);
+
+                  if (ctx.mounted) Navigator.pop(ctx);
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(res?['message'] ?? 'Tebrikler! Aboneliğiniz başarıyla aktif edildi ve tüm kısıtlamalar kaldırıldı.'),
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                    _loadData();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amberAccent,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: isUpgrading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2)) : const Icon(Icons.rocket_launch, size: 18),
+                label: Text(isUpgrading ? 'Abonelik Başlatılıyor...' : 'Paketi Hemen Aktif Et 🚀', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   // --- SADE ÜRÜN EKLEME MODALI ---
   void _showSimplifiedAddProductDialog() {
+    if (_isSubscriptionExpired()) {
+      _showSubscriptionExpiredDialog(customActionTitle: 'Yeni ürün ekleyebilmek için lütfen üyeliğinizi başlatın veya paketinizi yükseltin.');
+      return;
+    }
+
     final titleController = TextEditingController();
     final brandController = TextEditingController(text: 'Tudors');
     final categoryController = TextEditingController(text: 'Polo Yaka Tişört');
@@ -1636,6 +1852,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   }
 
   void _showEditProductDialog(String productId, Map<String, dynamic> product) {
+    if (_isSubscriptionExpired()) {
+      _showSubscriptionExpiredDialog(customActionTitle: 'Ürünlerinizi düzenleyebilmek için lütfen üyeliğinizi başlatın veya paketinizi yükseltin.');
+      return;
+    }
+
     final titleController = TextEditingController(text: product['title'] ?? '');
     final brandController = TextEditingController(text: product['brand'] ?? '');
     final categoryController = TextEditingController(text: product['categoryName'] ?? '');
@@ -2436,6 +2657,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   }
 
   void _showAddMarketplaceDialog() {
+    if (_isSubscriptionExpired()) {
+      _showSubscriptionExpiredDialog(customActionTitle: 'Yeni pazaryeri bağlayabilmek için lütfen üyeliğinizi başlatın veya paketinizi yükseltin.');
+      return;
+    }
+
     int selectedType = 1;
     final storeNameController = TextEditingController();
     final sellerIdController = TextEditingController();
@@ -2846,6 +3072,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       }
     }
 
+    final plan = _metrics?['plan'] ?? tenant?['subscriptionPlan'] ?? 'Free';
+    final isPaid = plan != 'Free' && plan != 'Deneme';
+    final isExpired = !isPaid && (_metrics?['isExpired'] == true || limits?['isExpired'] == true || daysLeft <= 0);
+
     final productCount = limits?['currentProducts'] ?? _metrics?['productCount'] ?? _metrics?['ProductCount'] ?? (_products?.length ?? 0);
     final productLimit = limits?['productLimit'] ?? _metrics?['productLimit'] ?? _metrics?['ProductLimit'] ?? 50;
     final connCount = limits?['currentConnections'] ?? _metrics?['connectionCount'] ?? _metrics?['ConnectionCount'] ?? (_connections?.length ?? 0);
@@ -2888,11 +3118,42 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text('$daysLeft Gün Kaldı • 50.000 ₺ Ücretsiz Deneme Paketi', style: GoogleFonts.inter(color: daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w500)),
+                        Row(
+                          children: [
+                            Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                            if (isPaid) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(color: Colors.amberAccent, borderRadius: BorderRadius.circular(6)),
+                                child: Text(plan.toUpperCase(), style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10)),
+                              ),
+                            ],
+                          ],
+                        ),
+                        if (isExpired)
+                          Text('⚠️ Deneme Süresi Doldu • İşlemler Kısıtlandı', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold))
+                        else if (isPaid)
+                          Text('$plan • $daysLeft Gün Kaldı • Sınırsız Senkronizasyon', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.w500))
+                        else
+                          Text('$daysLeft Gün Kaldı • 50.000 ₺ Ücretsiz Deneme Paketi', style: GoogleFonts.inter(color: daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w500)),
                       ],
                     ),
                     const Spacer(),
+                    if (isExpired) ...[
+                      ElevatedButton.icon(
+                        onPressed: () => _showSubscriptionExpiredDialog(customActionTitle: 'Aboneliğinizi başlatarak tüm kısıtlamaları anında kaldırın.'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amberAccent,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        ),
+                        icon: const Icon(Icons.rocket_launch, size: 16, color: Colors.black),
+                        label: Text('🚀 Paketi Yükselt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     ElevatedButton.icon(
                       onPressed: _showAiAssistantDialog,
                       style: ElevatedButton.styleFrom(
@@ -2963,11 +3224,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: _buildLimitStat(
-                                      'Kalan Deneme Süresi',
-                                      daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu (0 Gün)',
-                                      Icons.timer_outlined,
-                                      daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent,
+                                    child: InkWell(
+                                      onTap: isExpired ? () => _showSubscriptionExpiredDialog() : null,
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: _buildLimitStat(
+                                        isPaid ? 'Abonelik Durumu' : 'Kalan Deneme Süresi',
+                                        isPaid ? '$daysLeft Gün ($plan)' : (daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu (0 Gün)'),
+                                        isPaid ? Icons.verified : Icons.timer_outlined,
+                                        isExpired ? Colors.redAccent : (isPaid ? Colors.greenAccent : (daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent)),
+                                      ),
                                     ),
                                   ),
                                   Container(width: 1, height: 40, color: Colors.white12),

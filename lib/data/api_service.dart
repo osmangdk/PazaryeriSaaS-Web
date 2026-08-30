@@ -71,6 +71,18 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> upgradeSubscriptionPlan(String planName, {int durationMonths = 1}) async {
+    try {
+      final response = await _dio.post('/tenant/upgrade-plan', data: {
+        'planName': planName,
+        'durationMonths': durationMonths,
+      });
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<List<dynamic>?> getProducts() async {
     try {
       final response = await _dio.get('/products');
