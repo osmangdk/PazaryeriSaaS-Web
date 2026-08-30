@@ -757,61 +757,65 @@ class _LandingScreenState extends State<LandingScreen> {
                 final logoUrl = m['logoUrl'] as String;
                 final initials = m['initials'] as String;
 
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A).withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Sol Taraf: Marka Adı ve ENTEGRASYONU (Referans Görsel Birebir Tasarım)
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              name.toUpperCase(),
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16,
-                                letterSpacing: 0.8,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'ENTEGRASYONU',
-                              style: GoogleFonts.inter(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ],
+                return InkWell(
+                  onTap: () => _showMarketplaceDetailModal(m),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A).withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
-                      const SizedBox(width: 14),
-                      // Sağ Taraf: 3D Kıvrımlı Sticker Logo Rozeti (Peeled Sticker Badge)
-                      _PeeledStickerBadge(
-                        logoUrl: logoUrl,
-                        initials: initials,
-                        brandColor: color,
-                        size: 64,
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        // Sol Taraf: Marka Adı ve ENTEGRASYONU (Referans Görsel Birebir Tasarım)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                name.toUpperCase(),
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                  letterSpacing: 0.8,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'ENTEGRASYONU',
+                                style: GoogleFonts.inter(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        // Sağ Taraf: 3D Kıvrımlı Sticker Logo Rozeti (Peeled Sticker Badge)
+                        _PeeledStickerBadge(
+                          logoUrl: logoUrl,
+                          initials: initials,
+                          brandColor: color,
+                          size: 64,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -821,6 +825,111 @@ class _LandingScreenState extends State<LandingScreen> {
       ),
     );
   }
+
+  void _showMarketplaceDetailModal(Map<String, dynamic> m) {
+    final name = m['name'] as String;
+    final color = m['color'] as Color;
+    final logoUrl = m['logoUrl'] as String;
+    final initials = m['initials'] as String;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: color.withOpacity(0.5), width: 1.5),
+        ),
+        title: Row(
+          children: [
+            _PeeledStickerBadge(
+              logoUrl: logoUrl,
+              initials: initials,
+              brandColor: color,
+              size: 52,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$name Entegrasyonu',
+                    style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  Text(
+                    'Tam Otomatik Bulut Senkronizasyonu',
+                    style: GoogleFonts.inter(color: Colors.white60, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailFeatureRow(Icons.bolt, '1.2 Saniye Anlık Stok & Fiyat Eşitleme'),
+            const SizedBox(height: 10),
+            _buildDetailFeatureRow(Icons.receipt_long, 'Tek Tıkla Kargo Barkodu & E-Fatura'),
+            const SizedBox(height: 10),
+            _buildDetailFeatureRow(Icons.calculate, 'Akıllı Komisyon & Kâr Robotu Desteği'),
+            const SizedBox(height: 10),
+            _buildDetailFeatureRow(Icons.shield_outlined, 'Fiyat Koruma Kalkanı (0 TL / Zarar Önleyici)'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'PazaryeriSaaS ile $name mağazanızı 90 saniyede bağlayabilir, 30 gün boyunca tamamen ücretsiz deneyebilirsiniz.',
+                style: GoogleFonts.inter(color: Colors.white70, fontSize: 13, height: 1.4),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Kapat', style: GoogleFonts.inter(color: Colors.white60)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.go('/login');
+            },
+            icon: const Icon(Icons.rocket_launch, size: 16),
+            label: Text('30 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailFeatureRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.greenAccent, size: 18),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
+    );
+  }
+
 
 
 
@@ -1578,26 +1687,255 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildFooter() {
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
-      decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.white10))),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 20),
-              const SizedBox(width: 8),
-              Text('PazaryeriSaaS © 2026 Tüm Hakları Saklıdır.', style: GoogleFonts.inter(color: Colors.white54, fontSize: 13)),
-            ],
+      padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 32),
+      decoration: const BoxDecoration(
+        color: Color(0xFF070C12),
+        border: Border(top: BorderSide(color: Colors.white12)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: Column(
+          children: [
+            isDesktop
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Kolon 1: Şirket & Tanım (Misyon Bildirimi)
+                      Expanded(flex: 4, child: _buildFooterBrandCol()),
+                      const SizedBox(width: 48),
+                      // Kolon 2: Kurumsal
+                      Expanded(flex: 3, child: _buildFooterCorporateCol()),
+                      const SizedBox(width: 32),
+                      // Kolon 3: Entegrasyonlar
+                      Expanded(flex: 3, child: _buildFooterIntegrationsCol()),
+                      const SizedBox(width: 32),
+                      // Kolon 4: Özellikler & Mobil
+                      Expanded(flex: 3, child: _buildFooterFeaturesCol()),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildFooterBrandCol(),
+                      const SizedBox(height: 36),
+                      _buildFooterCorporateCol(),
+                      const SizedBox(height: 32),
+                      _buildFooterIntegrationsCol(),
+                      const SizedBox(height: 32),
+                      _buildFooterFeaturesCol(),
+                    ],
+                  ),
+            const SizedBox(height: 48),
+            const Divider(color: Colors.white12),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'PazaryeriSaaS © 2026 Tüm Hakları Saklıdır. Türkiye\'nin En Gelişmiş Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.',
+                    style: GoogleFonts.inter(color: Colors.white38, fontSize: 12, height: 1.4),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.greenAccent.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
+                          const SizedBox(width: 6),
+                          Text('Tüm Sunucular Aktif', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterBrandCol() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.blueAccent.withOpacity(0.4)),
+              ),
+              child: const Icon(Icons.rocket_launch, color: Colors.blueAccent, size: 22),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'PazaryeriSaaS',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'PazaryeriSaaS, pazaryerlerindeki mağazalarınız, e-Ticaret siteniz ve ERP/Muhasebe yazılımınızı birbirine bağlayan, tüm e-Ticaretinizi tek ekrandan yönetmenizi sağlayan bulut tabanlı bir entegrasyon yazılımıdır.',
+          style: GoogleFonts.inter(color: Colors.white60, fontSize: 13, height: 1.6),
+        ),
+        const SizedBox(height: 20),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            _buildTrustPill('🛡️ 256-Bit SSL'),
+            _buildTrustPill('⚖️ KVKK Uyumlu'),
+            _buildTrustPill('⚡ %99.9 Uptime'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrustPill(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Text(label, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600)),
+    );
+  }
+
+  Widget _buildFooterCorporateCol() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Kurumsal', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+        const SizedBox(height: 16),
+        _buildFooterLink('Kullanıcı Sözleşmesi', () => _showLegalDialog('Kullanıcı Sözleşmesi', _userAgreementText)),
+        _buildFooterLink('Gizlilik ve Çerez Politikası', () => _showLegalDialog('Gizlilik Politikası', _privacyPolicyText)),
+        _buildFooterLink('KVKK Aydınlatma Metni', () => _showLegalDialog('KVKK Aydınlatma Metni', _kvkkText)),
+        _buildFooterLink('Sık Sorulan Sorular', () => _scrollTo(_faqKey)),
+        _buildFooterLink('Hakkımızda & Ekibimiz', () => _showLegalDialog('Hakkımızda', 'PazaryeriSaaS, Türkiye ve global e-ticaret satıcılarının operasyonel yükünü sıfırlamak amacıyla geliştirilmiş yeni nesil çoklu kanal entegrasyon platformudur.')),
+        _buildFooterLink('İletişim & Canlı AI Destek', () => _showAiConsultantDialog()),
+      ],
+    );
+  }
+
+  Widget _buildFooterIntegrationsCol() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Entegrasyonlar', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+        const SizedBox(height: 16),
+        _buildFooterLink('Trendyol Entegrasyonu', () => _scrollTo(_marketplacesKey)),
+        _buildFooterLink('Hepsiburada Entegrasyonu', () => _scrollTo(_marketplacesKey)),
+        _buildFooterLink('N11 & Amazon TR', () => _scrollTo(_marketplacesKey)),
+        _buildFooterLink('ÇiçekSepeti & Pazarama', () => _scrollTo(_marketplacesKey)),
+        _buildFooterLink('PTT AVM & Akakçe', () => _scrollTo(_marketplacesKey)),
+        _buildFooterLink('IdeaSoft & T-Soft Köprüsü', () => _scrollTo(_marketplacesKey)),
+        _buildFooterLink('26+ Tüm Kanalları Gör →', () => _scrollTo(_marketplacesKey)),
+      ],
+    );
+  }
+
+  Widget _buildFooterFeaturesCol() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Özellikler & Mobil', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+        const SizedBox(height: 16),
+        _buildFooterLink('1.2s Işık Hızında Stok Eşitleme', () => _scrollTo(_featuresKey)),
+        _buildFooterLink('Akıllı Fiyat & Kâr Robotu', () => _scrollTo(_featuresKey)),
+        _buildFooterLink('Toplu E-Fatura & Barkod', () => _scrollTo(_featuresKey)),
+        _buildFooterLink('Android Mobil Uygulama (APK)', () => _scrollTo(_mobileAppKey)),
+        _buildFooterLink('iOS & Safari PWA Desteği', () => _scrollTo(_mobileAppKey)),
+        _buildFooterLink('Kamera Barkod & Face ID', () => _scrollTo(_mobileAppKey)),
+      ],
+    );
+  }
+
+
+  Widget _buildFooterLink(String label, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: onTap,
+        child: Text(
+          label,
+          style: GoogleFonts.inter(color: Colors.white60, fontSize: 13, height: 1.4),
+        ),
+      ),
+    );
+  }
+
+  void _showLegalDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.blueAccent, width: 1.2),
+        ),
+        title: Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Text(
+            content,
+            style: GoogleFonts.inter(color: Colors.white70, fontSize: 13, height: 1.6),
           ),
-          const SizedBox(height: 8),
-          Text('256-Bit SSL Güvenli Altyapı • KVKK Uyumlu', style: GoogleFonts.inter(color: Colors.white30, fontSize: 11)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Kapat', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
     );
   }
+
+  static const String _userAgreementText = '''
+PazaryeriSaaS Kullanıcı Sözleşmesi:
+1. Hizmet Kapsamı: PazaryeriSaaS, kullanıcıların birden fazla e-ticaret pazaryerindeki ürün, stok, fiyat ve sipariş verilerini senkronize etmelerini sağlar.
+2. Veri Güvenliği: Kullanıcının girdiği API anahtarları 256-bit AES şifreleme standardı ile korunur ve üçüncü taraflarla paylaşılmaz.
+3. 30 Gün Ücretsiz Deneme: Tüm yeni kayıtlar 30 gün boyunca kredi kartsız ücretsiz deneme hakkına sahiptir.
+4. Hizmet Kesintisizliği: Sistem %99.9 çalışma süresi (uptime) hedefiyle bulut mimarisinde barındırılmaktadır.
+''';
+
+  static const String _privacyPolicyText = '''
+Gizlilik ve Çerez Politikası:
+1. PazaryeriSaaS, kullanıcılarının kişisel bilgilerini ve mağaza verilerini en üst düzey şifreleme protokolleriyle muhafaza eder.
+2. Çerezler yalnızca kullanıcı oturumunu aktif tutmak ve panel performansını artırmak amacıyla kullanılır.
+3. Mağaza satış ve ciro verileriniz kesinlikle üçüncü parti reklam verenlerle paylaşılmaz.
+''';
+
+  static const String _kvkkText = '''
+6698 Sayılı KVKK Kapsamında Aydınlatma Metni:
+Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca, veri sorumlusu sıfatıyla PazaryeriSaaS tarafından; üyelik işlemlerinin yürütülmesi, faturalandırma ve teknik destek hizmetlerinin sağlanması amaçlarıyla sınırlı olarak işlenmektedir.
+''';
 }
+
 
 class _PeeledStickerBadge extends StatelessWidget {
   final String logoUrl;
