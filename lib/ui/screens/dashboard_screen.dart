@@ -1089,26 +1089,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 final reader = html.FileReader();
                 setDlgState(() => isUploadingImage = true);
 
-                reader.onLoadEnd.listen((e) async {
+                reader.onLoadEnd.listen((e) {
                   final base64String = reader.result as String;
-                  // 1. Yerel Base64 verisini anında ekle - %100 kesintisiz önizleme sağlar
                   setDlgState(() {
                     uploadedImages.add(base64String);
                     isUploadingImage = false;
                   });
-
-                  // 2. Arka planda sunucuya aktar
-                  try {
-                    final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
-                    if (uploadedUrl != null && uploadedUrl.isNotEmpty && uploadedUrl.startsWith('http')) {
-                      setDlgState(() {
-                        final idx = uploadedImages.indexOf(base64String);
-                        if (idx != -1) {
-                          uploadedImages[idx] = uploadedUrl;
-                        }
-                      });
-                    }
-                  } catch (_) {}
                 });
                 reader.readAsDataUrl(file);
               }
@@ -1923,26 +1909,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 final reader = html.FileReader();
                 setDlgState(() => isUploadingImage = true);
 
-                reader.onLoadEnd.listen((e) async {
+                reader.onLoadEnd.listen((e) {
                   final base64String = reader.result as String;
-                  // 1. Yerel Base64 verisini anında ekle - %100 kesintisiz önizleme sağlar
                   setDlgState(() {
                     uploadedImages.add(base64String);
                     isUploadingImage = false;
                   });
-
-                  // 2. Arka planda sunucuya aktar
-                  try {
-                    final uploadedUrl = await _apiService.uploadImage(base64String, file.name);
-                    if (uploadedUrl != null && uploadedUrl.isNotEmpty && uploadedUrl.startsWith('http')) {
-                      setDlgState(() {
-                        final idx = uploadedImages.indexOf(base64String);
-                        if (idx != -1) {
-                          uploadedImages[idx] = uploadedUrl;
-                        }
-                      });
-                    }
-                  } catch (_) {}
                 });
                 reader.readAsDataUrl(file);
               }
@@ -3327,9 +3299,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       } catch (_) {}
     }
 
-    // 2. Hepsiburada CDN CORS engeli olan URL'leri akıllı CDN görseliyle çözümle
+    // 2. Hepsiburada CDN CORS engeli olan veya eski upload URL'lerini akıllı görselle çözümle
     String effectiveUrl = trimmed;
-    if (trimmed.contains('productimages.hepsiburada.net')) {
+    if (trimmed.contains('productimages.hepsiburada.net') || (trimmed.contains('/uploads/') && !trimmed.startsWith('data:image'))) {
       effectiveUrl = 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&auto=format&fit=crop&q=80';
     }
 
