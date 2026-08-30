@@ -3397,14 +3397,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.12) : Colors.white.withOpacity(0.04),
+          color: isSelected ? color.withOpacity(0.15) : const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? color : Colors.white12,
+            color: isSelected ? color : const Color(0xFF334155),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
-              ? [BoxShadow(color: color.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: color.withOpacity(0.25), blurRadius: 10, offset: const Offset(0, 2))]
               : null,
         ),
         child: Column(
@@ -3415,22 +3415,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: isSelected ? color.withOpacity(0.25) : Colors.white10,
+                    color: isSelected ? color.withOpacity(0.25) : Colors.white.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, color: isSelected ? color : Colors.white70, size: 18),
                 ),
                 const Spacer(),
                 if (isSelected)
-                  Icon(Icons.check_circle, color: color, size: 18)
+                  Icon(Icons.check_circle, color: color, size: 20)
                 else
-                  const Icon(Icons.radio_button_unchecked, color: Colors.white24, size: 18),
+                  const Icon(Icons.radio_button_unchecked, color: Colors.white38, size: 20),
               ],
             ),
             const SizedBox(height: 10),
             Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
             const SizedBox(height: 4),
-            Text(subtitle, style: GoogleFonts.inter(color: Colors.white60, fontSize: 11, height: 1.3)),
+            Text(subtitle, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11, height: 1.35)),
           ],
         ),
       ),
@@ -3441,9 +3441,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: const Color(0xFF1E293B).withOpacity(0.6),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: const Color(0xFF334155)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -3456,7 +3456,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 child: Text('TÜM KATALOG ONAYLANDI', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 11)),
               ),
               const SizedBox(width: 10),
-              Text('Toplam ${products.length} Ürün • Canlı Eşitlemeye Hazır', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
+              Text('Toplam ${products.length} Ürün • Canlı Eşitlemeye Hazır', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
             ],
           ),
           const SizedBox(height: 12),
@@ -3508,7 +3508,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(p['title'] ?? 'Ürün', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                            Text('SKU: ${p['sku']} • Kategori: ${p['categoryName'] ?? 'Genel'}', style: GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
+                            Text('SKU: ${p['sku']} • Kategori: ${p['categoryName'] ?? 'Genel'}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
                           ],
                         ),
                       ),
@@ -3539,9 +3539,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: const Color(0xFF1E293B).withOpacity(0.6),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: const Color(0xFF334155)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -3555,45 +3555,94 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ),
               Row(
                 children: [
-                  TextButton(
+                  TextButton.icon(
                     onPressed: () {
                       selectedCategories.addAll(allCategories);
                       onSelectionChanged(selectedCategories);
                     },
-                    child: Text('Tümünü Seç', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
+                    icon: const Icon(Icons.select_all, size: 14, color: Colors.blueAccent),
+                    label: Text('Tümünü Seç', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
-                  TextButton(
+                  const SizedBox(width: 6),
+                  TextButton.icon(
                     onPressed: () {
                       selectedCategories.clear();
                       onSelectionChanged(selectedCategories);
                     },
-                    child: Text('Temizle', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12)),
+                    icon: const Icon(Icons.clear, size: 14, color: Colors.redAccent),
+                    label: Text('Temizle', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 10,
+            runSpacing: 10,
             children: allCategories.map((cat) {
               final isChecked = selectedCategories.contains(cat);
               final count = products.where((p) => (p['categoryName'] ?? p['category'] ?? 'Genel').toString() == cat).length;
-              return FilterChip(
-                label: Text('$cat ($count Ürün)', style: GoogleFonts.inter(color: isChecked ? Colors.black : Colors.white, fontWeight: isChecked ? FontWeight.bold : FontWeight.normal, fontSize: 12)),
-                selected: isChecked,
-                selectedColor: Colors.blueAccent,
-                backgroundColor: Colors.white.withOpacity(0.06),
-                checkmarkColor: Colors.black,
-                onSelected: (val) {
-                  if (val) {
-                    selectedCategories.add(cat);
-                  } else {
+              return InkWell(
+                onTap: () {
+                  if (isChecked) {
                     selectedCategories.remove(cat);
+                  } else {
+                    selectedCategories.add(cat);
                   }
                   onSelectionChanged(selectedCategories);
                 },
+                borderRadius: BorderRadius.circular(10),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isChecked ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isChecked ? const Color(0xFF60A5FA) : const Color(0xFF475569),
+                      width: isChecked ? 1.5 : 1,
+                    ),
+                    boxShadow: isChecked
+                        ? [BoxShadow(color: Colors.blueAccent.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: isChecked ? Colors.white : Colors.white60,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        cat,
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontWeight: isChecked ? FontWeight.bold : FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isChecked ? Colors.white.withOpacity(0.25) : Colors.white.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '$count Ürün',
+                          style: GoogleFonts.inter(
+                            color: isChecked ? Colors.white : Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }).toList(),
           ),
@@ -3610,9 +3659,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: const Color(0xFF1E293B).withOpacity(0.6),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: const Color(0xFF334155)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -3626,33 +3675,36 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ),
               Row(
                 children: [
-                  TextButton(
+                  TextButton.icon(
                     onPressed: () {
                       for (final p in products) {
                         selectedProductIds.add(p['id'].toString());
                       }
                       onSelectionChanged(selectedProductIds);
                     },
-                    child: Text('Tümünü Seç', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
+                    icon: const Icon(Icons.select_all, size: 14, color: Colors.orangeAccent),
+                    label: Text('Tümünü Seç', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
-                  TextButton(
+                  const SizedBox(width: 6),
+                  TextButton.icon(
                     onPressed: () {
                       selectedProductIds.clear();
                       onSelectionChanged(selectedProductIds);
                     },
-                    child: Text('Temizle', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12)),
+                    icon: const Icon(Icons.clear, size: 14, color: Colors.redAccent),
+                    label: Text('Temizle', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Container(
-            height: 200,
+            height: 220,
             decoration: BoxDecoration(
               color: const Color(0xFF0F172A),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white10),
+              border: Border.all(color: const Color(0xFF334155)),
             ),
             child: ListView.separated(
               itemCount: products.length,
@@ -3661,27 +3713,30 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 final p = products[i];
                 final pid = p['id'].toString();
                 final isChecked = selectedProductIds.contains(pid);
-                return CheckboxListTile(
-                  value: isChecked,
-                  activeColor: Colors.orangeAccent,
-                  checkColor: Colors.black,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                  onChanged: (val) {
-                    if (val == true) {
-                      selectedProductIds.add(pid);
-                    } else {
-                      selectedProductIds.remove(pid);
-                    }
-                    onSelectionChanged(selectedProductIds);
-                  },
-                  secondary: _buildSafeImageWidget(
-                    p['firstImage'] ?? (p['images'] != null && (p['images'] as List).isNotEmpty ? (p['images'] as List)[0] : null),
-                    width: 36,
-                    height: 36,
-                    borderRadius: BorderRadius.circular(6),
+                return Container(
+                  color: isChecked ? Colors.orangeAccent.withOpacity(0.08) : Colors.transparent,
+                  child: CheckboxListTile(
+                    value: isChecked,
+                    activeColor: Colors.orangeAccent,
+                    checkColor: Colors.black,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                    onChanged: (val) {
+                      if (val == true) {
+                        selectedProductIds.add(pid);
+                      } else {
+                        selectedProductIds.remove(pid);
+                      }
+                      onSelectionChanged(selectedProductIds);
+                    },
+                    secondary: _buildSafeImageWidget(
+                      p['firstImage'] ?? (p['images'] != null && (p['images'] as List).isNotEmpty ? (p['images'] as List)[0] : null),
+                      width: 36,
+                      height: 36,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    title: Text(p['title'] ?? 'Ürün', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: Text('SKU: ${p['sku']} • ${p['categoryName'] ?? 'Genel'} • Fiyat: ${formatTL(p['price'])} • Stok: ${p['stockQuantity']}', style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
                   ),
-                  title: Text(p['title'] ?? 'Ürün', style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  subtitle: Text('SKU: ${p['sku']} • ${p['categoryName'] ?? 'Genel'} • Fiyat: ${formatTL(p['price'])} • Stok: ${p['stockQuantity']}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
                 );
               },
             ),
