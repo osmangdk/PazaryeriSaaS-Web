@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "823666894685",
+    "project_id": "pazaryerlerisaas",
+    "storage_bucket": "pazaryerlerisaas.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:823666894685:android:9c5dff7ddbbc02f88ceab4",
+        "android_client_info": {
+          "package_name": "com.pazaryerisaas.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBdWsvh_bVqXlUiOqcMa4rhuPCo6eSHTQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
