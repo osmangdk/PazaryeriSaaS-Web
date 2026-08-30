@@ -662,57 +662,147 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildMarketplacesSection({required GlobalKey key}) {
     final marketplaces = [
-      {'name': 'Trendyol', 'color': const Color(0xFFF27A1A), 'desc': 'V2 Ürün, Stok & Sipariş'},
-      {'name': 'Hepsiburada', 'color': const Color(0xFFFF6000), 'desc': 'MPOP, Listing & OMS'},
-      {'name': 'Amazon', 'color': const Color(0xFFFF9900), 'desc': 'SP-API Global & TR'},
-      {'name': 'N11', 'color': const Color(0xFF5E2E91), 'desc': 'SOAP & REST Entegrasyon'},
-      {'name': 'Pazarama', 'color': const Color(0xFF0066FF), 'desc': 'OAuth2 & Anlık Stok'},
-      {'name': 'ÇiçekSepeti', 'color': const Color(0xFFE91E63), 'desc': 'Bayi & Marketplace API'},
-      {'name': 'PttAVM', 'color': const Color(0xFFFFB300), 'desc': 'REST & PTT Kargo'},
-      {'name': 'Boyner', 'color': const Color(0xFF00897B), 'desc': 'Mirakl Seller API'},
-      {'name': 'Sahibinden', 'color': const Color(0xFFFFE600), 'desc': 'Veri Transferi & İlanlar'},
+      {'name': 'Trendyol', 'color': const Color(0xFFF27A1A), 'logoUrl': 'https://logo.clearbit.com/trendyol.com', 'initials': 'TY'},
+      {'name': 'Hepsiburada', 'color': const Color(0xFFFF6000), 'logoUrl': 'https://logo.clearbit.com/hepsiburada.com', 'initials': 'HB'},
+      {'name': 'Amazon TR', 'color': const Color(0xFFFF9900), 'logoUrl': 'https://logo.clearbit.com/amazon.com.tr', 'initials': 'AMZ'},
+      {'name': 'N11 & N11Pro', 'color': const Color(0xFFE31E24), 'logoUrl': 'https://logo.clearbit.com/n11.com', 'initials': 'N11'},
+      {'name': 'Pazarama', 'color': const Color(0xFF0066FF), 'logoUrl': 'https://logo.clearbit.com/pazarama.com', 'initials': 'PZ'},
+      {'name': 'ÇiçekSepeti', 'color': const Color(0xFFE91E63), 'logoUrl': 'https://logo.clearbit.com/ciceksepeti.com', 'initials': 'ÇS'},
+      {'name': 'PttAVM', 'color': const Color(0xFFFFCC00), 'logoUrl': 'https://logo.clearbit.com/pttavm.com', 'initials': 'PTT'},
+      {'name': 'Teknosa', 'color': const Color(0xFF0055A5), 'logoUrl': 'https://logo.clearbit.com/teknosa.com', 'initials': 'TKN'},
+      {'name': 'Koçtaş', 'color': const Color(0xFFFF6600), 'logoUrl': 'https://logo.clearbit.com/koctas.com.tr', 'initials': 'KÇT'},
+      {'name': 'MediaMarkt', 'color': const Color(0xFFDF0000), 'logoUrl': 'https://logo.clearbit.com/mediamarkt.com.tr', 'initials': 'MM'},
+      {'name': 'Turkcell Pasaj', 'color': const Color(0xFFFFC72C), 'logoUrl': 'https://logo.clearbit.com/turkcell.com.tr', 'initials': 'PSJ'},
+      {'name': 'FLO', 'color': const Color(0xFFFF5000), 'logoUrl': 'https://logo.clearbit.com/flo.com.tr', 'initials': 'FLO'},
+      {'name': 'Modanisa', 'color': const Color(0xFFD81B60), 'logoUrl': 'https://logo.clearbit.com/modanisa.com', 'initials': 'MDN'},
+      {'name': 'İdefix', 'color': const Color(0xFF0088CC), 'logoUrl': 'https://logo.clearbit.com/idefix.com', 'initials': 'İDF'},
+      {'name': 'Vodafone', 'color': const Color(0xFFE60000), 'logoUrl': 'https://logo.clearbit.com/vodafone.com.tr', 'initials': 'VF'},
+      {'name': 'Beymen', 'color': const Color(0xFF9E9E9E), 'logoUrl': 'https://logo.clearbit.com/beymen.com', 'initials': 'BYM'},
+      {'name': 'Akakçe', 'color': const Color(0xFF00A3E0), 'logoUrl': 'https://logo.clearbit.com/akakce.com', 'initials': 'AKK'},
+      {'name': 'LC Waikiki', 'color': const Color(0xFF003399), 'logoUrl': 'https://logo.clearbit.com/lcwaikiki.com', 'initials': 'LCW'},
+      {'name': 'Boyner', 'color': const Color(0xFF00897B), 'logoUrl': 'https://logo.clearbit.com/boyner.com.tr', 'initials': 'BYN'},
+      {'name': 'Sahibinden', 'color': const Color(0xFFFFD200), 'logoUrl': 'https://logo.clearbit.com/sahibinden.com', 'initials': 'SHB'},
+      {'name': 'Farmazon', 'color': const Color(0xFF00B16A), 'logoUrl': 'https://logo.clearbit.com/farmazon.com.tr', 'initials': 'FRM'},
+      {'name': 'Cimri', 'color': const Color(0xFF00A859), 'logoUrl': 'https://logo.clearbit.com/cimri.com', 'initials': 'CMR'},
     ];
 
-    final isWide = MediaQuery.of(context).size.width > 800;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final int crossAxisCount = screenWidth > 1100 ? 4 : (screenWidth > 750 ? 3 : 2);
 
     return Padding(
       key: key,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
+        constraints: const BoxConstraints(maxWidth: 1200),
         child: Column(
           children: [
             Text('DESTEKLENEN KANALLAR', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
             const SizedBox(height: 12),
-            Text('Türkiye\'nin En Büyük Pazaryerleri ile Tam Entegre', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            Text('22 Büyük Pazaryeri ile Tam Otomatik Entegrasyon', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Text('Tüm mağazalarınızın stok, fiyat ve siparişlerini tek bir merkezden eşitleyin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white60, fontSize: 15)),
             const SizedBox(height: 36),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isWide ? 3 : 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 2.2,
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                childAspectRatio: 2.5,
               ),
               itemCount: marketplaces.length,
               itemBuilder: (context, index) {
                 final m = marketplaces[index];
                 final color = m['color'] as Color;
+                final name = m['name'] as String;
+                final logoUrl = m['logoUrl'] as String;
+                final initials = m['initials'] as String;
+
                 return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(16), border: Border.all(color: color.withOpacity(0.3))),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A).withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: color.withOpacity(0.35), width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
                   child: Row(
                     children: [
-                      Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.store, color: color, size: 24)),
+                      // Brand Logo Container
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        padding: const EdgeInsets.all(4),
+                        child: Image.network(
+                          logoUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  initials,
+                                  style: GoogleFonts.inter(
+                                    color: color,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                       const SizedBox(width: 14),
+                      // Brand Name
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(m['name'] as String, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                            Text(m['desc'] as String, style: GoogleFonts.inter(color: Colors.white54, fontSize: 11)),
+                        child: Text(
+                          name,
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            letterSpacing: -0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // Verified Live Indicator
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.withOpacity(0.6),
+                              blurRadius: 6,
+                              spreadRadius: 1,
+                            ),
                           ],
                         ),
                       ),
@@ -726,6 +816,7 @@ class _LandingScreenState extends State<LandingScreen> {
       ),
     );
   }
+
 
   Widget _buildFeaturesSection({required GlobalKey key}) {
     final features = [
