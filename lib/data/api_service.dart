@@ -233,9 +233,9 @@ class ApiService {
       };
     } else if (msg.contains('ücretsiz') || msg.contains('fiyat') || msg.contains('deneme') || msg.contains('paket') || msg.contains('kapsıyor')) {
       return {
-        'reply': '🎁 1 Ay (30 Gün) Boyunca 50.000 ₺ İşlem Hacmine Kadar %100 Ücretsiz!\n\nPazaryeriSaaS ı kredi kartı girmeden hemen deneyebilirsiniz:\n* 30 Gün Ücretsiz Kullanım\n* 50.000 ₺ Satış Hacmi & 50 Ürün Kotası\n* 3 Aktif Pazaryeri Bağlantısı (Trendyol, Hepsiburada, Amazon TR vb.)\n* 1.2s Gerçek Zamanlı Stok Senkronizasyonu\n* GİB E-Fatura & Kargo Barkodu Basımı',
+        'reply': '🎁 30 Gün Boyunca Kredi Kartsız %100 Ücretsiz Deneme!\n\nPazaryeriSaaS\'ı kredi kartı girmeden hemen deneyebilirsiniz:\n* 30 Gün Ücretsiz Kullanım\n* 3 Aktif Pazaryeri Bağlantısı (Trendyol, Hepsiburada, Amazon TR vb.)\n* 50 Ürün Kotası & Sınırsız Senkronizasyon\n* 1.2s Gerçek Zamanlı Stok Eşitleme\n* GİB E-Fatura & Kargo Barkodu Basımı',
         'suggestedActions': [
-          {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'},
+          {'label': '🚀 30 Gün Ücretsiz Başla', 'actionType': 'go_register'},
           {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}
         ],
         'quickPrompts': ['Trendyol mağazamı nasıl bağlarım?', '2 Al 1 Öde nasıl açılır?']
@@ -252,9 +252,9 @@ class ApiService {
     }
 
     return {
-      'reply': 'Merhaba! Ben sizin AI Pazaryeri Danışmanınızım. 🤖\n\nSize aşağıdaki konularda 7/24 rehberlik edebilirim:\n* 🛒 2 Al 1 Öde & Promosyon Kampanyası Tanımlama\n* 🔗 Pazaryeri Mağaza Bağlantıları (Trendyol, Hepsiburada vb.)\n* ⚡ 1.2 Saniyelik Hızlı Stok Eşitleme Mantığı\n* 📑 GİB E-Fatura & Kargo Barkodu Basımı\n* 🖩 Akıllı Komisyon & Kârlı Fiyatlandırma Robotu\n* 🎁 1 Ay / 50.000 ₺ Ücretsiz Deneme Paketi Detayları\n\nBana sormak istediğiniz konuyu yazabilir veya aşağıdaki hızlı butonlara basabilirsiniz!',
+      'reply': 'Merhaba! Ben sizin AI Pazaryeri Danışmanınızım. 🤖\n\nSize aşağıdaki konularda 7/24 rehberlik edebilirim:\n* 🛒 2 Al 1 Öde & Promosyon Kampanyası Tanımlama\n* 🔗 Pazaryeri Mağaza Bağlantıları (Trendyol, Hepsiburada vb.)\n* ⚡ 1.2 Saniyelik Hızlı Stok Eşitleme Mantığı\n* 📑 GİB E-Fatura & Kargo Barkodu Basımı\n* 🖩 Akıllı Komisyon & Kârlı Fiyatlandırma Robotu\n* 🎁 30 Gün Ücretsiz Deneme Paketi Detayları\n\nBana sormak istediğiniz konuyu yazabilir veya aşağıdaki hızlı butonlara basabilirsiniz!',
       'suggestedActions': [
-        {'label': '🚀 1 Ay Ücretsiz Başla', 'actionType': 'go_register'},
+        {'label': '🚀 30 Gün Ücretsiz Başla', 'actionType': 'go_register'},
         {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}
       ],
       'quickPrompts': ['1 Ay ücretsiz deneme nedir?', '2 Al 1 Öde nasıl açılır?', 'Stok senkronizasyonu nasıl çalışır?']

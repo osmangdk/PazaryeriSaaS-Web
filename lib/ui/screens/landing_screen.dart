@@ -33,7 +33,7 @@ class _LandingScreenState extends State<LandingScreen> {
     if (_aiMessages.isEmpty) {
       _aiMessages.add({
         'role': 'assistant',
-        'content': 'Merhaba! Ben sizin **AI Pazaryeri Danışmanınızım**. 🤖\n\nPazaryeri SaaS\'ın 1 Ay (30 gün) 50.000 ₺ ücretsiz deneme imkanı, 1.2s anlık stok eşitleme, 2 Al 1 Öde kampanya kurguları ve Trendyol/Hepsiburada entegrasyonu hakkında merak ettiğiniz her şeyi bana sorabilirsiniz.',
+        'content': 'Merhaba! Ben sizin **AI Pazaryeri Danışmanınızım**. 🤖\n\nPazaryeri SaaS\'ın 30 gün ücretsiz deneme imkanı (3 pazaryeri ve 50 ürün kotası), 1.2s anlık stok eşitleme, 2 Al 1 Öde kampanya kurguları ve Trendyol/Hepsiburada entegrasyonu hakkında merak ettiğiniz her şeyi bana sorabilirsiniz.',
         'actions': [
           {'label': '🎁 1 Ay Ücretsiz Deneme Nedir?', 'action': 'ask', 'prompt': '1 Ay ücretsiz deneme paketi neleri kapsıyor?'},
           {'label': '🔥 2 Al 1 Öde Nasıl Çalışır?', 'action': 'ask', 'prompt': '2 Al 1 Öde kampanyaları nasıl çalışıyor?'},
@@ -597,7 +597,7 @@ class _LandingScreenState extends State<LandingScreen> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 780),
               child: Text(
-                'Trendyol, Hepsiburada, Amazon, N11, ÇiçekSepeti, PttAVM, Boyner, Sahibinden ve Pazarama siparişlerinizi tek merkezde toplayın. 1 ay boyunca 50.000 ₺ işlem hacmine kadar tamamen ücretsiz deneyin.',
+                'Trendyol, Hepsiburada, Amazon, N11, ÇiçekSepeti, PttAVM, Boyner, Sahibinden ve Pazarama siparişlerinizi tek merkezde toplayın. 30 gün boyunca kredi kartsız tamamen ücretsiz deneyin.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(color: Colors.white60, fontSize: 16, height: 1.6),
               ),
@@ -628,8 +628,8 @@ class _LandingScreenState extends State<LandingScreen> {
               runSpacing: 8,
               alignment: WrapAlignment.center,
               children: [
-                _microTrustItem('30 Gün / 50.000 ₺ Ücretsiz Limit'),
-                _microTrustItem('Kredi Kartı Gerekmez'),
+                _microTrustItem('30 Gün Kredi Kartsız Deneme'),
+                _microTrustItem('3 Pazaryeri & 50 Ürün Kotası'),
                 _microTrustItem('%100 Çift Satış Koruması'),
                 _microTrustItem('90 Saniyede Kurulum'),
               ],
@@ -847,20 +847,20 @@ class _LandingScreenState extends State<LandingScreen> {
                 ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: '1 Ay Boyunca 50.000 ₺ Satışa Kadar Ücretsiz', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
+                      Expanded(child: _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
                       const SizedBox(width: 16),
-                      Expanded(child: _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '₺1.199' : '₺1.599', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['Tüm Pazaryerleri (Sınırsız)', 'Sınırsız Sipariş & Ürün', 'Otomatik E-Fatura & Barkod', 'Akıllı Fiyatlandırma Robotu', 'Öncelikli WhatsApp Desteği'], isPopular: true)),
+                      Expanded(child: _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true)),
                       const SizedBox(width: 16),
-                      Expanded(child: _pricingCard(title: 'Enterprise', price: _isAnnualPricing ? '₺2.799' : '₺3.699', desc: 'Yüksek hacimli markalar ve depolar', features: ['Sınırsız Kanal & Çoklu Depo', 'Logo / Mikro / SAP Entegrasyonu', 'Özel Müşteri Temsilcisi', '7/24 Telefon Hattı'], isPopular: false)),
+                      Expanded(child: _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false)),
                     ],
                   )
                 : Column(
                     children: [
-                      _pricingCard(title: 'Starter', price: _isAnnualPricing ? '₺499' : '₺699', desc: '1 Ay Boyunca 50.000 ₺ Satışa Kadar Ücretsiz', features: ['3 Pazaryeri Bağlantısı', 'Aylık 500 Sipariş', 'Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
+                      _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
                       const SizedBox(height: 16),
-                      _pricingCard(title: 'Scale PRO', price: _isAnnualPricing ? '₺1.199' : '₺1.599', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['Tüm Pazaryerleri (Sınırsız)', 'Sınırsız Sipariş & Ürün', 'Otomatik E-Fatura & Barkod', 'Akıllı Fiyatlandırma Robotu', 'Öncelikli WhatsApp Desteği'], isPopular: true),
+                      _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true),
                       const SizedBox(height: 16),
-                      _pricingCard(title: 'Enterprise', price: _isAnnualPricing ? '₺2.799' : '₺3.699', desc: 'Yüksek hacimli markalar ve depolar', features: ['Sınırsız Kanal & Çoklu Depo', 'Logo / Mikro / SAP Entegrasyonu', 'Özel Müşteri Temsilcisi', '7/24 Telefon Hattı'], isPopular: false),
+                      _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false),
                     ],
                   ),
           ],
@@ -883,7 +883,7 @@ class _LandingScreenState extends State<LandingScreen> {
           if (isPopular)
             Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(8)), child: Text('EN ÇOK TERCİH EDİLEN', style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
           const SizedBox(height: 12),
-          Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
+          Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
           const SizedBox(height: 6),
           Text(desc, style: GoogleFonts.inter(color: Colors.white54, fontSize: 12)),
           const SizedBox(height: 20),
@@ -908,7 +908,7 @@ class _LandingScreenState extends State<LandingScreen> {
             child: ElevatedButton(
               onPressed: () => context.go('/login'),
               style: ElevatedButton.styleFrom(backgroundColor: isPopular ? Colors.blueAccent : Colors.white12, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              child: Text('30 Gün Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -920,7 +920,7 @@ class _LandingScreenState extends State<LandingScreen> {
     final faqs = [
       {'q': 'Kurulum ne kadar sürer? Teknik bilgiye ihtiyacım var mı?', 'a': 'Hayır, hiçbir kodlama veya teknik bilgi gerekmez. Pazaryerlerinizden aldığınız API anahtarlarını panelimize girerek mağazalarınızı 90 saniye içinde bağlayabilirsiniz.'},
       {'q': 'Gerçekten çift satış (overselling) riskini engelliyor musunuz?', 'a': 'Evet. Gelişmiş Sync-Engine altyapımız, bir kanaldan sipariş düştüğü anda milisaniyeler seviyesinde diğer tüm platformlardaki stok miktarını günceller ve ceza puanı almanızı engeller.'},
-      {'q': '1 aylık ücretsiz deneme süresinde kredi kartı girmem gerekir mi?', 'a': 'Kesinlikle hayır. Kredi kartı bilginizi girmeden 30 gün boyunca (50.000 ₺ işlem hacmine kadar) tüm Pro özellikleri sınırsız deneyebilirsiniz.'},
+      {'q': '1 aylık ücretsiz deneme süresinde kredi kartı girmem gerekir mi?', 'a': 'Kesinlikle hayır. Kredi kartı bilginizi girmeden 30 gün boyunca (3 pazaryeri ve 50 ürüne kadar) tüm özellikleri ücretsiz deneyebilirsiniz.'},
       {'q': 'Kullandığım muhasebe ve ERP programları ile entegre olabilir mi?', 'a': 'Platformumuz Paraşüt, Bizmu, Logo, Mikro, Zirve gibi tüm popüler ön muhasebe ve ERP yazılımlarıyla tam entegre çalışmaktadır.'},
     ];
 
@@ -967,7 +967,7 @@ class _LandingScreenState extends State<LandingScreen> {
           children: [
             Text('Bugün Başlayın, İlk Satışınızı 10 Dakika İçinde Otomatize Edin.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
             const SizedBox(height: 16),
-            Text('30 gün boyunca (50.000 ₺ ciroya kadar) kredi kartsız ücretsiz deneyin. E-ticaret operasyonunuzu sıfır hata ile büyütün.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
+            Text('30 gün boyunca kredi kartsız ücretsiz deneyin. E-ticaret operasyonunuzu sıfır hata ile büyütün.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
             const SizedBox(height: 28),
             ElevatedButton(
               onPressed: () => context.go('/login'),
