@@ -1,8 +1,8 @@
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:frontend/data/api_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -28,6 +28,15 @@ class _LandingScreenState extends State<LandingScreen> {
   bool _isAiThinking = false;
   final TextEditingController _aiInputController = TextEditingController();
   final ScrollController _aiScrollController = ScrollController();
+
+  Future<void> _launchSafeUrl(String urlStr) async {
+    try {
+      final uri = Uri.parse(urlStr);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+  }
 
   void _initAiGreeting() {
     if (_aiMessages.isEmpty) {
@@ -78,7 +87,7 @@ class _LandingScreenState extends State<LandingScreen> {
             children: [
               InkWell(
                 onTap: () {
-                  html.window.open('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum', '_blank');
+                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -113,7 +122,7 @@ class _LandingScreenState extends State<LandingScreen> {
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  html.window.open('tel:08500000000', '_self');
+                  _launchSafeUrl('tel:08500000000');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -148,7 +157,7 @@ class _LandingScreenState extends State<LandingScreen> {
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  html.window.open('mailto:destek@pazaryeri.com?subject=PazaryeriSaaS%20Destek%20Talebi', '_self');
+                  _launchSafeUrl('mailto:destek@pazaryeri.com?subject=PazaryeriSaaS%20Destek%20Talebi');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -251,7 +260,7 @@ class _LandingScreenState extends State<LandingScreen> {
             } else if (actionType == 'open_support_channels') {
               _showCustomerSupportDialog();
             } else if (actionType == 'open_whatsapp_support') {
-              html.window.open('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum', '_blank');
+              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
             } else if (act['prompt'] != null && act['prompt'].toString().isNotEmpty) {
               sendMessage(act['prompt']);
             }

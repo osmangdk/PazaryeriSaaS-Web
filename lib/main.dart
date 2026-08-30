@@ -3,7 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/router.dart';
 
-void main() {
+// Firebase — google-services.json mevcut olduğunda aktif olur
+// ignore: depend_on_referenced_packages
+import 'package:firebase_core/firebase_core.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Firebase'i sessizce başlat; google-services.json yoksa devam et
+  try {
+    await Firebase.initializeApp();
+  } catch (_) {
+    // google-services.json henüz eklenmemişse uygulama yine de çalışır
+  }
   runApp(const ProviderScope(child: MyApp()));
 }
 

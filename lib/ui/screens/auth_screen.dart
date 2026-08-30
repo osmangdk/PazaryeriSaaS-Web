@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/core/biometric_service.dart';
 import 'package:frontend/data/api_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:local_auth/local_auth.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -17,7 +19,49 @@ class _AuthScreenState extends State<AuthScreen> {
   
   bool _isLogin = true;
   bool _isLoading = false;
+  bool _isBiometricLoading = false;
+  bool _biometricAvailable = false;
+  BiometricType? _preferredBiometric;
   final _apiService = ApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometric();
+  }
+
+  Future<void> _checkBiometric() async {
+    final available = await BiometricService.isAvailable();
+    final hasSaved = await BiometricService.hasSavedSession();
+    if (mounted) {
+      setState(() => _biometricAvailable = available && hasSaved);
+      if (available && hasSaved) {
+        _preferredBiometric = await BiometricService.getPreferredBiometric();
+      }
+    }
+  }
+
+  Future<void> _biometricLogin() async {
+    setState(() => _isBiometricLoading = true);
+    try {
+      final authenticated = await BiometricService.authenticate(
+        reason: 'PazaryeriSaaS hesabınıza giriş yapmak için doğrulayın',
+      );
+      if (authenticated && mounted) {
+        context.go('/dashboard');
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Biyometrik doğrulama başarısız.'),
+            backgroundColor: Colors.orangeAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isBiometricLoading = false);
+    }
+  }
 
   Future<void> _submit() async {
     setState(() => _isLoading = true);
@@ -39,6 +83,8 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = false);
 
     if (token != null) {
+      // Token'ı kaydet (biyometrik giriş için)
+      await BiometricService.saveToken(token);
       if (mounted) context.go('/dashboard');
     } else {
       if (mounted) {
@@ -205,6 +251,67 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ),
                       ),
+
+                      // ── Biyometrik Giriş Butonu ──────────────────────────
+                      if (_biometricAvailable && _isLogin) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Expanded(child: Divider(color: Colors.black12)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                'ya da',
+                                style: GoogleFonts.inter(
+                                  color: Colors.grey[400],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider(color: Colors.black12)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: OutlinedButton.icon(
+                            onPressed: _isBiometricLoading ? null : _biometricLogin,
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.blueAccent, width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: _isBiometricLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.blueAccent,
+                                    ),
+                                  )
+                                : Icon(
+                                    _preferredBiometric == BiometricType.face
+                                        ? Icons.face
+                                        : Icons.fingerprint,
+                                    color: Colors.blueAccent,
+                                    size: 24,
+                                  ),
+                            label: Text(
+                              _preferredBiometric == BiometricType.face
+                                  ? 'Face ID ile Giriş Yap'
+                                  : 'Parmak İzi ile Giriş Yap',
+                              style: GoogleFonts.inter(
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
 
                       const SizedBox(height: 12),
                       const Divider(color: Colors.black12),

@@ -1,10 +1,13 @@
 import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
+import 'package:frontend/core/notification_service.dart';
 import 'package:frontend/data/api_service.dart';
+import 'package:frontend/ui/screens/barcode_scanner_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,6 +21,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   Map<String, dynamic>? _metrics;
   List<dynamic>? _products;
   List<dynamic>? _connections;
+
+  Future<void> _launchSafeUrl(String urlStr) async {
+    try {
+      final uri = Uri.parse(urlStr);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+  }
   List<dynamic>? _orders;
   Map<String, dynamic>? _financialSummary;
   bool _isLoading = true;
@@ -189,6 +201,40 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     super.initState();
     _loadData();
     _initAiGreeting();
+    // Push bildirimlerini başlat
+    NotificationService.initialize();
+  }
+
+  /// Barkod tarayıcıyı açar, okunan barkodu ürün aramasına yönlendirir
+  void _openBarcodeScanner() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BarcodeScannerScreen(
+          title: 'Ürün Barkodu Tara',
+          onDetected: (barcode) {
+            setState(() {
+              _currentTabIndex = 1; // Ürünler sekmesi
+              _productSearchQuery = barcode;
+              _productSearchController.text = barcode;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.qr_code_scanner, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text('Barkod okundu: $barcode')),
+                  ],
+                ),
+                backgroundColor: const Color(0xFF1E40AF),
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   void _initAiGreeting() {
@@ -238,7 +284,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             children: [
               InkWell(
                 onTap: () {
-                  html.window.open('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum', '_blank');
+                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -273,7 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  html.window.open('tel:08500000000', '_self');
+                  _launchSafeUrl('tel:08500000000');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -308,7 +354,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  html.window.open('mailto:destek@pazaryeri.com?subject=PazaryeriSaaS%20Destek%20Talebi', '_self');
+                  _launchSafeUrl('mailto:destek@pazaryeri.com?subject=PazaryeriSaaS%20Destek%20Talebi');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -438,7 +484,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             } else if (actionType == 'open_support_channels') {
               _showCustomerSupportDialog();
             } else if (actionType == 'open_whatsapp_support') {
-              html.window.open('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum', '_blank');
+              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazaryeriSaaS%20hakkında%20bilgi%20almak%20istiyorum');
             } else if (actionType == 'switch_tab_orders') {
               Navigator.pop(ctx);
               setState(() => _currentTabIndex = 1);
@@ -1077,28 +1123,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               };
             });
           }
-          void pickAndUploadImage() {
-            final uploadInput = html.FileUploadInputElement();
-            uploadInput.accept = 'image/*';
-            uploadInput.click();
-
-            uploadInput.onChange.listen((e) {
-              final files = uploadInput.files;
-              if (files != null && files.isNotEmpty) {
-                final file = files[0];
-                final reader = html.FileReader();
+          void pickAndUploadImage() async {
+            try {
+              final picker = ImagePicker();
+              final pickedFile = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1200, maxHeight: 1200, imageQuality: 85);
+              if (pickedFile != null) {
                 setDlgState(() => isUploadingImage = true);
-
-                reader.onLoadEnd.listen((e) {
-                  final base64String = reader.result as String;
-                  setDlgState(() {
-                    uploadedImages.add(base64String);
-                    isUploadingImage = false;
-                  });
+                final bytes = await pickedFile.readAsBytes();
+                final base64String = 'data:image/png;base64,${base64Encode(bytes)}';
+                setDlgState(() {
+                  uploadedImages.add(base64String);
+                  isUploadingImage = false;
                 });
-                reader.readAsDataUrl(file);
               }
-            });
+            } catch (_) {
+              setDlgState(() => isUploadingImage = false);
+            }
           }
 
           final currentPrice = parseTLInput(priceController.text) > 0 ? parseTLInput(priceController.text) : 1083.90;
@@ -1897,28 +1937,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDlgState) {
-          void pickAndUploadImage() {
-            final uploadInput = html.FileUploadInputElement();
-            uploadInput.accept = 'image/*';
-            uploadInput.click();
-
-            uploadInput.onChange.listen((e) {
-              final files = uploadInput.files;
-              if (files != null && files.isNotEmpty) {
-                final file = files[0];
-                final reader = html.FileReader();
+          void pickAndUploadImage() async {
+            try {
+              final picker = ImagePicker();
+              final pickedFile = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1200, maxHeight: 1200, imageQuality: 85);
+              if (pickedFile != null) {
                 setDlgState(() => isUploadingImage = true);
-
-                reader.onLoadEnd.listen((e) {
-                  final base64String = reader.result as String;
-                  setDlgState(() {
-                    uploadedImages.add(base64String);
-                    isUploadingImage = false;
-                  });
+                final bytes = await pickedFile.readAsBytes();
+                final base64String = 'data:image/png;base64,${base64Encode(bytes)}';
+                setDlgState(() {
+                  uploadedImages.add(base64String);
+                  isUploadingImage = false;
                 });
-                reader.readAsDataUrl(file);
               }
-            });
+            } catch (_) {
+              setDlgState(() => isUploadingImage = false);
+            }
           }
 
           return AlertDialog(
@@ -4050,6 +4084,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     ),
                     const SizedBox(width: 12),
                     IconButton(
+                      icon: const Icon(Icons.qr_code_scanner, color: Colors.blueAccent),
+                      tooltip: 'Barkod / QR Tara',
+                      onPressed: _openBarcodeScanner,
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
                       icon: const Icon(Icons.logout, color: Colors.redAccent),
                       tooltip: 'Çıkış Yap',
                       onPressed: _logout,
@@ -4392,7 +4432,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     onPressed: () {
                       final firstOrderId = _orders!.first['orderId'] ?? 'ORD-001';
                       final url = _apiService.getInvoiceUrl(firstOrderId);
-                      html.window.open(url, '_blank');
+                      _launchSafeUrl(url);
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tüm siparişler için toplu GİB E-Fatura yazdırma sayfası açıldı! 📑'), backgroundColor: Colors.blueAccent));
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
@@ -4404,7 +4444,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     onPressed: () {
                       final firstOrderId = _orders!.first['orderId'] ?? 'ORD-001';
                       final url = _apiService.getShippingLabelUrl(firstOrderId);
-                      html.window.open(url, '_blank');
+                      _launchSafeUrl(url);
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tüm siparişler için toplu Kargo Barkodları yazdırma sayfası açıldı! 🏷️'), backgroundColor: Colors.orange));
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
@@ -4456,7 +4496,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             OutlinedButton.icon(
                               onPressed: () {
                                 final url = _apiService.getInvoiceUrl(orderId);
-                                html.window.open(url, '_blank');
+                                _launchSafeUrl(url);
                               },
                               icon: const Icon(Icons.receipt_long, size: 16, color: Colors.blueAccent),
                               label: Text('GİB E-Fatura Görüntüle', style: GoogleFonts.inter(fontSize: 12, color: Colors.blueAccent, fontWeight: FontWeight.bold)),
@@ -4466,7 +4506,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             OutlinedButton.icon(
                               onPressed: () {
                                 final url = _apiService.getShippingLabelUrl(orderId);
-                                html.window.open(url, '_blank');
+                                _launchSafeUrl(url);
                               },
                               icon: const Icon(Icons.qr_code, size: 16, color: Colors.orangeAccent),
                               label: Text('Kargo Barkodu Yazdır', style: GoogleFonts.inter(fontSize: 12, color: Colors.orangeAccent, fontWeight: FontWeight.bold)),
