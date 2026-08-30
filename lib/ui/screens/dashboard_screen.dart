@@ -2798,13 +2798,33 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final tenant = _metrics?['tenant'];
-    final companyName = tenant?['companyName'] ?? 'Mağazam';
+    final companyName = tenant?['companyName'] ?? _metrics?['companyName'] ?? _metrics?['CompanyName'] ?? 'Mağazam';
     final limits = _metrics?['limits'];
-    final productCount = limits?['currentProducts'] ?? 0;
-    final productLimit = limits?['productLimit'] ?? 50;
-    final connCount = limits?['currentConnections'] ?? 0;
-    final connLimit = limits?['connectionLimit'] ?? 3;
-    final daysLeft = limits?['daysLeft'] ?? 30;
+
+    // Dinamik kullanıcı bazlı Kalan Deneme Süresi (API + Yedek Tarih Hesabı)
+    int daysLeft = 30;
+    if (limits != null && limits['daysLeft'] != null) {
+      daysLeft = int.tryParse(limits['daysLeft'].toString()) ?? 30;
+    } else if (_metrics != null && _metrics!['daysLeft'] != null) {
+      daysLeft = int.tryParse(_metrics!['daysLeft'].toString()) ?? 30;
+    } else if (_metrics != null && _metrics!['DaysLeft'] != null) {
+      daysLeft = int.tryParse(_metrics!['DaysLeft'].toString()) ?? 30;
+    } else {
+      final subEndDateStr = tenant?['subscriptionEndDate'] ?? _metrics?['subscriptionEndDate'];
+      if (subEndDateStr != null) {
+        final end = DateTime.tryParse(subEndDateStr.toString());
+        if (end != null) {
+          final diff = end.difference(DateTime.now().toUtc());
+          daysLeft = (diff.inHours / 24.0).ceil();
+          if (daysLeft < 0) daysLeft = 0;
+        }
+      }
+    }
+
+    final productCount = limits?['currentProducts'] ?? _metrics?['productCount'] ?? _metrics?['ProductCount'] ?? (_products?.length ?? 0);
+    final productLimit = limits?['productLimit'] ?? _metrics?['productLimit'] ?? _metrics?['ProductLimit'] ?? 50;
+    final connCount = limits?['currentConnections'] ?? _metrics?['connectionCount'] ?? _metrics?['ConnectionCount'] ?? (_connections?.length ?? 0);
+    final connLimit = limits?['connectionLimit'] ?? _metrics?['connectionLimit'] ?? _metrics?['ConnectionLimit'] ?? 3;
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -2844,7 +2864,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text('30 Gün / 50.000 ₺ Ücretsiz Deneme Paketi', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                        Text('$daysLeft Gün Kaldı • 50.000 ₺ Ücretsiz Deneme Paketi', style: GoogleFonts.inter(color: daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w500)),
                       ],
                     ),
                     const Spacer(),
@@ -2917,7 +2937,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               ),
                               child: Row(
                                 children: [
-                                  Expanded(child: _buildLimitStat('Kalan Deneme Süresi', '$daysLeft Gün', Icons.timer_outlined, Colors.amberAccent)),
+                                  Expanded(
+                                    child: _buildLimitStat(
+                                      'Kalan Deneme Süresi',
+                                      daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu (0 Gün)',
+                                      Icons.timer_outlined,
+                                      daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent,
+                                    ),
+                                  ),
                                   Container(width: 1, height: 40, color: Colors.white12),
                                   Expanded(child: _buildLimitStat('Aktif Pazaryerleri', '$connCount / $connLimit', Icons.cable, Colors.blueAccent)),
                                   Container(width: 1, height: 40, color: Colors.white12),
