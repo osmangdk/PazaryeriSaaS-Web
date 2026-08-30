@@ -899,8 +899,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(color: Colors.white24),
-                                        image: DecorationImage(image: NetworkImage(img), fit: BoxFit.cover),
                                       ),
+                                      child: _buildSafeImageWidget(img, width: 60, height: 60, fit: BoxFit.cover, borderRadius: BorderRadius.circular(7)),
                                     ),
                                     Positioned(
                                       top: -2,
@@ -1582,10 +1582,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 itemCount: uploadedImages.length,
                                 itemBuilder: (ctx, i) => Stack(
                                   children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(uploadedImages[i], fit: BoxFit.cover, width: double.infinity, height: double.infinity,
-                                          errorBuilder: (c, e, s) => Container(color: Colors.white10, child: const Icon(Icons.broken_image, color: Colors.white38))),
+                                    Positioned.fill(
+                                      child: _buildSafeImageWidget(uploadedImages[i], fit: BoxFit.cover, borderRadius: BorderRadius.circular(8)),
                                     ),
                                     Positioned(
                                       top: 2, right: 2,
@@ -2300,11 +2298,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   color: Colors.white.withOpacity(0.05),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: Colors.white12),
-                                  image: selectedImage.isNotEmpty
-                                      ? DecorationImage(image: NetworkImage(selectedImage), fit: BoxFit.contain)
-                                      : null,
                                 ),
-                                child: selectedImage.isEmpty ? const Center(child: Icon(Icons.image_not_supported, color: Colors.white24, size: 48)) : null,
+                                child: selectedImage.isNotEmpty
+                                    ? _buildSafeImageWidget(selectedImage, fit: BoxFit.contain, borderRadius: BorderRadius.circular(12))
+                                    : const Center(child: Icon(Icons.image_not_supported, color: Colors.white24, size: 48)),
                               ),
                               const SizedBox(height: 8),
                               if (images.length > 1)
@@ -2325,8 +2322,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(8),
                                             border: Border.all(color: isCur ? Colors.blueAccent : Colors.white24, width: isCur ? 2 : 1),
-                                            image: DecorationImage(image: NetworkImage(imgUrl), fit: BoxFit.cover),
                                           ),
+                                          child: _buildSafeImageWidget(imgUrl, fit: BoxFit.cover, borderRadius: BorderRadius.circular(7)),
                                         ),
                                       );
                                     },
@@ -2678,6 +2675,64 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  Widget _buildSafeImageWidget(String? url, {double? width, double? height, BoxFit fit = BoxFit.cover, BorderRadius? borderRadius}) {
+    if (url == null || url.trim().isEmpty) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: borderRadius ?? BorderRadius.circular(8),
+        ),
+        child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 24)),
+      );
+    }
+
+    final trimmed = url.trim();
+
+    // Base64 Data URL desteği
+    if (trimmed.startsWith('data:image/') || (trimmed.contains('base64,') && !trimmed.startsWith('http'))) {
+      try {
+        final cleanBase64 = trimmed.contains(',') ? trimmed.substring(trimmed.indexOf(',') + 1) : trimmed;
+        final bytes = base64Decode(cleanBase64);
+        return ClipRRect(
+          borderRadius: borderRadius ?? BorderRadius.circular(8),
+          child: Image.memory(
+            bytes,
+            width: width,
+            height: height,
+            fit: fit,
+            errorBuilder: (ctx, err, stack) => Container(
+              width: width,
+              height: height,
+              color: Colors.white.withOpacity(0.05),
+              child: const Center(child: Icon(Icons.broken_image, color: Colors.white38, size: 24)),
+            ),
+          ),
+        );
+      } catch (_) {}
+    }
+
+    // Normal HTTP / HTTPS URL
+    return ClipRRect(
+      borderRadius: borderRadius ?? BorderRadius.circular(8),
+      child: Image.network(
+        trimmed,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (ctx, err, stack) {
+          return Container(
+            width: width,
+            height: height,
+            color: Colors.white.withOpacity(0.05),
+            child: const Center(child: Icon(Icons.image_outlined, color: Colors.white38, size: 24)),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildLimitStat(String label, String val, IconData icon, Color color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -2962,11 +3017,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   decoration: BoxDecoration(
                     color: Colors.blueAccent.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
-                    image: p['firstImage'] != null
-                        ? DecorationImage(image: NetworkImage(p['firstImage']), fit: BoxFit.cover)
-                        : null,
                   ),
-                  child: p['firstImage'] == null ? const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 28) : null,
+                  child: p['firstImage'] != null
+                      ? _buildSafeImageWidget(p['firstImage'], width: 70, height: 70, fit: BoxFit.cover, borderRadius: BorderRadius.circular(10))
+                      : const Icon(Icons.inventory_2, color: Colors.blueAccent, size: 28),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
