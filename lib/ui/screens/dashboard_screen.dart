@@ -2771,8 +2771,22 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     if (name.contains('Ciceksepeti') || name.contains('Çiçek')) return const Icon(Icons.circle, color: Colors.pinkAccent, size: 10);
     if (name.contains('Ptt')) return const Icon(Icons.circle, color: Colors.yellow, size: 10);
     if (name.contains('Boyner')) return const Icon(Icons.circle, color: Colors.blueAccent, size: 10);
+    if (name.contains('Pasaj')) return const Icon(Icons.circle, color: Colors.amberAccent, size: 10);
+    if (name.contains('Teknosa')) return const Icon(Icons.circle, color: Colors.lightBlueAccent, size: 10);
+    if (name.contains('Koçtaş') || name.contains('Koctas')) return const Icon(Icons.circle, color: Colors.orangeAccent, size: 10);
+    if (name.contains('MediaMarkt')) return const Icon(Icons.circle, color: Colors.red, size: 10);
+    if (name.contains('FLO') || name.contains('Flo')) return const Icon(Icons.circle, color: Colors.orange, size: 10);
+    if (name.contains('Modanisa')) return const Icon(Icons.circle, color: Colors.pink, size: 10);
+    if (name.contains('İdefix') || name.contains('Idefix')) return const Icon(Icons.circle, color: Colors.blue, size: 10);
+    if (name.contains('Vodafone')) return const Icon(Icons.circle, color: Colors.redAccent, size: 10);
+    if (name.contains('Beymen')) return const Icon(Icons.circle, color: Colors.grey, size: 10);
+    if (name.contains('Akakçe') || name.contains('Akakce')) return const Icon(Icons.circle, color: Colors.cyanAccent, size: 10);
+    if (name.contains('Farmazon')) return const Icon(Icons.circle, color: Colors.greenAccent, size: 10);
+    if (name.contains('LCW') || name.contains('LC Waikiki')) return const Icon(Icons.circle, color: Colors.indigoAccent, size: 10);
+    if (name.contains('Cimri')) return const Icon(Icons.circle, color: Colors.tealAccent, size: 10);
     return const Icon(Icons.circle, color: Colors.white38, size: 10);
   }
+
 
   void _showAddMarketplaceDialog() {
     if (_isSubscriptionExpired()) {
@@ -2826,7 +2840,21 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         DropdownMenuItem(value: 7, child: Text('🟡 PttAVM')),
                         DropdownMenuItem(value: 8, child: Text('🔵 Boyner')),
                         DropdownMenuItem(value: 9, child: Text('🟡 Sahibinden')),
+                        DropdownMenuItem(value: 10, child: Text('🟡 Turkcell Pasaj')),
+                        DropdownMenuItem(value: 11, child: Text('🔵 Teknosa')),
+                        DropdownMenuItem(value: 12, child: Text('🟠 Koçtaş')),
+                        DropdownMenuItem(value: 13, child: Text('🔴 MediaMarkt')),
+                        DropdownMenuItem(value: 14, child: Text('🟠 FLO')),
+                        DropdownMenuItem(value: 15, child: Text('🌸 Modanisa')),
+                        DropdownMenuItem(value: 16, child: Text('🔵 İdefix')),
+                        DropdownMenuItem(value: 17, child: Text('🔴 Vodafone')),
+                        DropdownMenuItem(value: 18, child: Text('⚫ Beymen')),
+                        DropdownMenuItem(value: 19, child: Text('🔵 Akakçe')),
+                        DropdownMenuItem(value: 20, child: Text('🟢 Farmazon (Eczane B2B)')),
+                        DropdownMenuItem(value: 21, child: Text('🔵 LC Waikiki')),
+                        DropdownMenuItem(value: 22, child: Text('🔵 Cimri')),
                       ],
+
                       onChanged: (val) => setDialogState(() => selectedType = val ?? 1),
                     ),
                     const SizedBox(height: 12),
@@ -3932,9 +3960,25 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       case 5: return 'Pazarama';
       case 6: return 'ÇiçekSepeti';
       case 7: return 'PttAVM';
+      case 8: return 'Boyner';
+      case 9: return 'Sahibinden';
+      case 10: return 'Turkcell Pasaj';
+      case 11: return 'Teknosa';
+      case 12: return 'Koçtaş';
+      case 13: return 'MediaMarkt';
+      case 14: return 'FLO';
+      case 15: return 'Modanisa';
+      case 16: return 'İdefix';
+      case 17: return 'Vodafone';
+      case 18: return 'Beymen';
+      case 19: return 'Akakçe';
+      case 20: return 'Farmazon';
+      case 21: return 'LC Waikiki';
+      case 22: return 'Cimri';
       default: return 'Pazaryeri';
     }
   }
+
 
   Widget _specRow(String label, String val) {
     return Padding(
