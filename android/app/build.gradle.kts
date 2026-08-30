@@ -19,12 +19,14 @@ android {
 
     defaultConfig {
         applicationId = "com.pazaryerisaas.app"
-        // flutter_local_notifications requires minSdk 21
-        minSdk = flutter.minSdkVersion
+        // Güvenlik Desteği Biten Eski Sürümleri Engelle (Min Android 9.0 Pie / API 28)
+        // Android 8.0 ve altındaki EOL / güvenlik yaması almayan cihazlar engellenir.
+        minSdk = 28
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
+
 
     buildTypes {
         release {

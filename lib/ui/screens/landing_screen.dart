@@ -15,6 +15,7 @@ class _LandingScreenState extends State<LandingScreen> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _marketplacesKey = GlobalKey();
+  final GlobalKey _mobileAppKey = GlobalKey();
   final GlobalKey _howItWorksKey = GlobalKey();
   final GlobalKey _pricingKey = GlobalKey();
   final GlobalKey _faqKey = GlobalKey();
@@ -488,6 +489,8 @@ class _LandingScreenState extends State<LandingScreen> {
                   const SizedBox(height: 80),
                   _buildFeaturesSection(key: _featuresKey),
                   const SizedBox(height: 80),
+                  _buildMobileAppSection(key: _mobileAppKey),
+                  const SizedBox(height: 80),
                   _buildHowItWorksSection(key: _howItWorksKey),
                   const SizedBox(height: 80),
                   _buildPricingSection(key: _pricingKey),
@@ -539,6 +542,7 @@ class _LandingScreenState extends State<LandingScreen> {
           if (isDesktop) ...[
             _navButton('Özellikler', () => _scrollTo(_featuresKey)),
             _navButton('Pazaryerleri', () => _scrollTo(_marketplacesKey)),
+            _navButton('📱 Mobil Uygulama', () => _scrollTo(_mobileAppKey)),
             _navButton('Nasıl Çalışır?', () => _scrollTo(_howItWorksKey)),
             _navButton('Fiyatlandırma', () => _scrollTo(_pricingKey)),
             _navButton('SSS', () => _scrollTo(_faqKey)),
@@ -875,7 +879,498 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
+  Widget _buildMobileAppSection({required GlobalKey key}) {
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: Container(
+          padding: EdgeInsets.all(isDesktop ? 48 : 24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.blueAccent.withOpacity(0.35), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blueAccent.withOpacity(0.12),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: isDesktop
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(flex: 6, child: _buildMobileAppContent()),
+                    const SizedBox(width: 48),
+                    Expanded(flex: 5, child: _buildMobileAppMockup()),
+                  ],
+                )
+              : Column(
+                  children: [
+                    _buildMobileAppContent(),
+                    const SizedBox(height: 36),
+                    _buildMobileAppMockup(),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileAppContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.blueAccent.withOpacity(0.18),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.blueAccent.withOpacity(0.4)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.phone_iphone_rounded, color: Colors.blueAccent, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                'HEM ANDROİD HEM iOS İLE %100 UYUMLU',
+                style: GoogleFonts.inter(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+        Text(
+          'Pazaryeri Mağazanızı Cebinizden Yönetin:\nBarkod Tara, Bildirim Al, Yüzünle Giriş Yap',
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontSize: 30,
+            fontWeight: FontWeight.w900,
+            height: 1.25,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Depoda ürün ararken, yoldayken veya tatildeyken bilgisayara bağlı kalmayın. PazaryeriSaaS mobil uygulaması ile 22 pazaryerindeki tüm satışlarınız, siparişleriniz ve kargolarınız parmaklarınızın ucunda.',
+          style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.6),
+        ),
+        const SizedBox(height: 28),
+
+        // 4 Mobil Güç Özelliği
+        _buildMobileFeatureItem(
+          icon: Icons.qr_code_scanner,
+          color: Colors.cyanAccent,
+          title: 'Kamera ile Barkod / QR Okuma',
+          desc: 'Depoda veya reyonda telefonunuzun kamerasıyla ürün barkodunu tarayın, stok ve fiyatları saniyeler içinde anında güncelleyin.',
+        ),
+        const SizedBox(height: 16),
+        _buildMobileFeatureItem(
+          icon: Icons.notifications_active_rounded,
+          color: Colors.amberAccent,
+          title: 'Anlık Push Bildirimleri (Firebase FCM)',
+          desc: '"Yeni Sipariş Geldi!" veya "Kritik Stok Uyarısı!" telefonunuza anında sesli düşsün, hiçbir satışı kaçırmayın.',
+        ),
+        const SizedBox(height: 16),
+        _buildMobileFeatureItem(
+          icon: Icons.fingerprint_rounded,
+          color: Colors.greenAccent,
+          title: 'Biyometrik Giriş (Face ID & Parmak İzi)',
+          desc: 'Her defasında uzun şifreler yazmaya son. Tek dokunuşla veya yüz tanıma ile 0.5 saniyede panelinize güvenle bağlanın.',
+        ),
+        const SizedBox(height: 16),
+        _buildMobileFeatureItem(
+          icon: Icons.sync_rounded,
+          color: Colors.purpleAccent,
+          title: '22 Pazaryeri Canlı Ciro & Kargo Takibi',
+          desc: 'Trendyol, Hepsiburada, Amazon ve diğer tüm mağazalarınızın günlük cirosunu ve kargo paketlerini tek ekrandan izleyin.',
+        ),
+
+        const SizedBox(height: 32),
+
+        // İndirme Butonları (Android & iOS)
+        Wrap(
+          spacing: 14,
+          runSpacing: 12,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => _launchSafeUrl('https://pazaryerleri.vercel.app/PazaryeriSaaS.apk'),
+              icon: const Icon(Icons.android, color: Colors.white, size: 20),
+              label: Text(
+                'Android APK İndir (v2.0)',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 4,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: const Color(0xFF0F172A),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: Colors.blueAccent, width: 1.5),
+                    ),
+                    title: Row(
+                      children: [
+                        const Icon(Icons.apple, color: Colors.white, size: 28),
+                        const SizedBox(width: 10),
+                        Text('iOS / iPhone Desteği', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'iPhone ve iPad cihazlarınızda Safari tarayıcısı üzerinden:',
+                          style: GoogleFonts.inter(color: Colors.white70, fontSize: 14),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('1️⃣  Safari ile pazaryerleri.vercel.app adresini açın', style: GoogleFonts.inter(color: Colors.white, fontSize: 13)),
+                              const SizedBox(height: 6),
+                              Text('2️⃣  Alttaki "Paylaş" (Kare + Ok) simgesine basın', style: GoogleFonts.inter(color: Colors.white, fontSize: 13)),
+                              const SizedBox(height: 6),
+                              Text('3️⃣  "Ana Ekrana Ekle" seçeneğine dokunun', style: GoogleFonts.inter(color: Colors.white, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          '⚡ Uygulama ana ekranınıza ikon olarak eklenecek ve tam ekran mobil uygulama deneyimiyle açılacaktır.',
+                          style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text('Anladım', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.apple, color: Colors.white, size: 22),
+              label: Text(
+                'iOS & iPhone Desteği',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.white30, width: 1.5),
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            const Icon(Icons.shield_outlined, color: Colors.greenAccent, size: 16),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                'Güvenlik Standardı: En üst düzey donanımsal şifreleme ile Android 9.0+ ve iOS 14+ tam desteklenir.',
+                style: GoogleFonts.inter(color: Colors.white54, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileFeatureItem({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String desc,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                desc,
+                style: GoogleFonts.inter(color: Colors.white60, fontSize: 13, height: 1.4),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileAppMockup() {
+    return Center(
+      child: Container(
+        width: 320,
+        height: 580,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B0F19),
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(color: const Color(0xFF334155), width: 6),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blueAccent.withOpacity(0.25),
+              blurRadius: 35,
+              offset: const Offset(0, 15),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(34),
+          child: Column(
+            children: [
+              // Dynamic Island / Notch
+              Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 8),
+                width: 90,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF1E293B), shape: BoxShape.circle)),
+                    Container(width: 10, height: 10, decoration: const BoxDecoration(color: Color(0xFF0F172A), shape: BoxShape.circle)),
+                  ],
+                ),
+              ),
+
+              // Mock App Screen Content
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  color: const Color(0xFF0F172A),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(8)),
+                                child: const Icon(Icons.rocket_launch, color: Colors.white, size: 14),
+                              ),
+                              const SizedBox(width: 8),
+                              Text('PazaryeriSaaS', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.greenAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.fingerprint, color: Colors.greenAccent, size: 12),
+                                const SizedBox(width: 4),
+                                Text('Giriş Yapıldı', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Camera Viewfinder Mockup
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.cyanAccent.withOpacity(0.5)),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.qr_code_scanner, color: Colors.cyanAccent, size: 16),
+                                    const SizedBox(width: 6),
+                                    Text('Kamera Barkod Okuyucu', style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(color: Colors.cyanAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
+                                  child: Text('CANLI', style: GoogleFonts.inter(color: Colors.cyanAccent, fontSize: 9, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Container(
+                              height: 70,
+                              decoration: BoxDecoration(
+                                color: Colors.black45,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+                              ),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 140,
+                                      height: 2,
+                                      decoration: BoxDecoration(
+                                        color: Colors.cyanAccent,
+                                        boxShadow: [
+                                          BoxShadow(color: Colors.cyanAccent.withOpacity(0.8), blurRadius: 6),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text('Barkod: 8690123456789', style: GoogleFonts.inter(color: Colors.white70, fontSize: 9)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Notification Mockup
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.amberAccent.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(color: Colors.amberAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                              child: const Icon(Icons.shopping_cart_checkout, color: Colors.amberAccent, size: 16),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('🔔 Yeni Sipariş • Trendyol', style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  Text('#TY-90412 • ₺1.850,00', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                            ),
+                            Text('Şimdi', style: GoogleFonts.inter(color: Colors.white38, fontSize: 9)),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Live Sync Status
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.flash_on, color: Colors.blueAccent, size: 16),
+                                const SizedBox(width: 6),
+                                Text('22 Pazaryeri Senkron', style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            Text('1.2s Eşitlendi', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Home Bar
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                width: 120,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white38,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildHowItWorksSection({required GlobalKey key}) {
+
     final steps = [
       {'step': '01', 'title': 'Mağazalarını Bağla', 'desc': 'API anahtarlarınızı girerek Trendyol, Hepsiburada ve diğer mağazalarınızı 90 saniyede ekleyin.'},
       {'step': '02', 'title': 'Ürünlerini Eşleştir', 'desc': 'Stok ve fiyatlarınızı tek tıkla merkezi kataloğunuzla eşleştirin veya içe aktarın.'},
