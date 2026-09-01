@@ -199,6 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   final List<Map<String, dynamic>> _aiMessages = [];
   final Set<String> _askedPrompts = {};
   bool _isAiThinking = false;
+  bool _isAiFabMinimized = false;
   final TextEditingController _aiInputController = TextEditingController();
   final ScrollController _aiScrollController = ScrollController();
 
@@ -4169,13 +4170,64 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final connLimit = limits?['connectionLimit'] ?? _metrics?['connectionLimit'] ?? _metrics?['ConnectionLimit'] ?? 3;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAiAssistantDialog,
-        backgroundColor: Colors.purpleAccent.shade700,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
-        label: Text('✨ AI Pazaryeri Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
-      ),
+      floatingActionButton: _isAiFabMinimized
+          ? FloatingActionButton(
+              heroTag: 'ai_fab_minimized',
+              onPressed: () {
+                setState(() => _isAiFabMinimized = false);
+                _showAiAssistantDialog();
+              },
+              backgroundColor: Colors.purple.shade800,
+              tooltip: '✨ AI Pazaryeri Danışmanı (Açmak için tıklayın)',
+              child: const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 24),
+            )
+          : Container(
+              decoration: BoxDecoration(
+                color: Colors.purple.shade800,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.purpleAccent.withOpacity(0.5), width: 1.5),
+                boxShadow: [
+                  BoxShadow(color: Colors.purple.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    onTap: _showAiAssistantDialog,
+                    borderRadius: BorderRadius.circular(30),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Text('✨ AI Pazaryeri Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Simge halinde küçült',
+                    child: InkWell(
+                      onTap: () => setState(() => _isAiFabMinimized = true),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: const Icon(Icons.close, color: Colors.white70, size: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -4434,31 +4486,43 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.05),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: Colors.white12),
                               ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: InkWell(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    InkWell(
                                       onTap: isExpired ? () => _showSubscriptionExpiredDialog() : null,
                                       borderRadius: BorderRadius.circular(8),
-                                      child: _buildLimitStat(
-                                        isPaid ? 'Abonelik Durumu' : 'Kalan Deneme Süresi',
-                                        isPaid ? '$daysLeft Gün ($plan)' : (daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu (0 Gün)'),
-                                        isPaid ? Icons.verified : Icons.timer_outlined,
-                                        isExpired ? Colors.redAccent : (isPaid ? Colors.greenAccent : (daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        child: _buildLimitStat(
+                                          isPaid ? 'Abonelik Durumu' : 'Kalan Deneme',
+                                          isPaid ? '$daysLeft Gün ($plan)' : (daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu'),
+                                          isPaid ? Icons.verified : Icons.timer_outlined,
+                                          isExpired ? Colors.redAccent : (isPaid ? Colors.greenAccent : (daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent)),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Container(width: 1, height: 40, color: Colors.white12),
-                                  Expanded(child: _buildLimitStat('Aktif Pazaryerleri', '$connCount / $connLimit', Icons.cable, Colors.blueAccent)),
-                                  Container(width: 1, height: 40, color: Colors.white12),
-                                  Expanded(child: _buildLimitStat('Kayıtlı Ürünler', '$productCount / $productLimit', Icons.inventory_2, Colors.greenAccent)),
-                                ],
+                                    Container(width: 1, height: 32, color: Colors.white12),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      child: _buildLimitStat('Aktif Pazaryerleri', '$connCount / $connLimit', Icons.cable, Colors.blueAccent),
+                                    ),
+                                    Container(width: 1, height: 32, color: Colors.white12),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      child: _buildLimitStat('Kayıtlı Ürünler', '$productCount / $productLimit', Icons.inventory_2, Colors.greenAccent),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -4643,14 +4707,27 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-            Text(val, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-          ],
+        Icon(icon, color: color, size: 20),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.inter(color: Colors.white60, fontSize: 10),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                val,
+                style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -4862,38 +4939,42 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           children: [
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                 child: Row(
                   children: [
-                    Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.shopping_bag_outlined, color: Colors.blueAccent, size: 20)),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Toplam Sipariş', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                        Text('${allOrders.length} Adet', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                      ],
+                    Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.shopping_bag_outlined, color: Colors.blueAccent, size: 18)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Toplam Sipariş', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text('${allOrders.length} Adet', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                 child: Row(
                   children: [
-                    Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.greenAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.payments_outlined, color: Colors.greenAccent, size: 20)),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Sipariş Cirosu', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                        Text(formatTL(totalRevenue), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-                      ],
+                    Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.greenAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.payments_outlined, color: Colors.greenAccent, size: 18)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Sipariş Cirosu', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(formatTL(totalRevenue), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -5034,75 +5115,66 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       children: [
                         // Card Header
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.03),
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                             border: const Border(bottom: BorderSide(color: Colors.white10)),
                           ),
-                          child: Row(
+                          child: Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
-                              // Marketplace badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: mpColor.withOpacity(0.18),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: mpColor.withOpacity(0.4)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(color: mpColor, shape: BoxShape.circle),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Marketplace badge
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: mpColor.withOpacity(0.18),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: mpColor.withOpacity(0.4)),
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      marketplace,
-                                      style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(width: 7, height: 7, decoration: BoxDecoration(color: mpColor, shape: BoxShape.circle)),
+                                        const SizedBox(width: 5),
+                                        Text(marketplace, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text('Sipariş No: ', style: GoogleFonts.inter(color: Colors.white54, fontSize: 11)),
+                                  Text(orderId, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
+                                ],
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'Sipariş No: ',
-                                      style: GoogleFonts.inter(color: Colors.white54, fontSize: 12),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Status Chip
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: statusColor.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: statusColor.withOpacity(0.3)),
                                     ),
-                                    Text(
-                                      orderId,
-                                      style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(statusIcon, color: statusColor, size: 13),
+                                        const SizedBox(width: 4),
+                                        Text(status, style: GoogleFonts.inter(color: statusColor, fontWeight: FontWeight.w600, fontSize: 11)),
+                                      ],
                                     ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      '•  $orderDate',
-                                      style: GoogleFonts.inter(color: Colors.white38, fontSize: 11),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Status Chip
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: statusColor.withOpacity(0.3)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(statusIcon, color: statusColor, size: 14),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      status,
-                                      style: GoogleFonts.inter(color: statusColor, fontWeight: FontWeight.w600, fontSize: 12),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(orderDate, style: GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
+                                ],
                               ),
                             ],
                           ),
@@ -5110,10 +5182,73 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
                         // Card Body (Customer & Cargo Details)
                         Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              Row(
+                          padding: const EdgeInsets.all(14),
+                          child: LayoutBuilder(
+                            builder: (context, cardBox) {
+                              final isCompactCard = cardBox.maxWidth < 520;
+                              if (isCompactCard) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Customer Info
+                                        Expanded(
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(7),
+                                                decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                                child: const Icon(Icons.person, color: Colors.blueAccent, size: 18),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(customerName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                                    const SizedBox(height: 2),
+                                                    Text(customerAddress, style: GoogleFonts.inter(color: Colors.white60, fontSize: 11), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        // Total Price
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text('Toplam Tutar', style: GoogleFonts.inter(color: Colors.white38, fontSize: 10)),
+                                            const SizedBox(height: 2),
+                                            Text(formatTL(totalPrice), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    // Cargo Info
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(color: Colors.orangeAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                                          child: const Icon(Icons.local_shipping_outlined, color: Colors.orangeAccent, size: 16),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text('$cargoCompany • Takip: $trackingNumber', style: GoogleFonts.inter(color: Colors.cyanAccent, fontSize: 11, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              return Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // Customer Info
@@ -5177,94 +5312,88 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     ],
                                   ),
                                 ],
-                              ),
-                              const SizedBox(height: 14),
+                              );
+                            },
+                          ),
+                        ),
 
-                              // Products in this order
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.25),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.white10),
-                                ),
-                                child: Column(
+                        // Products in this order
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white10),
+                          ),
+                          child: Column(
+                            children: [
+                              if (lines.isEmpty)
+                                Row(
                                   children: [
-                                    if (lines.isEmpty)
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.inventory_2_outlined, color: Colors.white54, size: 18),
-                                          const SizedBox(width: 8),
-                                          Expanded(child: Text('Örnek Sipariş Ürünü', style: GoogleFonts.inter(color: Colors.white70, fontSize: 13))),
-                                          Text('1 Adet', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
-                                        ],
-                                      )
-                                    else
-                                      ...lines.map((line) {
-                                        final pTitle = (line['productTitle'] ?? 'Sipariş Ürünü').toString();
-                                        final pSku = (line['sku'] ?? 'SKU').toString();
-                                        final pQty = (line['quantity'] ?? 1).toString();
-                                        final pVariant = (line['variant'] ?? '').toString();
-                                        final pPrice = double.tryParse(line['price']?.toString() ?? '0') ?? 0;
-                                        final pImg = line['imageUrl']?.toString() ?? '';
+                                    const Icon(Icons.inventory_2_outlined, color: Colors.white54, size: 18),
+                                    const SizedBox(width: 8),
+                                    Expanded(child: Text('Örnek Sipariş Ürünü', style: GoogleFonts.inter(color: Colors.white70, fontSize: 13))),
+                                    Text('1 Adet', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                                  ],
+                                )
+                              else
+                                ...lines.map((line) {
+                                  final pTitle = (line['productTitle'] ?? 'Sipariş Ürünü').toString();
+                                  final pSku = (line['sku'] ?? 'SKU').toString();
+                                  final pQty = (line['quantity'] ?? 1).toString();
+                                  final pVariant = (line['variant'] ?? '').toString();
+                                  final pPrice = double.tryParse(line['price']?.toString() ?? '0') ?? 0;
+                                  final pImg = line['imageUrl']?.toString() ?? '';
 
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 4),
-                                          child: Row(
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        // Thumbnail
+                                        Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.06),
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: Colors.white12),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(6),
+                                            child: pImg.isNotEmpty
+                                                ? Image.network(
+                                                    pImg,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (_, __, ___) => const Icon(Icons.inventory_2, color: Colors.white38, size: 20),
+                                                  )
+                                                : const Icon(Icons.inventory_2, color: Colors.white38, size: 20),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              // Thumbnail
-                                              Container(
-                                                width: 42,
-                                                height: 42,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white.withOpacity(0.06),
-                                                  borderRadius: BorderRadius.circular(6),
-                                                  border: Border.all(color: Colors.white12),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius: BorderRadius.circular(6),
-                                                  child: pImg.isNotEmpty
-                                                      ? Image.network(
-                                                          pImg,
-                                                          fit: BoxFit.cover,
-                                                          errorBuilder: (_, __, ___) => const Icon(Icons.inventory_2, color: Colors.white38, size: 20),
-                                                        )
-                                                      : const Icon(Icons.inventory_2, color: Colors.white38, size: 20),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(pTitle, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                                    Row(
-                                                      children: [
-                                                        Text('SKU: $pSku', style: GoogleFonts.inter(color: Colors.white54, fontSize: 11)),
-                                                        if (pVariant.isNotEmpty) ...[
-                                                          const SizedBox(width: 8),
-                                                          Text('• $pVariant', style: GoogleFonts.inter(color: Colors.amberAccent.withOpacity(0.8), fontSize: 11)),
-                                                        ],
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Column(
-                                                crossAxisAlignment: CrossAxisAlignment.end,
-                                                children: [
-                                                  Text('$pQty Adet', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12)),
-                                                  Text(formatTL(pPrice), style: GoogleFonts.inter(color: Colors.white54, fontSize: 11)),
-                                                ],
-                                              ),
+                                              Text(pTitle, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                              Text('SKU: $pSku${pVariant.isNotEmpty ? ' • $pVariant' : ''}', style: GoogleFonts.inter(color: Colors.white54, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                                             ],
                                           ),
-                                        );
-                                      }).toList(),
-                                  ],
-                                ),
-                              ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text('$pQty Adet', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12)),
+                                            Text(formatTL(pPrice), style: GoogleFonts.inter(color: Colors.white54, fontSize: 11)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                            ],
+                          ),
+                        ),
                             ],
                           ),
                         ),

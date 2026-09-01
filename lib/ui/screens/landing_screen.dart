@@ -27,6 +27,7 @@ class _LandingScreenState extends State<LandingScreen> {
   final List<Map<String, dynamic>> _aiMessages = [];
   final Set<String> _askedPrompts = {};
   bool _isAiThinking = false;
+  bool _isAiFabMinimized = false;
   final TextEditingController _aiInputController = TextEditingController();
   final ScrollController _aiScrollController = ScrollController();
 
@@ -469,13 +470,64 @@ class _LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAiConsultantDialog,
-        backgroundColor: Colors.purpleAccent.shade700,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
-        label: Text('✨ RoaTech AI Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
-      ),
+      floatingActionButton: _isAiFabMinimized
+          ? FloatingActionButton(
+              heroTag: 'ai_landing_fab_minimized',
+              onPressed: () {
+                setState(() => _isAiFabMinimized = false);
+                _showAiConsultantDialog();
+              },
+              backgroundColor: Colors.purple.shade800,
+              tooltip: '✨ RoaTech AI Danışmanı (Açmak için tıklayın)',
+              child: const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 24),
+            )
+          : Container(
+              decoration: BoxDecoration(
+                color: Colors.purple.shade800,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.purpleAccent.withOpacity(0.5), width: 1.5),
+                boxShadow: [
+                  BoxShadow(color: Colors.purple.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    onTap: _showAiConsultantDialog,
+                    borderRadius: BorderRadius.circular(30),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Text('✨ RoaTech AI Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Simge halinde küçült',
+                    child: InkWell(
+                      onTap: () => setState(() => _isAiFabMinimized = true),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: const Icon(Icons.close, color: Colors.white70, size: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
       backgroundColor: const Color(0xFF0A1118),
       body: Stack(
         children: [
@@ -1002,23 +1054,25 @@ class _LandingScreenState extends State<LandingScreen> {
                 crossAxisCount: isDesktop ? 2 : 1,
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 20,
-                childAspectRatio: isDesktop ? 1.8 : 2.0,
+                childAspectRatio: isDesktop ? 1.8 : 1.3,
               ),
               itemCount: features.length,
               itemBuilder: (context, index) {
                 final f = features[index];
                 final color = f['color'] as Color;
                 return Container(
-                  padding: const EdgeInsets.all(28),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(12)), child: Icon(f['icon'] as IconData, color: color, size: 28)),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       Text(f['title'] as String, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                      const SizedBox(height: 10),
-                      Text(f['desc'] as String, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5)),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: Text(f['desc'] as String, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5), overflow: TextOverflow.fade),
+                      ),
                     ],
                   ),
                 );
@@ -1694,14 +1748,21 @@ class _LandingScreenState extends State<LandingScreen> {
             const SizedBox(height: 36),
             ...faqs.map((faq) => Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.white10)),
-                  child: ExpansionTile(
-                    iconColor: Colors.blueAccent,
-                    collapsedIconColor: Colors.white60,
-                    title: Text(faq['q']!, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
-                    children: [
-                      Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), child: Text(faq['a']!, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5))),
-                    ],
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.white10)),
+                  child: Material(
+                    color: Colors.white.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(14),
+                    clipBehavior: Clip.antiAlias,
+                    child: ExpansionTile(
+                      shape: const RoundedRectangleBorder(),
+                      collapsedShape: const RoundedRectangleBorder(),
+                      iconColor: Colors.blueAccent,
+                      collapsedIconColor: Colors.white60,
+                      title: Text(faq['q']!, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+                      children: [
+                        Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), child: Text(faq['a']!, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5))),
+                      ],
+                    ),
                   ),
                 )),
           ],
