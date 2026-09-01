@@ -4496,13 +4496,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 scrollDirection: Axis.horizontal,
                                 physics: const BouncingScrollPhysics(),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
                                     InkWell(
                                       onTap: isExpired ? () => _showSubscriptionExpiredDialog() : null,
                                       borderRadius: BorderRadius.circular(8),
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        padding: const EdgeInsets.symmetric(horizontal: 14),
                                         child: _buildLimitStat(
                                           isPaid ? 'Abonelik Durumu' : 'Kalan Deneme',
                                           isPaid ? '$daysLeft Gün ($plan)' : (daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu'),
@@ -4513,12 +4512,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     ),
                                     Container(width: 1, height: 32, color: Colors.white12),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      padding: const EdgeInsets.symmetric(horizontal: 14),
                                       child: _buildLimitStat('Aktif Pazaryerleri', '$connCount / $connLimit', Icons.cable, Colors.blueAccent),
                                     ),
                                     Container(width: 1, height: 32, color: Colors.white12),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      padding: const EdgeInsets.symmetric(horizontal: 14),
                                       child: _buildLimitStat('Kayıtlı Ürünler', '$productCount / $productLimit', Icons.inventory_2, Colors.greenAccent),
                                     ),
                                   ],
@@ -4705,29 +4704,24 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
   Widget _buildLimitStat(String label, String val, IconData icon, Color color) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, color: color, size: 20),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: GoogleFonts.inter(color: Colors.white60, fontSize: 10),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                val,
-                style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(color: Colors.white60, fontSize: 10),
+            ),
+            Text(
+              val,
+              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ],
         ),
       ],
     );
@@ -4843,41 +4837,72 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Tüm Pazaryeri Siparişleri', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 6),
-                      Text('Tüm bağlı mağazalarınızdan gelen siparişleri tek panelden yönetin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 13)),
+                      Text('Tüm Pazaryeri Siparişleri', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('Tüm bağlı mağazalarınızdan gelen siparişleri tek panelden yönetin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
                       const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                      Row(
                         children: [
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
-                              final url = _apiService.getInvoiceUrl(firstOrderId);
-                              _launchSafeUrl(url);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu GİB E-Fatura yazdırma sayfası açıldı! 📑'), backgroundColor: Colors.blueAccent));
-                            },
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                            icon: const Icon(Icons.receipt_long, size: 15),
-                            label: Text('Toplu E-Fatura', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
+                                final url = _apiService.getInvoiceUrl(firstOrderId);
+                                _launchSafeUrl(url);
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu GİB E-Fatura yazdırma sayfası açıldı! 📑'), backgroundColor: Colors.blueAccent));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1E40AF),
+                                foregroundColor: Colors.white,
+                                elevation: 1,
+                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              icon: const Icon(Icons.receipt_long, size: 14),
+                              label: Text('Toplu E-Fatura', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
                           ),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
-                              final url = _apiService.getShippingLabelUrl(firstOrderId);
-                              _launchSafeUrl(url);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu Kargo Barkodları yazdırma sayfası açıldı! 🏷️'), backgroundColor: Colors.orange));
-                            },
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                            icon: const Icon(Icons.qr_code_2, size: 15),
-                            label: Text('Toplu Barkod', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
+                                final url = _apiService.getShippingLabelUrl(firstOrderId);
+                                _launchSafeUrl(url);
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu Kargo Barkodları yazdırma sayfası açıldı! 🏷️'), backgroundColor: Colors.orange));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFC2410C),
+                                foregroundColor: Colors.white,
+                                elevation: 1,
+                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              icon: const Icon(Icons.qr_code_2, size: 14),
+                              label: Text('Toplu Barkod', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
                           ),
-                          OutlinedButton.icon(
-                            onPressed: _loadData,
-                            style: OutlinedButton.styleFrom(foregroundColor: Colors.cyanAccent, side: const BorderSide(color: Colors.cyanAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                            icon: const Icon(Icons.refresh, size: 15),
-                            label: Text('Yenile', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: _loadData,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              height: 36,
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.cyanAccent.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.cyanAccent.withOpacity(0.4), width: 1.2),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.refresh, size: 15, color: Colors.cyanAccent),
+                                  const SizedBox(width: 4),
+                                  Text('Yenile', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.cyanAccent)),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -4903,7 +4928,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               _launchSafeUrl(url);
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu GİB E-Fatura yazdırma sayfası açıldı! 📑'), backgroundColor: Colors.blueAccent));
                             },
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E40AF), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                             icon: const Icon(Icons.receipt_long, size: 16),
                             label: Text('📑 Toplu E-Fatura Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
                           ),
@@ -4915,14 +4940,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               _launchSafeUrl(url);
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu Kargo Barkodları yazdırma sayfası açıldı! 🏷️'), backgroundColor: Colors.orange));
                             },
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC2410C), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                             icon: const Icon(Icons.qr_code_2, size: 16),
                             label: Text('🏷️ Toplu Barkod Bas', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
                           ),
                           const SizedBox(width: 8),
                           OutlinedButton.icon(
                             onPressed: _loadData,
-                            style: OutlinedButton.styleFrom(foregroundColor: Colors.cyanAccent, side: const BorderSide(color: Colors.cyanAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                            style: OutlinedButton.styleFrom(foregroundColor: Colors.cyanAccent, side: const BorderSide(color: Colors.cyanAccent, width: 1.2), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                             icon: const Icon(Icons.refresh, size: 16),
                             label: Text('Yenile', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
                           ),
@@ -5020,38 +5045,63 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ),
               const SizedBox(height: 12),
 
-              // Marketplace & Status Filters Row
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    Text('Pazaryeri:', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w600)),
-                    const SizedBox(width: 8),
-                    _buildOrderFilterChip('Tümü (${allOrders.length})', 'ALL', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val)),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Trendyol', 'Trendyol', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFFF27A1A)),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Hepsiburada', 'Hepsiburada', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFFFF6000)),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Amazon TR', 'Amazon', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFFFF9900)),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Pazarama', 'Pazarama', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFF0066FF)),
-                    const SizedBox(width: 16),
-                    Container(height: 18, width: 1, color: Colors.white24),
-                    const SizedBox(width: 16),
-                    Text('Durum:', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w600)),
-                    const SizedBox(width: 8),
-                    _buildOrderFilterChip('Tümü', 'ALL', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val)),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Yeni', 'Yeni', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.greenAccent),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Hazırlanıyor', 'Hazırlanıyor', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.amberAccent),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Kargoda', 'Kargo', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.blueAccent),
-                    const SizedBox(width: 6),
-                    _buildOrderFilterChip('Teslim Edildi', 'Teslim', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.grey),
-                  ],
-                ),
+              // Pazaryeri Filtreleri
+              Row(
+                children: [
+                  const Icon(Icons.storefront_outlined, size: 15, color: Colors.white60),
+                  const SizedBox(width: 6),
+                  Text('Pazaryeri:', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w600)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildOrderFilterChip('Tümü (${allOrders.length})', 'ALL', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val)),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Trendyol', 'Trendyol', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFFF27A1A)),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Hepsiburada', 'Hepsiburada', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFFFF6000)),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Amazon TR', 'Amazon', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFFFF9900)),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Pazarama', 'Pazarama', _selectedOrderMarketplaceFilter, (val) => setState(() => _selectedOrderMarketplaceFilter = val), color: const Color(0xFF0066FF)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Durum Filtreleri
+              Row(
+                children: [
+                  const Icon(Icons.filter_list_rounded, size: 15, color: Colors.white60),
+                  const SizedBox(width: 6),
+                  Text('Durum:', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12, fontWeight: FontWeight.w600)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildOrderFilterChip('Tümü', 'ALL', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val)),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Yeni', 'Yeni', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.greenAccent),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Hazırlanıyor', 'Hazırlanıyor', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.amberAccent),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Kargoda', 'Kargo', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.blueAccent),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('Teslim Edildi', 'Teslim', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -5101,6 +5151,28 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     statusIcon = Icons.check_circle;
                   }
 
+                  String statusActionLabel;
+                  Color statusBtnColor;
+                  IconData statusActionIcon;
+
+                  if (status.contains('Yeni')) {
+                    statusActionLabel = '📦 Siparişi Paketle & Hazırla';
+                    statusBtnColor = const Color(0xFFD97706);
+                    statusActionIcon = Icons.inventory_2_outlined;
+                  } else if (status.contains('Hazır')) {
+                    statusActionLabel = '🚚 Kargoya Teslim Et';
+                    statusBtnColor = const Color(0xFF2563EB);
+                    statusActionIcon = Icons.local_shipping_outlined;
+                  } else if (status.contains('Kargo')) {
+                    statusActionLabel = '✅ Teslim Edildi Olarak İşaretle';
+                    statusBtnColor = const Color(0xFF059669);
+                    statusActionIcon = Icons.check_circle_outline;
+                  } else {
+                    statusActionLabel = '🔄 Durumu Başa Sar (Test)';
+                    statusBtnColor = const Color(0xFF475569);
+                    statusActionIcon = Icons.refresh_rounded;
+                  }
+
                   return Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF131D26),
@@ -5123,7 +5195,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           ),
                           child: Wrap(
                             alignment: WrapAlignment.spaceBetween,
-                            crossAlignment: WrapCrossAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             spacing: 8,
                             runSpacing: 8,
                             children: [
@@ -5394,76 +5466,143 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             ],
                           ),
                         ),
-                            ],
-                          ),
-                        ),
 
-                        // Card Actions Footer
+                        // Card Actions Footer (Responsive & Ultra Clean)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.02),
                             borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
                             border: const Border(top: BorderSide(color: Colors.white10)),
                           ),
-                          child: Wrap(
-                            alignment: WrapAlignment.end,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              // GİB E-Fatura Görüntüle
-                              OutlinedButton.icon(
-                                onPressed: () {
-                                  final url = _apiService.getInvoiceUrl(orderId);
-                                  _launchSafeUrl(url);
-                                },
-                                icon: const Icon(Icons.receipt_long, size: 15, color: Colors.blueAccent),
-                                label: Text('GİB E-Fatura', style: GoogleFonts.inter(fontSize: 12, color: Colors.blueAccent, fontWeight: FontWeight.w600)),
-                                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                              ),
-                              // Kargo Barkodu Yazdır
-                              OutlinedButton.icon(
-                                onPressed: () {
-                                  final url = _apiService.getShippingLabelUrl(orderId);
-                                  _launchSafeUrl(url);
-                                },
-                                icon: const Icon(Icons.qr_code, size: 15, color: Colors.orangeAccent),
-                                label: Text('Kargo Barkodu', style: GoogleFonts.inter(fontSize: 12, color: Colors.orangeAccent, fontWeight: FontWeight.w600)),
-                                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orangeAccent), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                              ),
-                              // Canlı Kargo Takibi
-                              OutlinedButton.icon(
-                                onPressed: () => _showCargoTrackingDialog(o),
-                                icon: const Icon(Icons.track_changes, size: 15, color: Colors.cyanAccent),
-                                label: Text('Canlı Takip', style: GoogleFonts.inter(fontSize: 12, color: Colors.cyanAccent, fontWeight: FontWeight.w600)),
-                                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.cyanAccent), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                              ),
-                              // Durum İlerletme
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    if (status.contains('Yeni')) {
-                                      o['status'] = 'Hazırlanıyor';
-                                    } else if (status.contains('Hazır')) {
-                                      o['status'] = 'Kargoya Verildi';
-                                    } else if (status.contains('Kargo')) {
-                                      o['status'] = 'Teslim Edildi';
-                                    } else {
-                                      o['status'] = 'Yeni Sipariş';
-                                    }
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text('$orderId nolu sipariş durumu güncellendi: ${o['status']} ✅'),
-                                    backgroundColor: Colors.green,
-                                    duration: const Duration(seconds: 2),
-                                  ));
-                                },
-                                icon: const Icon(Icons.check_circle_outline, size: 15),
-                                label: Text(status.contains('Yeni') ? '📦 Paketle' : (status.contains('Hazır') ? '🚚 Kargoya Ver' : (status.contains('Kargo') ? '✅ Teslim Et' : '🔄 Sıfırla')), style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade800, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                              ),
-                            ],
+                          child: LayoutBuilder(
+                            builder: (context, cardFooterBox) {
+                              final isCompact = cardFooterBox.maxWidth < 560;
+
+                              void advanceOrderStatus() {
+                                setState(() {
+                                  if (status.contains('Yeni')) {
+                                    o['status'] = 'Hazırlanıyor';
+                                  } else if (status.contains('Hazır')) {
+                                    o['status'] = 'Kargoya Verildi';
+                                  } else if (status.contains('Kargo')) {
+                                    o['status'] = 'Teslim Edildi';
+                                  } else {
+                                    o['status'] = 'Yeni Sipariş';
+                                  }
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text('$orderId nolu sipariş durumu güncellendi: ${o['status']} ✅'),
+                                  backgroundColor: Colors.green,
+                                  duration: const Duration(seconds: 2),
+                                ));
+                              }
+
+                              if (isCompact) {
+                                return Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildOrderActionButton(
+                                            icon: Icons.receipt_long_rounded,
+                                            label: 'GİB E-Fatura',
+                                            color: Colors.blueAccent,
+                                            onTap: () {
+                                              final url = _apiService.getInvoiceUrl(orderId);
+                                              _launchSafeUrl(url);
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: _buildOrderActionButton(
+                                            icon: Icons.qr_code_2_rounded,
+                                            label: 'Kargo Barkodu',
+                                            color: Colors.orangeAccent,
+                                            onTap: () {
+                                              final url = _apiService.getShippingLabelUrl(orderId);
+                                              _launchSafeUrl(url);
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: _buildOrderActionButton(
+                                            icon: Icons.track_changes_rounded,
+                                            label: 'Canlı Takip',
+                                            color: Colors.cyanAccent,
+                                            onTap: () => _showCargoTrackingDialog(o),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 38,
+                                      child: ElevatedButton.icon(
+                                        onPressed: advanceOrderStatus,
+                                        icon: Icon(statusActionIcon, size: 16, color: Colors.white),
+                                        label: Text(statusActionLabel, style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white)),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: statusBtnColor,
+                                          elevation: 1,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              return Row(
+                                children: [
+                                  _buildOrderActionButton(
+                                    icon: Icons.receipt_long_rounded,
+                                    label: 'GİB E-Fatura',
+                                    color: Colors.blueAccent,
+                                    onTap: () {
+                                      final url = _apiService.getInvoiceUrl(orderId);
+                                      _launchSafeUrl(url);
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildOrderActionButton(
+                                    icon: Icons.qr_code_2_rounded,
+                                    label: 'Kargo Barkodu',
+                                    color: Colors.orangeAccent,
+                                    onTap: () {
+                                      final url = _apiService.getShippingLabelUrl(orderId);
+                                      _launchSafeUrl(url);
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildOrderActionButton(
+                                    icon: Icons.track_changes_rounded,
+                                    label: 'Canlı Takip',
+                                    color: Colors.cyanAccent,
+                                    onTap: () => _showCargoTrackingDialog(o),
+                                  ),
+                                  const Spacer(),
+                                  SizedBox(
+                                    height: 36,
+                                    child: ElevatedButton.icon(
+                                      onPressed: advanceOrderStatus,
+                                      icon: Icon(statusActionIcon, size: 16, color: Colors.white),
+                                      label: Text(statusActionLabel, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: statusBtnColor,
+                                        elevation: 1,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -5471,7 +5610,52 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   );
                 },
               ),
+        const SizedBox(height: 70),
       ],
+    );
+  }
+
+  Widget _buildOrderActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withOpacity(0.4), width: 1.2),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: color),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -5481,21 +5665,35 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
     return InkWell(
       onTap: () => onSelected(value),
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
+      borderRadius: BorderRadius.circular(8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isSelected ? activeColor : Colors.white12),
+          color: isSelected ? activeColor.withOpacity(0.22) : Colors.white.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isSelected ? activeColor : Colors.white12, width: isSelected ? 1.4 : 1.0),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            color: isSelected ? Colors.white : Colors.white60,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 11,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (color != null && !label.contains('Tümü')) ...[
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(color: isSelected ? activeColor : activeColor.withOpacity(0.6), shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 5),
+            ],
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: isSelected ? Colors.white : Colors.white70,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 11.5,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -6443,81 +6641,203 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           const SizedBox(height: 12),
           const Divider(color: Colors.white12),
           const SizedBox(height: 6),
-          Row(
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => _showProductDetailsDialog(productId),
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.lightBlueAccent, side: const BorderSide(color: Colors.lightBlueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                icon: const Icon(Icons.visibility, size: 16),
-                label: Text('Detayları İncele', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: () => _showEditProductDialog(productId, p),
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.amberAccent, side: const BorderSide(color: Colors.amberAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                icon: const Icon(Icons.edit, size: 16),
-                label: Text('Düzenle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-              ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trendyol v2 Ürün & Kampanya API isteği gönderiliyor...'), backgroundColor: Colors.orange));
-                  final res = await _apiService.uploadProductToTrendyol(productId);
-                  if (mounted) {
-                    final isOk = res?['isSuccess'] == true;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(isOk ? 'Ürün ve promosyon kurgusu Trendyol kataloğuna aktarıldı!' : (res?['errorMessage'] ?? 'Trendyol aktarımında hata!')), backgroundColor: isOk ? Colors.green : Colors.orange),
-                    );
-                    _loadData();
-                  }
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                icon: const Icon(Icons.cloud_upload, size: 16),
-                label: Text('Trendyol a Yükle (v2)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'product', initialProductId: productId),
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.blueAccent, side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                icon: const Icon(Icons.sync_alt, size: 16),
-                label: Text('Pazaryerlerine Dağıt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-                tooltip: 'Ürünü Sil',
-                onPressed: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      backgroundColor: const Color(0xFF1E293B),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      title: Text('Ürünü Sil?', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
-                      content: Text('Bu ürünü ve alt varyantlarını silmek istediğinize emin misiniz?', style: GoogleFonts.inter(color: Colors.white70)),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60))),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(ctx, true),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                          child: Text('Sil', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+          LayoutBuilder(
+            builder: (context, cardActionBox) {
+              final isCompact = cardActionBox.maxWidth < 640;
+              if (isCompact) {
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _showProductDetailsDialog(productId),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.lightBlueAccent,
+                              side: const BorderSide(color: Colors.lightBlueAccent),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            icon: const Icon(Icons.visibility, size: 14),
+                            label: Text('İncele', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _showEditProductDialog(productId, p),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.amberAccent,
+                              side: const BorderSide(color: Colors.amberAccent),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            icon: const Icon(Icons.edit, size: 14),
+                            label: Text('Düzenle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 19),
+                          tooltip: 'Ürünü Sil',
+                          padding: const EdgeInsets.all(8),
+                          constraints: const BoxConstraints(),
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: const Color(0xFF1E293B),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                title: Text('Ürünü Sil?', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                                content: Text('Bu ürünü ve alt varyantlarını silmek istediğinize emin misiniz?', style: GoogleFonts.inter(color: Colors.white70)),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60))),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                                    child: Text('Sil', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              final success = await _apiService.deleteProduct(productId);
+                              if (mounted) {
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla silindi.'), backgroundColor: Colors.redAccent));
+                                  _loadData();
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün silinirken bir hata oluştu.'), backgroundColor: Colors.red));
+                                }
+                              }
+                            }
+                          },
                         ),
                       ],
                     ),
-                  );
-                  if (confirm == true) {
-                    final success = await _apiService.deleteProduct(productId);
-                    if (mounted) {
-                      if (success) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla silindi.'), backgroundColor: Colors.redAccent));
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trendyol v2 Ürün & Kampanya API isteği gönderiliyor...'), backgroundColor: Colors.orange));
+                              final res = await _apiService.uploadProductToTrendyol(productId);
+                              if (mounted) {
+                                final isOk = res?['isSuccess'] == true;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(isOk ? 'Ürün ve promosyon kurgusu Trendyol kataloğuna aktarıldı!' : (res?['errorMessage'] ?? 'Trendyol aktarımında hata!')), backgroundColor: isOk ? Colors.green : Colors.orange),
+                                );
+                                _loadData();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepOrange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            icon: const Icon(Icons.cloud_upload, size: 14),
+                            label: Text('Trendyol\'a Yükle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'product', initialProductId: productId),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.blueAccent,
+                              side: const BorderSide(color: Colors.blueAccent),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            icon: const Icon(Icons.sync_alt, size: 14),
+                            label: Text('Pazaryerlerine Dağıt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => _showProductDetailsDialog(productId),
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.lightBlueAccent, side: const BorderSide(color: Colors.lightBlueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    icon: const Icon(Icons.visibility, size: 16),
+                    label: Text('Detayları İncele', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _showEditProductDialog(productId, p),
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.amberAccent, side: const BorderSide(color: Colors.amberAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: Text('Düzenle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                  const Spacer(),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trendyol v2 Ürün & Kampanya API isteği gönderiliyor...'), backgroundColor: Colors.orange));
+                      final res = await _apiService.uploadProductToTrendyol(productId);
+                      if (mounted) {
+                        final isOk = res?['isSuccess'] == true;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(isOk ? 'Ürün ve promosyon kurgusu Trendyol kataloğuna aktarıldı!' : (res?['errorMessage'] ?? 'Trendyol aktarımında hata!')), backgroundColor: isOk ? Colors.green : Colors.orange),
+                        );
                         _loadData();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün silinirken bir hata oluştu.'), backgroundColor: Colors.red));
                       }
-                    }
-                  }
-                },
-              ),
-            ],
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    icon: const Icon(Icons.cloud_upload, size: 16),
+                    label: Text('Trendyol\'a Yükle (v2)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'product', initialProductId: productId),
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.blueAccent, side: const BorderSide(color: Colors.blueAccent), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    icon: const Icon(Icons.sync_alt, size: 16),
+                    label: Text('Pazaryerlerine Dağıt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                    tooltip: 'Ürünü Sil',
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: const Color(0xFF1E293B),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          title: Text('Ürünü Sil?', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                          content: Text('Bu ürünü ve alt varyantlarını silmek istediğinize emin misiniz?', style: GoogleFonts.inter(color: Colors.white70)),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60))),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                              child: Text('Sil', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        final success = await _apiService.deleteProduct(productId);
+                        if (mounted) {
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün başarıyla silindi.'), backgroundColor: Colors.redAccent));
+                            _loadData();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ürün silinirken bir hata oluştu.'), backgroundColor: Colors.red));
+                          }
+                        }
+                      }
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

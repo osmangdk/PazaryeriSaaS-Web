@@ -572,9 +572,11 @@ class _LandingScreenState extends State<LandingScreen> {
 
 
   Widget _buildNavbar() {
-    final isDesktop = MediaQuery.of(context).size.width > 850;
+    final isDesktop = MediaQuery.of(context).size.width > 1050;
+    final isTablet = MediaQuery.of(context).size.width > 700;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16, vertical: 14),
       decoration: BoxDecoration(
         color: const Color(0xFF0A1118).withOpacity(0.92),
         border: const Border(bottom: BorderSide(color: Colors.white10)),
@@ -587,19 +589,19 @@ class _LandingScreenState extends State<LandingScreen> {
               children: [
                 Image.asset(
                   'assets/images/roatech_emblem.png',
-                  width: 38,
-                  height: 38,
+                  width: 34,
+                  height: 34,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: Colors.blueAccent.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 22),
+                    child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 20),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -608,20 +610,20 @@ class _LandingScreenState extends State<LandingScreen> {
                       'Roatech',
                       style: GoogleFonts.inter(
                         color: Colors.white,
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.5,
                         height: 1.0,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
-                      'Pazaryeri Entegrasyon & API',
+                      'Pazaryeri Entegrasyon',
                       style: GoogleFonts.inter(
                         color: const Color(0xFF38BDF8),
-                        fontSize: 9.5,
+                        fontSize: 9.0,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -629,31 +631,41 @@ class _LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-
-          const Spacer(),
           if (isDesktop) ...[
-            _navButton('Özellikler', () => _scrollTo(_featuresKey)),
-            _navButton('Pazaryerleri', () => _scrollTo(_marketplacesKey)),
-            _navButton('📱 Mobil Uygulama', () => _scrollTo(_mobileAppKey)),
-            _navButton('Nasıl Çalışır?', () => _scrollTo(_howItWorksKey)),
-            _navButton('Fiyatlandırma', () => _scrollTo(_pricingKey)),
-            _navButton('SSS', () => _scrollTo(_faqKey)),
-            const SizedBox(width: 20),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _navButton('Özellikler', () => _scrollTo(_featuresKey)),
+                    _navButton('Pazaryerleri', () => _scrollTo(_marketplacesKey)),
+                    _navButton('Mobil Uygulama', () => _scrollTo(_mobileAppKey)),
+                    _navButton('Nasıl Çalışır?', () => _scrollTo(_howItWorksKey)),
+                    _navButton('Fiyatlandırma', () => _scrollTo(_pricingKey)),
+                    _navButton('SSS', () => _scrollTo(_faqKey)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ] else ...[
+            const Spacer(),
           ],
           TextButton(
             onPressed: () => context.go('/login'),
-            child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600)),
+            child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 13)),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () => context.go('/login'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blueAccent,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+            child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
           ),
         ],
       ),
@@ -677,7 +689,7 @@ class _LandingScreenState extends State<LandingScreen> {
           children: [
             const SizedBox(height: 30),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.blueAccent.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(30),
@@ -686,9 +698,12 @@ class _LandingScreenState extends State<LandingScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.flash_on, color: Colors.blueAccent, size: 16),
-                  const SizedBox(width: 8),
-                  Text('2026 Nesil Entegrasyon Motoru — 1.2sn Senkronizasyon', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 13, fontWeight: FontWeight.w600)),
+                  const Icon(Icons.flash_on, color: Colors.blueAccent, size: 15),
+                  const SizedBox(width: 6),
+                  Text(
+                    isMobile ? '⚡ 1.2sn Anlık Senkronizasyon' : '2026 Nesil Entegrasyon Motoru — 1.2sn Senkronizasyon',
+                    style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: isMobile ? 11.5 : 13, fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
             ),
