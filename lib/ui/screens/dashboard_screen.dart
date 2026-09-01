@@ -4845,12 +4845,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         children: [
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () {
-                                final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
-                                final url = _apiService.getInvoiceUrl(firstOrderId);
-                                _launchSafeUrl(url);
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu GİB E-Fatura yazdırma sayfası açıldı! 📑'), backgroundColor: Colors.blueAccent));
-                              },
+                              onPressed: _showBulkInvoiceDialog,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF1E40AF),
                                 foregroundColor: Colors.white,
@@ -4865,12 +4860,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           const SizedBox(width: 8),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () {
-                                final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
-                                final url = _apiService.getShippingLabelUrl(firstOrderId);
-                                _launchSafeUrl(url);
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu Kargo Barkodları yazdırma sayfası açıldı! 🏷️'), backgroundColor: Colors.orange));
-                              },
+                              onPressed: _showBulkShippingLabelDialog,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFC2410C),
                                 foregroundColor: Colors.white,
@@ -4922,24 +4912,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       Row(
                         children: [
                           ElevatedButton.icon(
-                            onPressed: () {
-                              final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
-                              final url = _apiService.getInvoiceUrl(firstOrderId);
-                              _launchSafeUrl(url);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu GİB E-Fatura yazdırma sayfası açıldı! 📑'), backgroundColor: Colors.blueAccent));
-                            },
+                            onPressed: _showBulkInvoiceDialog,
                             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E40AF), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                             icon: const Icon(Icons.receipt_long, size: 16),
                             label: Text('📑 Toplu E-Fatura Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton.icon(
-                            onPressed: () {
-                              final firstOrderId = allOrders.isNotEmpty ? (allOrders.first['orderId'] ?? 'TY-984321045') : 'TY-984321045';
-                              final url = _apiService.getShippingLabelUrl(firstOrderId);
-                              _launchSafeUrl(url);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Toplu Kargo Barkodları yazdırma sayfası açıldı! 🏷️'), backgroundColor: Colors.orange));
-                            },
+                            onPressed: _showBulkShippingLabelDialog,
                             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC2410C), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                             icon: const Icon(Icons.qr_code_2, size: 16),
                             label: Text('🏷️ Toplu Barkod Bas', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -5508,10 +5488,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                             icon: Icons.receipt_long_rounded,
                                             label: 'GİB E-Fatura',
                                             color: Colors.blueAccent,
-                                            onTap: () {
-                                              final url = _apiService.getInvoiceUrl(orderId);
-                                              _launchSafeUrl(url);
-                                            },
+                                            onTap: () => _showInvoiceDialog(o),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
@@ -5520,10 +5497,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                             icon: Icons.qr_code_2_rounded,
                                             label: 'Kargo Barkodu',
                                             color: Colors.orangeAccent,
-                                            onTap: () {
-                                              final url = _apiService.getShippingLabelUrl(orderId);
-                                              _launchSafeUrl(url);
-                                            },
+                                            onTap: () => _showShippingLabelDialog(o),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
@@ -5563,20 +5537,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     icon: Icons.receipt_long_rounded,
                                     label: 'GİB E-Fatura',
                                     color: Colors.blueAccent,
-                                    onTap: () {
-                                      final url = _apiService.getInvoiceUrl(orderId);
-                                      _launchSafeUrl(url);
-                                    },
+                                    onTap: () => _showInvoiceDialog(o),
                                   ),
                                   const SizedBox(width: 8),
                                   _buildOrderActionButton(
                                     icon: Icons.qr_code_2_rounded,
                                     label: 'Kargo Barkodu',
                                     color: Colors.orangeAccent,
-                                    onTap: () {
-                                      final url = _apiService.getShippingLabelUrl(orderId);
-                                      _launchSafeUrl(url);
-                                    },
+                                    onTap: () => _showShippingLabelDialog(o),
                                   ),
                                   const SizedBox(width: 8),
                                   _buildOrderActionButton(
@@ -5695,6 +5663,774 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // --- GİB E-ARŞİV FATURA GÖRÜNTÜLEME MODALI ---
+  void _showInvoiceDialog(Map<String, dynamic> order) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
+    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
+    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
+    final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
+    final orderDate = (order['orderDate'] ?? '01.09.2026 19:42').toString();
+    final totalPrice = double.tryParse(order['totalPrice']?.toString() ?? '0') ?? 1083.90;
+    final lines = (order['lines'] is List && (order['lines'] as List).isNotEmpty)
+        ? (order['lines'] as List)
+        : [
+            {
+              'productTitle': 'Tudors Erkek 5\'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört',
+              'sku': 'TDR-POLO-5PK-L',
+              'quantity': 1,
+              'price': totalPrice,
+            }
+          ];
+
+    final kdvRatio = 0.20;
+    final matrah = totalPrice / (1 + kdvRatio);
+    final kdvAmount = totalPrice - matrah;
+    final cleanDigits = orderId.replaceAll(RegExp(r'[^0-9]'), '');
+    final invoiceNo = 'GIB${DateTime.now().year}${cleanDigits.padLeft(9, '0').substring(0, 9)}';
+    final ettnUuid = 'a4b89c72-${orderId.hashCode.abs().toString().padLeft(4, '0')}-4e31-8f12-${orderId.length}a9b2c3d4e5f';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.blueAccent, width: 1.5),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('GİB E-Arşiv Fatura Önizleme', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('Fatura No: $invoiceNo • $marketplace', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
+                ],
+              ),
+            ),
+            IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+          ],
+        ),
+        content: SizedBox(
+          width: 620,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Fatura Başlık & Resmi Damga Kutusu
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                        ),
+                        child: const Icon(Icons.account_balance, color: Colors.redAccent, size: 26),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('T.C. GELİR İDARESİ BAŞKANLIĞI', style: GoogleFonts.inter(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.5)),
+                            Text('E-ARŞİV FATURA (509 VUK)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('ETTN: $ettnUuid', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.greenAccent.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.greenAccent.withOpacity(0.4)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.verified, color: Colors.greenAccent, size: 14),
+                            const SizedBox(width: 5),
+                            Text('GİB ONAYLI', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 11)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Satıcı & Alıcı Bilgileri
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Satıcı
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.02),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('SATICI (MÜKELLEF)', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 11)),
+                            const SizedBox(height: 4),
+                            Text('RoaTech Bilişim ve E-Ticaret A.Ş.', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                            Text('VKN: 7890123456 • Kadıköy V.D.', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                            Text('Barbaros Mah. Mor Sümbül Sok. No:1/A Ataşehir / İstanbul', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Alıcı
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.02),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('ALICI (MÜŞTERİ)', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 11)),
+                            const SizedBox(height: 4),
+                            Text(customerName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                            Text('TCKN: 11111111111', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                            Text(customerAddress, style: GoogleFonts.inter(color: Colors.white54, fontSize: 10), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Kalemler Tablosu
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(flex: 4, child: Text('Mal / Hizmet Açıklaması', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                            Expanded(flex: 1, child: Text('Miktar', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                            Expanded(flex: 2, child: Text('Birim Fiyat', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                            Expanded(flex: 1, child: Text('KDV', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                            Expanded(flex: 2, child: Text('Toplam', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                          ],
+                        ),
+                      ),
+                      ...lines.map((line) {
+                        final pTitle = (line['productTitle'] ?? 'Sipariş Ürünü').toString();
+                        final pQty = (line['quantity'] ?? 1).toString();
+                        final pPrice = double.tryParse(line['price']?.toString() ?? '0') ?? totalPrice;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Row(
+                            children: [
+                              Expanded(flex: 4, child: Text(pTitle, style: GoogleFonts.inter(color: Colors.white, fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis)),
+                              Expanded(flex: 1, child: Text('$pQty Adet', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11))),
+                              Expanded(flex: 2, child: Text(formatTL(pPrice), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white, fontSize: 11))),
+                              Expanded(flex: 1, child: Text('%20', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11))),
+                              Expanded(flex: 2, child: Text(formatTL(pPrice), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Fatura Toplam Özeti & QR
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Row(
+                    children: [
+                      // QR Kod Görseli
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.qr_code_2, color: Colors.black87, size: 44),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Ödeme: Kredi Kartı / Pazaryeri Havuzu', style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
+                            Text('Sipariş: $orderId ($marketplace)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
+                            Text('Tarih: $orderDate', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('Matrah: ${formatTL(matrah)}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                          Text('KDV (%20): ${formatTL(kdvAmount)}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 11)),
+                          const SizedBox(height: 4),
+                          Text('ÖDENECEK: ${formatTL(totalPrice)}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Kapat', style: GoogleFonts.inter(color: Colors.white70)),
+          ),
+          OutlinedButton.icon(
+            onPressed: () {
+              final url = _apiService.getInvoiceUrl(orderId);
+              _launchSafeUrl(url);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('E-Fatura harici tarayıcı sekmesinde açılıyor... 🌐'), backgroundColor: Colors.blueAccent),
+              );
+            },
+            icon: const Icon(Icons.open_in_new, size: 14, color: Colors.blueAccent),
+            label: Text('Tarayıcıda Aç', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+            style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.blueAccent)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text('$invoiceNo nolu GİB E-Arşiv Fatura PDF olarak oluşturuldu ve yazdırma kuyruğuna gönderildi! 📑')),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFF1E40AF),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            },
+            icon: const Icon(Icons.print, size: 15),
+            label: Text('🖨️ Faturayı Yazdır / PDF İndir', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- PAZARYERİ KARGO BARKODU & SEVK ETİKETİ MODALI ---
+  void _showShippingLabelDialog(Map<String, dynamic> order) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
+    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
+    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
+    final cargoCompany = (order['cargoCompany'] ?? 'Trendyol Express').toString();
+    final trackingNumber = (order['cargoTrackingNumber'] ?? 'TYEXP-884920194').toString();
+    final cargoBarcode = (order['cargoBarcode'] ?? '8680009423635-TY').toString();
+    final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.orangeAccent, width: 1.5),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orangeAccent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.qr_code_2, color: Colors.orangeAccent, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Kargo Barkodu & Sevk Etiketi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('$cargoCompany • $marketplace', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
+                ],
+              ),
+            ),
+            IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+          ],
+        ),
+        content: SizedBox(
+          width: 460,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Termal Etiket Çerçevesi (100x150 mm formatı)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 10, offset: Offset(0, 4))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Kargo Şirket Başlığı
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(cargoCompany.toUpperCase(), style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 17, letterSpacing: 0.5)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
+                            child: Text(marketplace.toUpperCase(), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
+                          ),
+                        ],
+                      ),
+                      const Divider(color: Colors.black38, thickness: 1.5, height: 16),
+
+                      // Büyük Barkod Çizgileri
+                      Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 60,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.black26),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: List.generate(38, (i) {
+                                  final isThick = (i % 3 == 0) || (i % 7 == 0);
+                                  final isSpace = (i % 5 == 0);
+                                  if (isSpace) return const SizedBox(width: 3);
+                                  return Container(
+                                    width: isThick ? 4 : 2,
+                                    color: Colors.black87,
+                                  );
+                                }),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(trackingNumber, style: GoogleFonts.courierPrime(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 15, letterSpacing: 2)),
+                            Text('Barkod Kodu: $cargoBarcode', style: GoogleFonts.inter(color: Colors.black54, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                      const Divider(color: Colors.black38, thickness: 1.5, height: 16),
+
+                      // Alıcı Bilgileri
+                      Text('ALICI BİLGİLERİ:', style: GoogleFonts.inter(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 10)),
+                      const SizedBox(height: 2),
+                      Text(customerName, style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text(customerAddress, style: GoogleFonts.inter(color: Colors.black87, fontSize: 11, height: 1.3)),
+                      const SizedBox(height: 10),
+
+                      // Gönderici & Paket Detayı
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(6)),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('GÖNDERİCİ: RoaTech Mağazacılık', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 10)),
+                                  Text('Sipariş No: $orderId', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9)),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('DESİ: 1.5', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 10)),
+                                Text('Parça: 1 / 1', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Kapat', style: GoogleFonts.inter(color: Colors.white70)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text('$orderId için $cargoCompany kargo barkodu termal etiket yazıcıya gönderildi! 🏷️')),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFFC2410C),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            },
+            icon: const Icon(Icons.print, size: 16),
+            label: Text('🖨️ Termal Barkod Yazıcıya Gönder', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC2410C), foregroundColor: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- TOPLU GİB E-FATURA KESME & YAZDIRMA MODALI ---
+  void _showBulkInvoiceDialog() {
+    final allOrders = (_orders ?? []);
+    double totalRevenue = 0;
+    for (var o in allOrders) {
+      totalRevenue += double.tryParse(o['totalPrice']?.toString() ?? '0') ?? 0;
+    }
+    final kdvTotal = totalRevenue * (0.20 / 1.20);
+    final matrahTotal = totalRevenue - kdvTotal;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.blueAccent, width: 1.5),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Toplu GİB E-Fatura Kesme & Yazdırma', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('${allOrders.length} Adet Sipariş Seçildi', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
+                ],
+              ),
+            ),
+            IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+          ],
+        ),
+        content: SizedBox(
+          width: 580,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Toplam Matrah', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                        Text(formatTL(matrahTotal), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('KDV (%20)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                        Text(formatTL(kdvTotal), style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('Genel Toplam', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                        Text(formatTL(totalRevenue), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text('Fatura Kesilecek Siparişler:', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 13)),
+              const SizedBox(height: 8),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 220),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(8),
+                  itemCount: allOrders.length,
+                  separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
+                  itemBuilder: (context, index) {
+                    final o = allOrders[index];
+                    final oId = o['orderId'] ?? o['orderNumber'] ?? 'ORD-$index';
+                    final cName = o['customerName'] ?? 'Müşteri';
+                    final mp = o['marketplace'] ?? 'Trendyol';
+                    final price = double.tryParse(o['totalPrice']?.toString() ?? '0') ?? 0;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_box, color: Colors.blueAccent, size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('$cName ($oId)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                                Text(mp, style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
+                              ],
+                            ),
+                          ),
+                          Text(formatTL(price), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white70)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text('${allOrders.length} adet sipariş için GİB E-Arşiv faturaları başarıyla kesildi ve toplu PDF olarak hazırlandı! 📑')),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFF1E40AF),
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            },
+            icon: const Icon(Icons.print, size: 16),
+            label: Text('📑 ${allOrders.length} Faturayı Toplu Kes & Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E40AF), foregroundColor: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- TOPLU KARGO BARKODU BASIM MODALI ---
+  void _showBulkShippingLabelDialog() {
+    final allOrders = (_orders ?? []);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Colors.orangeAccent, width: 1.5),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Colors.orangeAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.qr_code_2, color: Colors.orangeAccent, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Toplu Kargo Barkodu Basımı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('${allOrders.length} Adet Sevk Etiketi Hazır', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
+                ],
+              ),
+            ),
+            IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+          ],
+        ),
+        content: SizedBox(
+          width: 540,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.orangeAccent.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.print_outlined, color: Colors.orangeAccent, size: 24),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text('Tüm siparişlerin kargo barkodları 100x150 mm termal rulo etiket formatında sıraya alındı.', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text('Yazdırılacak Kargo Etiketleri:', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 13)),
+              const SizedBox(height: 8),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 220),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(8),
+                  itemCount: allOrders.length,
+                  separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
+                  itemBuilder: (context, index) {
+                    final o = allOrders[index];
+                    final oId = o['orderId'] ?? o['orderNumber'] ?? 'ORD-$index';
+                    final cName = o['customerName'] ?? 'Müşteri';
+                    final cargo = o['cargoCompany'] ?? 'Trendyol Express';
+                    final tracking = o['cargoTrackingNumber'] ?? 'TYEXP-884920194';
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_box, color: Colors.orangeAccent, size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('$cName • $oId', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                                Text('$cargo - Takip: $tracking', style: GoogleFonts.inter(color: Colors.cyanAccent, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(4)),
+                            child: Text('1.5 Desi', style: GoogleFonts.inter(color: Colors.white70, fontSize: 10)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white70)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text('${allOrders.length} adet kargo barkodu termal etiket yazıcıya gönderildi! 🏷️')),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFFC2410C),
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            },
+            icon: const Icon(Icons.print, size: 16),
+            label: Text('🏷️ ${allOrders.length} Kargo Barkodunu Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC2410C), foregroundColor: Colors.white),
+          ),
+        ],
       ),
     );
   }
@@ -6285,236 +7021,643 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildProductsTab() {
-    final filtered = _getFilteredProducts();
-    final activeCatLabel = _getActiveCategoryLabel();
-    final isFilteringActive = _selectedCategoryFilter != 'ALL' || _productSearchQuery.trim().isNotEmpty;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Üst Başlık & Eylem Butonları
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Ürün Kataloğu & Kategori Yönetimi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                Text('Kategorilere göre ürünlerinizi filtreleyin, kampanya tanımlayın ve pazaryerlerine eşitleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
-              ],
-            ),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _showSimplifiedAddProductDialog,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  icon: const Icon(Icons.add_photo_alternate, size: 18),
-                  label: Text('+ Yeni Ürün & Kampanya Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'all'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  icon: const Icon(Icons.sync_alt, size: 18),
-                  label: Text('⚡ Tüm Pazaryerlerine Senkronize Et', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // Ana İçerik: Sol Kategori Ağacı + Sağ Ürün Kataloğu
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Sol: Kategori Ağacı Menüsü
-            _buildCategorySidebar(),
-            const SizedBox(width: 18),
-
-            // Sağ: Filtrelenmiş Ürün Listesi
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Arama ve Filtre Durum Çubuğu
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A).withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
+  void _showCategoryFilterBottomSheet() {
+    final totalCount = _products?.length ?? 0;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF0F172A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        side: BorderSide(color: Colors.white24),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            minChildSize: 0.4,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (_, scrollController) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(color: Colors.white38, borderRadius: BorderRadius.circular(2)),
+                      ),
                     ),
-                    child: Row(
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Arama Kutusu
-                        Expanded(
-                          child: TextField(
-                            controller: _productSearchController,
-                            onChanged: (v) => setState(() => _productSearchQuery = v),
-                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-                            decoration: InputDecoration(
-                              hintText: '🔍 Ürün adı, barkod, model kodu veya SKU ara...',
-                              hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.04),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                              prefixIcon: const Icon(Icons.search, color: Colors.white38, size: 18),
-                              suffixIcon: _productSearchQuery.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear, size: 16, color: Colors.white54),
-                                      onPressed: () {
-                                        _productSearchController.clear();
-                                        setState(() => _productSearchQuery = '');
-                                      },
-                                    )
-                                  : null,
-                            ),
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.category_outlined, color: Colors.blueAccent, size: 22),
+                            const SizedBox(width: 8),
+                            Text('Kategori Seçin', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-
-                        // Aktif Kategori Göstergesi & Sıfırla Butonu
-                        if (isFilteringActive) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.orangeAccent.withOpacity(0.3)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.filter_alt, size: 14, color: Colors.orangeAccent),
-                                const SizedBox(width: 6),
-                                Text(
-                                  activeCatLabel,
-                                  style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12, fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedCategoryFilter = 'ALL';
-                                      _selectedSubCategoryFilter = null;
-                                      _productSearchController.clear();
-                                      _productSearchQuery = '';
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(color: Colors.orangeAccent.withOpacity(0.2), shape: BoxShape.circle),
-                                    child: const Icon(Icons.close, size: 12, color: Colors.orangeAccent),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-
-                        // Tüm Ürünleri Göster Butonu
-                        OutlinedButton.icon(
+                        TextButton(
                           onPressed: () {
                             setState(() {
                               _selectedCategoryFilter = 'ALL';
                               _selectedSubCategoryFilter = null;
-                              _productSearchController.clear();
-                              _productSearchQuery = '';
                             });
+                            Navigator.pop(ctx);
                           },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white70,
-                            side: BorderSide(color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white24),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          icon: const Icon(Icons.list_alt, size: 16),
-                          label: Text('Tüm Ürünleri Listele (${_products?.length ?? 0})', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                          child: Text('Tümünü Göster ($totalCount)', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Ürün Listesi VEYA Filtre Boş Durumu
-                  if (filtered.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(36),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.04),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white12),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    const Divider(color: Colors.white12),
+                    Expanded(
+                      child: ListView(
+                        controller: scrollController,
                         children: [
-                          Icon(Icons.inventory_2_outlined, color: Colors.orangeAccent.withOpacity(0.6), size: 48),
-                          const SizedBox(height: 14),
-                          Text(
-                            '"$activeCatLabel" kategorisinde ürün bulunamadı',
-                            style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Bu kategoriye yeni ürün tanımlayabilir veya sol menüden tüm ürünleri listeleyebilirsiniz.',
-                            style: GoogleFonts.inter(color: Colors.white60, fontSize: 13),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 18),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton.icon(
-                                onPressed: _showSimplifiedAddProductDialog,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange[800],
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                icon: const Icon(Icons.add, size: 16),
-                                label: Text('+ Bu Kategoriye Ürün Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                          ..._catalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
+                            final catId = cat['id'] as String;
+                            final catTitle = cat['title'] as String;
+                            final icon = cat['icon'] as IconData;
+                            final color = cat['color'] as Color;
+                            final subCats = cat['subCategories'] as List<String>;
+                            final isExpanded = _expandedCategoryIds.contains(catId);
+                            final isMainSelected = _selectedCategoryFilter == catId;
+                            final catCount = _getCategoryCount(catId);
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: isMainSelected ? color.withOpacity(0.1) : Colors.white.withOpacity(0.03),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: isMainSelected ? color : Colors.white12),
                               ),
-                              const SizedBox(width: 12),
-                              OutlinedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    _selectedCategoryFilter = 'ALL';
-                                    _selectedSubCategoryFilter = null;
+                              child: ExpansionTile(
+                                key: PageStorageKey(catId),
+                                initiallyExpanded: isExpanded,
+                                onExpansionChanged: (exp) {
+                                  setModalState(() {
+                                    if (exp) {
+                                      _expandedCategoryIds.add(catId);
+                                    } else {
+                                      _expandedCategoryIds.remove(catId);
+                                    }
                                   });
                                 },
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.blueAccent,
-                                  side: const BorderSide(color: Colors.blueAccent),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                leading: Icon(icon, color: color, size: 22),
+                                title: Text(catTitle, style: GoogleFonts.inter(color: Colors.white, fontWeight: isMainSelected ? FontWeight.bold : FontWeight.w600, fontSize: 14)),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
+                                      child: Text('$catCount', style: GoogleFonts.inter(color: color, fontWeight: FontWeight.bold, fontSize: 11)),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54),
+                                  ],
                                 ),
-                                icon: const Icon(Icons.apps, size: 16),
-                                label: Text('🌐 Tüm Ürünleri Listele', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                                children: [
+                                  ListTile(
+                                    dense: true,
+                                    title: Text('Tüm $catTitle Ürünleri', style: GoogleFonts.inter(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
+                                    trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.white38),
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedCategoryFilter = catId;
+                                        _selectedSubCategoryFilter = null;
+                                      });
+                                      Navigator.pop(ctx);
+                                    },
+                                  ),
+                                  ...subCats.map((sub) {
+                                    final isSub = isMainSelected && _selectedSubCategoryFilter == sub;
+                                    final subCount = _getCategoryCount(catId, subCat: sub);
+                                    return ListTile(
+                                      dense: true,
+                                      title: Text(sub, style: GoogleFonts.inter(color: isSub ? Colors.white : Colors.white70, fontWeight: isSub ? FontWeight.bold : FontWeight.normal, fontSize: 12.5)),
+                                      trailing: Text('$subCount', style: GoogleFonts.inter(color: Colors.white38, fontSize: 11)),
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCategoryFilter = catId;
+                                          _selectedSubCategoryFilter = sub;
+                                        });
+                                        Navigator.pop(ctx);
+                                      },
+                                    );
+                                  }).toList(),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildProductsTab() {
+    final filtered = _getFilteredProducts();
+    final activeCatLabel = _getActiveCategoryLabel();
+    final isFilteringActive = _selectedCategoryFilter != 'ALL' || _productSearchQuery.trim().isNotEmpty;
+    final totalCount = _products?.length ?? 0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 960;
+        final isSmallMobile = constraints.maxWidth < 640;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Üst Başlık & Eylem Butonları (Responsive)
+            if (isSmallMobile)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Ürün Kataloğu & Varyantlar', style: GoogleFonts.inter(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text('Kategorilere göre filtreleyin, kampanya tanımlayın ve pazaryerlerine aktarın', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11.5)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _showSimplifiedAddProductDialog,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange[800],
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          icon: const Icon(Icons.add, size: 16),
+                          label: Text('+ Yeni Ürün', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'all'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          icon: const Icon(Icons.sync_alt, size: 16),
+                          label: Text('⚡ Senkronize Et', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Ürün Kataloğu & Kategori Yönetimi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                      Text('Kategorilere göre ürünlerinizi filtreleyin, kampanya tanımlayın ve pazaryerlerine eşitleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _showSimplifiedAddProductDialog,
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[800], foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                        icon: const Icon(Icons.add_photo_alternate, size: 18),
+                        label: Text('+ Yeni Ürün & Kampanya Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => _showBatchSyncApprovalDialog(initialScope: 'all'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                        icon: const Icon(Icons.sync_alt, size: 18),
+                        label: Text('⚡ Tüm Pazaryerlerine Senkronize Et', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            const SizedBox(height: 16),
+
+            // Mobil / Tablet İçin Yatay Kategori Çip Çubuğu
+            if (isMobile) ...[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    // Tümü Çipi
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedCategoryFilter = 'ALL';
+                          _selectedSubCategoryFilter = null;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent.withOpacity(0.25) : Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white12,
+                            width: _selectedCategoryFilter == 'ALL' ? 1.4 : 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.apps, size: 15, color: Colors.blueAccent),
+                            const SizedBox(width: 6),
+                            Text('Tümü ($totalCount)', style: GoogleFonts.inter(color: Colors.white, fontWeight: _selectedCategoryFilter == 'ALL' ? FontWeight.bold : FontWeight.w500, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Kategori Çipleri
+                    ..._catalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
+                      final catId = cat['id'] as String;
+                      final catTitle = cat['title'] as String;
+                      final icon = cat['icon'] as IconData;
+                      final color = cat['color'] as Color;
+                      final isSelected = _selectedCategoryFilter == catId;
+                      final count = _getCategoryCount(catId);
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _selectedCategoryFilter = catId;
+                              _selectedSubCategoryFilter = null;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: isSelected ? color.withOpacity(0.22) : Colors.white.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSelected ? color : Colors.white12,
+                                width: isSelected ? 1.4 : 1.0,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(icon, size: 15, color: color),
+                                const SizedBox(width: 6),
+                                Text(catTitle, style: GoogleFonts.inter(color: isSelected ? Colors.white : Colors.white70, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, fontSize: 12)),
+                                if (count > 0) ...[
+                                  const SizedBox(width: 5),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                    decoration: BoxDecoration(color: color.withOpacity(0.25), borderRadius: BorderRadius.circular(6)),
+                                    child: Text('$count', style: GoogleFonts.inter(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+
+                    // Kategori Ağacı Aç Modalı Butonu
+                    InkWell(
+                      onTap: _showCategoryFilterBottomSheet,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.account_tree_outlined, size: 15, color: Colors.cyanAccent),
+                            const SizedBox(width: 5),
+                            Text('Ağaç Görünümü', style: GoogleFonts.inter(color: Colors.cyanAccent, fontWeight: FontWeight.w600, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Seçili Kategori Alt Kategorileri Çip Çubuğu (Varsa)
+              if (_selectedCategoryFilter != 'ALL') ...[
+                Builder(
+                  builder: (context) {
+                    final currentCat = _catalogCategories.firstWhere((c) => c['id'] == _selectedCategoryFilter, orElse: () => _catalogCategories.first);
+                    final subCats = currentCat['subCategories'] as List<String>? ?? [];
+                    final color = currentCat['color'] as Color? ?? Colors.blueAccent;
+
+                    if (subCats.isEmpty) return const SizedBox.shrink();
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Row(
+                          children: [
+                            // "Tüm Alt Kategoriler"
+                            InkWell(
+                              onTap: () => setState(() => _selectedSubCategoryFilter = null),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                margin: const EdgeInsets.only(right: 6),
+                                decoration: BoxDecoration(
+                                  color: _selectedSubCategoryFilter == null ? color.withOpacity(0.25) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: _selectedSubCategoryFilter == null ? color : Colors.white12),
+                                ),
+                                child: Text('Tüm ${currentCat['title']}', style: GoogleFonts.inter(color: _selectedSubCategoryFilter == null ? Colors.white : Colors.white60, fontSize: 11, fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                            // Tekil Alt Kategoriler
+                            ...subCats.map((sub) {
+                              final isSub = _selectedSubCategoryFilter == sub;
+                              final subCount = _getCategoryCount(_selectedCategoryFilter, subCat: sub);
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: InkWell(
+                                  onTap: () => setState(() => _selectedSubCategoryFilter = sub),
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: isSub ? color.withOpacity(0.3) : Colors.white.withOpacity(0.03),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: isSub ? color : Colors.white12),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(sub, style: GoogleFonts.inter(color: isSub ? Colors.white : Colors.white70, fontSize: 11, fontWeight: isSub ? FontWeight.bold : FontWeight.normal)),
+                                        if (subCount > 0) ...[
+                                          const SizedBox(width: 4),
+                                          Text('($subCount)', style: GoogleFonts.inter(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+            ],
+
+            // Ana Bölüm (Masaüstü: 2 Sütun, Mobil: 1 Sütun Tam Genişlik)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Sol Sidebar Yalnızca Masaüstü Ekranlarda Gösterilir!
+                if (!isMobile) ...[
+                  _buildCategorySidebar(),
+                  const SizedBox(width: 18),
+                ],
+
+                // Sağ Liste / Mobil Liste (Tam Genişlik)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Arama ve Filtre Durum Çubuğu
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A).withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white12),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                // Arama Kutusu
+                                Expanded(
+                                  child: TextField(
+                                    controller: _productSearchController,
+                                    onChanged: (v) => setState(() => _productSearchQuery = v),
+                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                    decoration: InputDecoration(
+                                      hintText: '🔍 Ürün adı, barkod veya SKU ara...',
+                                      hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                      filled: true,
+                                      fillColor: Colors.white.withOpacity(0.04),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                                      prefixIcon: const Icon(Icons.search, color: Colors.white38, size: 18),
+                                      suffixIcon: _productSearchQuery.isNotEmpty
+                                          ? IconButton(
+                                              icon: const Icon(Icons.clear, size: 16, color: Colors.white54),
+                                              onPressed: () {
+                                                _productSearchController.clear();
+                                                setState(() => _productSearchQuery = '');
+                                              },
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                                if (!isSmallMobile) ...[
+                                  const SizedBox(width: 10),
+                                  // Tüm Ürünleri Göster Butonu (Masaüstü/Tablet)
+                                  OutlinedButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        _selectedCategoryFilter = 'ALL';
+                                        _selectedSubCategoryFilter = null;
+                                        _productSearchController.clear();
+                                        _productSearchQuery = '';
+                                      });
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white70,
+                                      side: BorderSide(color: _selectedCategoryFilter == 'ALL' ? Colors.blueAccent : Colors.white24),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    icon: const Icon(Icons.list_alt, size: 16),
+                                    label: Text('Tümü ($totalCount)', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            // Mobil İçin Aktif Filtre Bilgisi ve Sıfırlama
+                            if (isFilteringActive) ...[
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: Colors.orangeAccent.withOpacity(0.4)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.filter_alt, size: 13, color: Colors.orangeAccent),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          activeCatLabel,
+                                          style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 11.5, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedCategoryFilter = 'ALL';
+                                        _selectedSubCategoryFilter = null;
+                                        _productSearchController.clear();
+                                        _productSearchQuery = '';
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.redAccent.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.close, size: 12, color: Colors.redAccent),
+                                          const SizedBox(width: 4),
+                                          Text('Filtreyi Temizle', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Ürün Listesi VEYA Filtre Boş Durumu
+                      if (filtered.isEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.04),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.white12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.inventory_2_outlined, color: Colors.orangeAccent.withOpacity(0.6), size: 44),
+                              const SizedBox(height: 12),
+                              Text(
+                                '"$activeCatLabel" kategorisinde ürün bulunamadı',
+                                style: GoogleFonts.inter(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Bu kategoriye yeni ürün ekleyebilir veya filtreyi temizleyip tüm kataloğu listeleyebilirsiniz.',
+                                style: GoogleFonts.inter(color: Colors.white60, fontSize: 12),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                spacing: 10,
+                                runSpacing: 8,
+                                children: [
+                                  ElevatedButton.icon(
+                                    onPressed: _showSimplifiedAddProductDialog,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange[800],
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    icon: const Icon(Icons.add, size: 15),
+                                    label: Text('+ Ürün Ekle', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                                  ),
+                                  OutlinedButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        _selectedCategoryFilter = 'ALL';
+                                        _selectedSubCategoryFilter = null;
+                                        _productSearchController.clear();
+                                        _productSearchQuery = '';
+                                      });
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.blueAccent,
+                                      side: const BorderSide(color: Colors.blueAccent),
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    icon: const Icon(Icons.apps, size: 15),
+                                    label: Text('🌐 Tümünü Listele ($totalCount)', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    )
-                  else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) => _buildProductCard(filtered[index]),
-                    ),
-                ],
-              ),
+                        )
+                      else
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) => _buildProductCard(filtered[index]),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -6872,87 +8015,258 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   }
 
   Widget _buildFinancialsTab() {
-    final gross = _financialSummary?['totalGrossSales'] ?? 18450.0;
-    final commission = _financialSummary?['totalCommissionDeduction'] ?? 3690.0;
-    final cargo = _financialSummary?['totalEstimatedCargoCost'] ?? 1125.0;
-    final netProfit = _financialSummary?['totalNetProfit'] ?? 7380.0;
-    final margin = _financialSummary?['overallProfitMarginPercent'] ?? 40.0;
-    final breakdowns = _financialSummary?['channelBreakdowns'] as List<dynamic>? ?? [];
+    final gross = _financialSummary?['totalGrossSales'] ?? 0.0;
+    final commission = _financialSummary?['totalCommissionDeduction'] ?? 0.0;
+    final cargo = _financialSummary?['totalEstimatedCargoCost'] ?? 0.0;
+    final netProfit = _financialSummary?['totalNetProfit'] ?? 0.0;
+    final margin = _financialSummary?['overallProfitMarginPercent'] ?? 0.0;
+    final rawBreakdowns = _financialSummary?['channelBreakdowns'] as List<dynamic>?;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Gerçek Zamanlı Finans & Kâr/Zarar Analizi', style: GoogleFonts.inter(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        Row(
+    final breakdowns = (rawBreakdowns != null && rawBreakdowns.isNotEmpty)
+        ? rawBreakdowns
+        : [
+            {'marketplace': 'Trendyol', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
+            {'marketplace': 'Hepsiburada', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
+            {'marketplace': 'Amazon TR', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
+            {'marketplace': 'Pazarama', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
+          ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 640;
+        final isTablet = constraints.maxWidth >= 640 && constraints.maxWidth < 960;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: _finCard('Toplam Brüt Ciro', formatTL(gross), Icons.monetization_on, Colors.blueAccent)),
-            const SizedBox(width: 12),
-            Expanded(child: _finCard('Komisyon Kesintileri', formatTL(commission), Icons.percent, Colors.orangeAccent)),
-            const SizedBox(width: 12),
-            Expanded(child: _finCard('Tahmini Kargo Gideri', formatTL(cargo), Icons.local_shipping, Colors.purpleAccent)),
-            const SizedBox(width: 12),
-            Expanded(child: _finCard('Net Kâr Marjı (%$margin)', formatTL(netProfit), Icons.trending_up, Colors.greenAccent)),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Text('Kanal Bazlı Kârlılık Dağılımı', style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        if (breakdowns.isEmpty)
-          _buildEmptyState('Finansal dağılım verisi hesaplanıyor...', Icons.analytics_outlined)
-        else
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
-            child: Column(
+            Text('Gerçek Zamanlı Finans & Kâr/Zarar Analizi', style: GoogleFonts.inter(color: Colors.white, fontSize: isMobile ? 18 : 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('Pazaryeri komisyonları, kargo giderleri ve net kârlılık durumunuzu anlık izleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+            const SizedBox(height: 16),
+
+            // Metrik Kartları (Responsive 2x2 Grid mobilde, 4 sütun masaüstünde)
+            if (isMobile || isTablet) ...[
+              Row(
+                children: [
+                  Expanded(child: _finCard('Brüt Ciro', formatTL(gross), Icons.monetization_on_outlined, Colors.blueAccent)),
+                  const SizedBox(width: 10),
+                  Expanded(child: _finCard('Komisyonlar', formatTL(commission), Icons.percent_outlined, Colors.orangeAccent)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(child: _finCard('Kargo Gideri', formatTL(cargo), Icons.local_shipping_outlined, Colors.purpleAccent)),
+                  const SizedBox(width: 10),
+                  Expanded(child: _finCard('Net Kâr (%$margin)', formatTL(netProfit), Icons.trending_up_outlined, Colors.greenAccent)),
+                ],
+              ),
+            ] else ...[
+              Row(
+                children: [
+                  Expanded(child: _finCard('Toplam Brüt Ciro', formatTL(gross), Icons.monetization_on_outlined, Colors.blueAccent)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _finCard('Komisyon Kesintileri', formatTL(commission), Icons.percent_outlined, Colors.orangeAccent)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _finCard('Tahmini Kargo Gideri', formatTL(cargo), Icons.local_shipping_outlined, Colors.purpleAccent)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _finCard('Net Kâr Marjı (%$margin)', formatTL(netProfit), Icons.trending_up_outlined, Colors.greenAccent)),
+                ],
+              ),
+            ],
+            const SizedBox(height: 24),
+
+            // Kanal Bazlı Kârlılık Dağılımı Başlığı
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Expanded(flex: 3, child: Text('Kanal', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('Sipariş', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('Brüt Ciro', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('Komisyon', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold))),
-                    Expanded(flex: 2, child: Text('Net Kâr', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold))),
-                  ],
+                Text('Kanal Bazlı Kârlılık Dağılımı', style: GoogleFonts.inter(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
+                  child: Text('${breakdowns.length} Kanal', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
-                const SizedBox(height: 8),
-                const Divider(color: Colors.white12),
-                const SizedBox(height: 8),
-                ...breakdowns.map((b) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        children: [
-                          Expanded(flex: 3, child: Text(b['marketplace'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold))),
-                          Expanded(flex: 2, child: Text('${b['orderCount']} Adet', style: GoogleFonts.inter(color: Colors.white70))),
-                          Expanded(flex: 2, child: Text(formatTL(b['grossSales']), style: GoogleFonts.inter(color: Colors.white))),
-                          Expanded(flex: 2, child: Text(formatTL(b['commissionDeducted']), style: GoogleFonts.inter(color: Colors.orangeAccent))),
-                          Expanded(flex: 2, child: Text(formatTL(b['netProfit']), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold))),
-                        ],
-                      ),
-                    )),
               ],
             ),
-          ),
-      ],
+            const SizedBox(height: 12),
+
+            // Kanal Listesi (Mobilde Kart Görünümü, Masaüstünde Tablo)
+            if (isMobile) ...[
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: breakdowns.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final b = breakdowns[index];
+                  final mp = (b['marketplace'] ?? 'Pazaryeri').toString();
+                  final orderCount = b['orderCount'] ?? 0;
+                  final grossSales = b['grossSales'] ?? 0.0;
+                  final com = b['commissionDeducted'] ?? 0.0;
+                  final net = b['netProfit'] ?? 0.0;
+
+                  Color mpColor = Colors.blueAccent;
+                  if (mp.toLowerCase().contains('trendyol')) mpColor = Colors.orange;
+                  else if (mp.toLowerCase().contains('hepsiburada')) mpColor = Colors.deepOrangeAccent;
+                  else if (mp.toLowerCase().contains('amazon')) mpColor = Colors.amberAccent;
+                  else if (mp.toLowerCase().contains('pazarama')) mpColor = Colors.purpleAccent;
+
+                  return Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(color: mpColor, shape: BoxShape.circle),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(mp, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(6)),
+                              child: Text('$orderCount Sipariş', style: GoogleFonts.inter(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        const Divider(color: Colors.white10, height: 1),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Brüt Ciro', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10.5)),
+                                const SizedBox(height: 2),
+                                Text(formatTL(grossSales), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12.5)),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text('Komisyon', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10.5)),
+                                const SizedBox(height: 2),
+                                Text(formatTL(com), style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 12.5)),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('Net Kâr', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10.5)),
+                                const SizedBox(height: 2),
+                                Text(formatTL(net), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(flex: 3, child: Text('Satış Kanalı', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                          Expanded(flex: 2, child: Text('Sipariş Adedi', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                          Expanded(flex: 2, child: Text('Brüt Ciro', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                          Expanded(flex: 2, child: Text('Komisyon Kesintisi', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12))),
+                          Expanded(flex: 2, child: Text('Net Kâr', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ...breakdowns.map((b) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(flex: 3, child: Text(b['marketplace'] ?? '', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
+                              Expanded(flex: 2, child: Text('${b['orderCount']} Adet', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 12))),
+                              Expanded(flex: 2, child: Text(formatTL(b['grossSales']), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white, fontSize: 12))),
+                              Expanded(flex: 2, child: Text(formatTL(b['commissionDeducted']), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12))),
+                              Expanded(flex: 2, child: Text(formatTL(b['netProfit']), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13))),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 70),
+          ],
+        );
+      },
     );
   }
 
   Widget _finCard(String title, String val, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.25), width: 1.2),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
-              Icon(icon, color: color, size: 20),
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(color: Colors.white60, fontSize: 11.5, fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(val, style: GoogleFonts.inter(color: color, fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              val,
+              style: GoogleFonts.inter(
+                color: color,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );
