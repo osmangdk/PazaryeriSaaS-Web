@@ -455,11 +455,15 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   void _scrollTo(GlobalKey key) {
-    Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOut,
-    );
+    final ctx = key.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeInOutCubic,
+        alignment: 0.08,
+      );
+    }
   }
 
   @override
@@ -470,7 +474,7 @@ class _LandingScreenState extends State<LandingScreen> {
         backgroundColor: Colors.purpleAccent.shade700,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
-        label: Text('✨ AI Pazaryeri Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+        label: Text('✨ RoaTech AI Danışmanı', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
       ),
       backgroundColor: const Color(0xFF0A1118),
       body: Stack(
@@ -479,9 +483,11 @@ class _LandingScreenState extends State<LandingScreen> {
             controller: _scrollController,
             thumbVisibility: true,
             interactive: true,
+            thickness: 8,
+            radius: const Radius.circular(8),
             child: SingleChildScrollView(
               controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               child: Column(
                 children: [
                   const SizedBox(height: 80),
@@ -511,6 +517,7 @@ class _LandingScreenState extends State<LandingScreen> {
       ),
     );
   }
+
 
   Widget _buildNavbar() {
     final isDesktop = MediaQuery.of(context).size.width > 850;
