@@ -411,19 +411,212 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final orders = await _apiService.getMarketplaceOrders();
     final financials = await _apiService.getFinancialSummary();
 
+    final populatedProducts = (products != null && products.isNotEmpty)
+        ? products
+        : _getDefaultMockProducts();
+
+    final populatedConnections = (connections != null && connections.isNotEmpty)
+        ? connections
+        : _getDefaultMockConnections();
+
     final populatedOrders = (orders != null && orders.isNotEmpty)
         ? orders
-        : _generateSampleOrders(products);
+        : _generateSampleOrders(populatedProducts);
+
+    final populatedMetrics = metrics ?? {
+      'productCount': populatedProducts.length,
+      'connectionCount': populatedConnections.length,
+      'plan': 'Free',
+      'DaysLeft': 27,
+      'isExpired': false,
+      'tenant': {
+        'companyName': 'Trendyol Entegrasyon Ltd.',
+        'email': 'demo@roatech.com',
+        'subscriptionPlan': 'Free',
+        'subscriptionEndDate': DateTime.now().add(const Duration(days: 27)).toIso8601String(),
+      },
+      'limits': {
+        'currentProducts': populatedProducts.length,
+        'productLimit': 50,
+        'currentConnections': populatedConnections.length,
+        'connectionLimit': 3,
+        'isExpired': false,
+      }
+    };
 
     setState(() {
-      _metrics = metrics;
-      _products = products;
-      _connections = connections;
+      _metrics = populatedMetrics;
+      _products = populatedProducts;
+      _connections = populatedConnections;
       _orders = populatedOrders;
       _financialSummary = financials;
       _isLoading = false;
     });
   }
+
+  List<Map<String, dynamic>> _getDefaultMockConnections() {
+    return [
+      {
+        'id': 'conn-ty-001',
+        'marketplaceType': 0, // Trendyol
+        'marketplaceName': 'Trendyol',
+        'storeName': 'Trendyol Butik Mağazam',
+        'sellerId': '104859',
+        'isActive': true,
+        'lastSyncAt': 'Bugün 20:30',
+      },
+    ];
+  }
+
+  List<Map<String, dynamic>> _getDefaultMockProducts() {
+    return [
+      {
+        'id': 'prod-001',
+        'title': 'Tudors Erkek 5\'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört',
+        'sku': 'TDR-POLO-5PK',
+        'barcode': '8680009423635',
+        'modelCode': '942363515',
+        'brand': 'Tudors',
+        'categoryName': 'Moda',
+        'subCategoryName': 'Erkek Giyim',
+        'price': 1083.90,
+        'listPrice': 1747.80,
+        'costPrice': 450.00,
+        'stockQuantity': 385,
+        'vatRate': 20,
+        'commissionRate': 18.5,
+        'shippingCost': 42.50,
+        'description': 'Tudors 5\'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört. Rahat ve şık günlük kullanım.',
+        'images': [
+          'https://cdn.dsmcdn.com/ty1687/prod/QC_PREP/20250603/18/c2992fcf-6771-3257-8743-e1c6731041fd/1_org_zoom.jpg',
+          'https://cdn.dsmcdn.com/ty1686/prod/QC_PREP/20250603/18/53f6bf86-2c9f-3e2c-87c1-206a47e4ad34/1_org_zoom.jpg'
+        ],
+        'attributes': {
+          'Kalıp': 'Slim Fit',
+          'Materyal': '%55 Polyester %45 Pamuk',
+          'Yaka': 'Polo Yaka',
+          'Renk': 'Gri-Mavi-Haki-Yeşil-Siyah',
+          'Paket': '5\'li'
+        },
+        'connectedMarketplaces': ['Trendyol', 'Hepsiburada', 'Pazarama'],
+        'hasVariants': true,
+        'variants': [
+          {'size': 'XS', 'sku': 'TDR-POLO-5PK-XS', 'barcode': '8680009423630', 'stock': 45, 'price': 1083.90},
+          {'size': 'S', 'sku': 'TDR-POLO-5PK-S', 'barcode': '8680009423631', 'stock': 60, 'price': 1083.90},
+          {'size': 'M', 'sku': 'TDR-POLO-5PK-M', 'barcode': '8680009423632', 'stock': 85, 'price': 1083.90},
+          {'size': 'L', 'sku': 'TDR-POLO-5PK-L', 'barcode': '8680009423633', 'stock': 95, 'price': 1083.90},
+          {'size': 'XL', 'sku': 'TDR-POLO-5PK-XL', 'barcode': '8680009423634', 'stock': 60, 'price': 1083.90},
+          {'size': '2XL', 'sku': 'TDR-POLO-5PK-2XL', 'barcode': '8680009423635', 'stock': 25, 'price': 1083.90},
+          {'size': '3XL', 'sku': 'TDR-POLO-5PK-3XL', 'barcode': '8680009423636', 'stock': 15, 'price': 1083.90},
+        ],
+        'isActive': true,
+        'createdAt': '2026-08-30T12:00:00Z',
+      },
+      {
+        'id': 'prod-002',
+        'title': 'Lenovo V15 G4 ABP AMD Ryzen 5 7530U 16GB 512GB SSD 15.6" FHD FreeDOS Taşınabilir Bilgisayar',
+        'sku': 'LEN-V15-G4-R5-16-512',
+        'barcode': '0197529482109',
+        'modelCode': '82YU00PNLK',
+        'brand': 'Lenovo',
+        'categoryName': 'Elektronik',
+        'subCategoryName': 'Bilgisayar / Tablet',
+        'price': 14899.00,
+        'listPrice': 17999.00,
+        'costPrice': 11500.00,
+        'stockQuantity': 42,
+        'vatRate': 20,
+        'commissionRate': 9.0,
+        'shippingCost': 65.00,
+        'description': 'Lenovo V15 G4 ABP İş ve Günlük Kullanım İçin Yüksek Performanslı Dizüstü Bilgisayar.',
+        'images': [
+          'https://images.hepsiburada.net/assets/Bilgisayar/ProductDescriptions/202305/Lenovo-V15-G4-1.jpg',
+          'https://images.hepsiburada.net/assets/Bilgisayar/ProductDescriptions/202305/Lenovo-V15-G4-2.jpg'
+        ],
+        'attributes': {
+          'İşlemci': 'AMD Ryzen 5 7530U',
+          'RAM': '16 GB',
+          'SSD Kapasitesi': '512 GB SSD',
+          'Ekran': '15.6 inç FHD',
+          'İşletim Sistemi': 'FreeDOS'
+        },
+        'connectedMarketplaces': ['Trendyol', 'Hepsiburada', 'Amazon'],
+        'hasVariants': false,
+        'isActive': true,
+        'createdAt': '2026-08-30T12:00:00Z',
+      },
+      {
+        'id': 'prod-003',
+        'title': 'Apple AirPods Pro 2. Nesil USB-C MagSafe Şarj Kutulu Bluetooth Kulaklık',
+        'sku': 'APL-APP2-USBC',
+        'barcode': '195949052520',
+        'modelCode': 'MTJV3TU/A',
+        'brand': 'Apple',
+        'categoryName': 'Elektronik',
+        'subCategoryName': 'TV, Görüntü & Ses',
+        'price': 8499.00,
+        'listPrice': 9999.00,
+        'costPrice': 6800.00,
+        'stockQuantity': 68,
+        'vatRate': 20,
+        'commissionRate': 12.0,
+        'shippingCost': 35.00,
+        'description': 'Apple AirPods Pro 2. Nesil Aktif Gürültü Engelleme ve Şeffaf Mod Özellikli Premium Kulaklık.',
+        'images': [
+          'https://store.storeimages.cdn-apple.com/4664/as-images.apple.com/is/MTJV3?wid=1144&hei=1144&fmt=jpeg&qlt=90&.v=1694014871985'
+        ],
+        'attributes': {
+          'Bağlantı': 'Bluetooth 5.3',
+          'Gürültü Engelleme': 'Aktif Gürültü Engelleme (ANC)',
+          'Şarj Kutusu': 'MagSafe (USB-C)',
+          'Renk': 'Beyaz'
+        },
+        'connectedMarketplaces': ['Trendyol', 'Hepsiburada', 'Amazon', 'Pazarama'],
+        'hasVariants': false,
+        'isActive': true,
+        'createdAt': '2026-08-30T12:00:00Z',
+      },
+      {
+        'id': 'prod-004',
+        'title': 'Nike Air Monarch IV Erkek Antrenman & Yürüyüş Spor Ayakkabı',
+        'sku': 'NKE-MONARCH4-WHT',
+        'barcode': '0886737000517',
+        'modelCode': '415445-102',
+        'brand': 'Nike',
+        'categoryName': 'Moda',
+        'subCategoryName': 'Erkek Ayakkabı',
+        'price': 2899.00,
+        'listPrice': 3499.00,
+        'costPrice': 1650.00,
+        'stockQuantity': 120,
+        'vatRate': 20,
+        'commissionRate': 16.0,
+        'shippingCost': 45.00,
+        'description': 'Nike Air Monarch IV Erkek Spor Ayakkabı. Dayanıklı deri saya ve hafif köpük taban.',
+        'images': [
+          'https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/e98be903-82a1-4389-897c-ad4429df3457/AIR+MONARCH+IV.png'
+        ],
+        'attributes': {
+          'Cinsiyet': 'Erkek',
+          'Kullanım': 'Antrenman / Günlük',
+          'Taban': 'Air-Sole Yastıklama',
+          'Renk': 'Beyaz/Lacivert'
+        },
+        'connectedMarketplaces': ['Trendyol', 'Hepsiburada'],
+        'hasVariants': true,
+        'variants': [
+          {'size': '40', 'sku': 'NKE-MONARCH4-40', 'barcode': '0886737000510', 'stock': 20, 'price': 2899.00},
+          {'size': '41', 'sku': 'NKE-MONARCH4-41', 'barcode': '0886737000511', 'stock': 30, 'price': 2899.00},
+          {'size': '42', 'sku': 'NKE-MONARCH4-42', 'barcode': '0886737000512', 'stock': 35, 'price': 2899.00},
+          {'size': '43', 'sku': 'NKE-MONARCH4-43', 'barcode': '0886737000513', 'stock': 25, 'price': 2899.00},
+          {'size': '44', 'sku': 'NKE-MONARCH4-44', 'barcode': '0886737000514', 'stock': 10, 'price': 2899.00},
+        ],
+        'isActive': true,
+        'createdAt': '2026-08-30T12:00:00Z',
+      },
+    ];
+  }
+
 
   List<Map<String, dynamic>> _generateSampleOrders(List<dynamic>? products) {
     // Extract actual catalog products if available
