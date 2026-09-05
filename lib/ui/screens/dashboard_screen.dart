@@ -4812,7 +4812,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   Widget _buildTabButton(int index, String label, IconData icon) {
     final isSelected = _currentTabIndex == index;
     return InkWell(
-      onTap: () => setState(() => _currentTabIndex = index),
+      onTap: () {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        setState(() => _currentTabIndex = index);
+      },
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -5498,6 +5501,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             setState(() {
                               o['status'] = previousStatus;
                             });
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 behavior: SnackBarBehavior.floating,
@@ -5508,12 +5512,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   '$orderId nolu sipariş önceki aşamasına ($previousStatus) geri alındı ↩️',
                                   style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 12),
                                 ),
-                                duration: const Duration(seconds: 2),
+                                duration: const Duration(seconds: 3),
                               ),
                             );
                           },
                         ),
-                        duration: const Duration(seconds: 6),
+                        duration: const Duration(seconds: 4),
                       ),
                     );
                   }
