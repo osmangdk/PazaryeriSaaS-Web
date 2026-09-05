@@ -581,93 +581,98 @@ class _LandingScreenState extends State<LandingScreen> {
         color: const Color(0xFF0A1118).withOpacity(0.92),
         border: const Border(bottom: BorderSide(color: Colors.white10)),
       ),
-      child: Row(
-        children: [
-          InkWell(
-            onTap: () => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut),
-            child: Row(
-              children: [
-                Image.asset(
-                  'assets/images/roatech_emblem.png',
-                  width: 34,
-                  height: 34,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 20),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Roatech',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                        height: 1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Pazaryeri Entegrasyon',
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFF38BDF8),
-                        fontSize: 9.0,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (isDesktop) ...[
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1280),
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    _navButton('Özellikler', () => _scrollTo(_featuresKey)),
-                    _navButton('Pazaryerleri', () => _scrollTo(_marketplacesKey)),
-                    _navButton('Mobil Uygulama', () => _scrollTo(_mobileAppKey)),
-                    _navButton('Nasıl Çalışır?', () => _scrollTo(_howItWorksKey)),
-                    _navButton('Fiyatlandırma', () => _scrollTo(_pricingKey)),
-                    _navButton('SSS', () => _scrollTo(_faqKey)),
+                    Image.asset(
+                      'assets/images/roatech_emblem.png',
+                      width: 34,
+                      height: 34,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Roatech',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                            height: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Pazaryeri Entegrasyon',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF38BDF8),
+                            fontSize: 9.0,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-          ] else ...[
-            const Spacer(),
-          ],
-          TextButton(
-            onPressed: () => context.go('/login'),
-            child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 13)),
+              if (isDesktop) ...[
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _navButton('Özellikler', () => _scrollTo(_featuresKey)),
+                        _navButton('Pazaryerleri', () => _scrollTo(_marketplacesKey)),
+                        _navButton('Mobil Uygulama', () => _scrollTo(_mobileAppKey)),
+                        _navButton('Nasıl Çalışır?', () => _scrollTo(_howItWorksKey)),
+                        _navButton('Fiyatlandırma', () => _scrollTo(_pricingKey)),
+                        _navButton('SSS', () => _scrollTo(_faqKey)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ] else ...[
+                const Spacer(),
+              ],
+              TextButton(
+                onPressed: () => context.go('/login'),
+                child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 13)),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () => context.go('/login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: () => context.go('/login'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -4489,298 +4489,316 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         child: SafeArea(
           child: Column(
             children: [
-              // Top Bar
+              // Top Bar (Centered & Responsive for Ultra-Wide / 2K / 4K)
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.3),
                   border: const Border(bottom: BorderSide(color: Colors.white12)),
                 ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isSmallScreen = constraints.maxWidth < 950;
-                    return isSmallScreen
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/images/roatech_emblem.png',
-                                    width: 32,
-                                    height: 32,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 24),
-                                  ),
-
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                companyName,
-                                                style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            if (isPaid) ...[
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                decoration: BoxDecoration(color: Colors.amberAccent, borderRadius: BorderRadius.circular(6)),
-                                                child: Text(plan.toUpperCase(), style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 9)),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                        Text(
-                                          isExpired
-                                              ? '⚠️ Deneme Süresi Doldu'
-                                              : (isPaid ? '$plan • $daysLeft Gün Kaldı' : '$daysLeft Gün Kaldı • Deneme (3 Pazaryeri • 50 Ürün)'),
-                                          style: GoogleFonts.inter(
-                                            color: isExpired ? Colors.redAccent : (isPaid ? Colors.greenAccent : Colors.amberAccent),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.qr_code_scanner, color: Colors.cyanAccent),
-                                    tooltip: 'Barkod / QR Tara',
-                                    onPressed: _openBarcodeScanner,
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
-                                    tooltip: 'Çıkış Yap',
-                                    onPressed: _logout,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                child: Row(
-                                  children: [
-                                    if (isExpired) ...[
-                                      ElevatedButton.icon(
-                                        onPressed: () => _showSubscriptionExpiredDialog(),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.amberAccent,
-                                          foregroundColor: Colors.black,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                        ),
-                                        icon: const Icon(Icons.rocket_launch, size: 14, color: Colors.black),
-                                        label: Text('Paketi Yükselt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
-                                      ),
-                                      const SizedBox(width: 8),
-                                    ],
-                                    ElevatedButton.icon(
-                                      onPressed: _showAiAssistantDialog,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.purple.shade800,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                      ),
-                                      icon: const Icon(Icons.auto_awesome, size: 14, color: Colors.amberAccent),
-                                      label: Text('AI Asistan', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    OutlinedButton.icon(
-                                      onPressed: _showPricingCalculatorDialog,
-                                      style: OutlinedButton.styleFrom(foregroundColor: Colors.orangeAccent, side: const BorderSide(color: Colors.orangeAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
-                                      icon: const Icon(Icons.calculate, size: 16),
-                                      label: Text('Fiyat Robotu', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    ElevatedButton.icon(
-                                      onPressed: _showAddMarketplaceDialog,
-                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
-                                      icon: const Icon(Icons.add_link, size: 16),
-                                      label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )
-                        : Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/roatech_emblem.png',
-                                width: 38,
-                                height: 38,
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 28),
-                              ),
-
-                              const SizedBox(width: 12),
-                              Column(
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 1560),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isSmallScreen = constraints.maxWidth < 950;
+                        return isSmallScreen
+                            ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                                      if (isPaid) ...[
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(color: Colors.amberAccent, borderRadius: BorderRadius.circular(6)),
-                                          child: Text(plan.toUpperCase(), style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10)),
+                                      Image.asset(
+                                        'assets/images/roatech_emblem.png',
+                                        width: 32,
+                                        height: 32,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 24),
+                                      ),
+
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    companyName,
+                                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                if (isPaid) ...[
+                                                  const SizedBox(width: 8),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                    decoration: BoxDecoration(color: Colors.amberAccent, borderRadius: BorderRadius.circular(6)),
+                                                    child: Text(plan.toUpperCase(), style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 9)),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                            Text(
+                                              isExpired
+                                                  ? '⚠️ Deneme Süresi Doldu'
+                                                  : (isPaid ? '$plan • $daysLeft Gün Kaldı' : '$daysLeft Gün Kaldı • Deneme (3 Pazaryeri • 50 Ürün)'),
+                                              style: GoogleFonts.inter(
+                                                color: isExpired ? Colors.redAccent : (isPaid ? Colors.greenAccent : Colors.amberAccent),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.qr_code_scanner, color: Colors.cyanAccent),
+                                        tooltip: 'Barkod / QR Tara',
+                                        onPressed: _openBarcodeScanner,
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                                        tooltip: 'Çıkış Yap',
+                                        onPressed: _logout,
+                                      ),
                                     ],
                                   ),
-                                  if (isExpired)
-                                    Text('⚠️ Deneme Süresi Doldu • İşlemler Kısıtlandı', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold))
-                                  else if (isPaid)
-                                    Text('$plan • $daysLeft Gün Kaldı • Sınırsız Senkronizasyon', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.w500))
-                                  else
-                                    Text('$daysLeft Gün Kaldı • Ücretsiz Deneme (3 Pazaryeri • 50 Ürün)', style: GoogleFonts.inter(color: daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w500)),
-                                ],
-                              ),
-                              const Spacer(),
-                              if (isExpired) ...[
-                                ElevatedButton.icon(
-                                  onPressed: () => _showSubscriptionExpiredDialog(customActionTitle: 'Aboneliğinizi başlatarak tüm kısıtlamaları anında kaldırın.'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.amberAccent,
-                                    foregroundColor: Colors.black,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  const SizedBox(height: 12),
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    child: Row(
+                                      children: [
+                                        if (isExpired) ...[
+                                          ElevatedButton.icon(
+                                            onPressed: () => _showSubscriptionExpiredDialog(),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.amberAccent,
+                                              foregroundColor: Colors.black,
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            ),
+                                            icon: const Icon(Icons.rocket_launch, size: 14, color: Colors.black),
+                                            label: Text('Paketi Yükselt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
+                                          ),
+                                          const SizedBox(width: 8),
+                                        ],
+                                        ElevatedButton.icon(
+                                          onPressed: _showAiAssistantDialog,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.purple.shade800,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          ),
+                                          icon: const Icon(Icons.auto_awesome, size: 14, color: Colors.amberAccent),
+                                          label: Text('AI Asistan', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        OutlinedButton.icon(
+                                          onPressed: _showPricingCalculatorDialog,
+                                          style: OutlinedButton.styleFrom(foregroundColor: Colors.orangeAccent, side: const BorderSide(color: Colors.orangeAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                                          icon: const Icon(Icons.calculate, size: 16),
+                                          label: Text('Fiyat Robotu', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        ElevatedButton.icon(
+                                          onPressed: _showAddMarketplaceDialog,
+                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                                          icon: const Icon(Icons.add_link, size: 16),
+                                          label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  icon: const Icon(Icons.rocket_launch, size: 16, color: Colors.black),
-                                  label: Text('🚀 Paketi Yükselt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              ElevatedButton.icon(
-                                onPressed: _showAiAssistantDialog,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple.shade800,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                ),
-                                icon: const Icon(Icons.auto_awesome, size: 16, color: Colors.amberAccent),
-                                label: Text('AI Asistan', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-                              ),
-                              const SizedBox(width: 8),
-                              OutlinedButton.icon(
-                                onPressed: _showPricingCalculatorDialog,
-                                style: OutlinedButton.styleFrom(foregroundColor: Colors.orangeAccent, side: const BorderSide(color: Colors.orangeAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                                icon: const Icon(Icons.calculate, size: 18),
-                                label: Text('Akıllı Fiyat Robotu', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton.icon(
-                                onPressed: _showAddMarketplaceDialog,
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                                icon: const Icon(Icons.add_link, size: 18),
-                                label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                              ),
-                              const SizedBox(width: 12),
-                              IconButton(
-                                icon: const Icon(Icons.qr_code_scanner, color: Colors.blueAccent),
-                                tooltip: 'Barkod / QR Tara',
-                                onPressed: _openBarcodeScanner,
-                              ),
-                              const SizedBox(width: 4),
-                              IconButton(
-                                icon: const Icon(Icons.logout, color: Colors.redAccent),
-                                tooltip: 'Çıkış Yap',
-                                onPressed: _logout,
-                              ),
-                            ],
-                          );
-                  },
-                ),
-              ),
+                                ],
+                              )
+                            : Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/roatech_emblem.png',
+                                    width: 38,
+                                    height: 38,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 28),
+                                  ),
 
-              // Navigation Tabs (Mobile Scrollable)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      _buildTabButton(0, 'Pazaryeri Entegrasyonları', Icons.hub_outlined),
-                      const SizedBox(width: 10),
-                      _buildTabButton(1, 'Siparişler', Icons.shopping_bag_outlined),
-                      const SizedBox(width: 10),
-                      _buildTabButton(2, 'Ürün Kataloğu & Varyantlar', Icons.inventory_2_outlined),
-                      const SizedBox(width: 10),
-                      _buildTabButton(3, 'Finans & Kâr Analizi 📊', Icons.query_stats_outlined),
-                    ],
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(companyName, style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                          if (isPaid) ...[
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(color: Colors.amberAccent, borderRadius: BorderRadius.circular(6)),
+                                              child: Text(plan.toUpperCase(), style: GoogleFonts.inter(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10)),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      if (isExpired)
+                                        Text('⚠️ Deneme Süresi Doldu • İşlemler Kısıtlandı', style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold))
+                                      else if (isPaid)
+                                        Text('$plan • $daysLeft Gün Kaldı • Sınırsız Senkronizasyon', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.w500))
+                                      else
+                                        Text('$daysLeft Gün Kaldı • Ücretsiz Deneme (3 Pazaryeri • 50 Ürün)', style: GoogleFonts.inter(color: daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w500)),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  if (isExpired) ...[
+                                    ElevatedButton.icon(
+                                      onPressed: () => _showSubscriptionExpiredDialog(customActionTitle: 'Aboneliğinizi başlatarak tüm kısıtlamaları anında kaldırın.'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.amberAccent,
+                                        foregroundColor: Colors.black,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                      ),
+                                      icon: const Icon(Icons.rocket_launch, size: 16, color: Colors.black),
+                                      label: Text('🚀 Paketi Yükselt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  ElevatedButton.icon(
+                                    onPressed: _showAiAssistantDialog,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.purple.shade800,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    ),
+                                    icon: const Icon(Icons.auto_awesome, size: 16, color: Colors.amberAccent),
+                                    label: Text('AI Asistan', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  OutlinedButton.icon(
+                                    onPressed: _showPricingCalculatorDialog,
+                                    style: OutlinedButton.styleFrom(foregroundColor: Colors.orangeAccent, side: const BorderSide(color: Colors.orangeAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                    icon: const Icon(Icons.calculate, size: 18),
+                                    label: Text('Akıllı Fiyat Robotu', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: _showAddMarketplaceDialog,
+                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                    icon: const Icon(Icons.add_link, size: 18),
+                                    label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  IconButton(
+                                    icon: const Icon(Icons.qr_code_scanner, color: Colors.blueAccent),
+                                    tooltip: 'Barkod / QR Tara',
+                                    onPressed: _openBarcodeScanner,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: const Icon(Icons.logout, color: Colors.redAccent),
+                                    tooltip: 'Çıkış Yap',
+                                    onPressed: _logout,
+                                  ),
+                                ],
+                              );
+                      },
+                    ),
                   ),
                 ),
               ),
 
+              // Navigation Tabs (Centered & Responsive for Ultra-Wide / 2K / 4K)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 1560),
+                    width: double.infinity,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildTabButton(0, 'Pazaryeri Entegrasyonları', Icons.hub_outlined),
+                          const SizedBox(width: 10),
+                          _buildTabButton(1, 'Siparişler', Icons.shopping_bag_outlined),
+                          const SizedBox(width: 10),
+                          _buildTabButton(2, 'Ürün Kataloğu & Varyantlar', Icons.inventory_2_outlined),
+                          const SizedBox(width: 10),
+                          _buildTabButton(3, 'Finans & Kâr Analizi 📊', Icons.query_stats_outlined),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
-              // Main Content
+              // Main Content (Centered & Responsive for Ultra-Wide / 2K / 4K)
               Expanded(
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
                     : SingleChildScrollView(
                         padding: const EdgeInsets.all(24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.05),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white12),
-                              ),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                child: Row(
-                                  children: [
-                                    InkWell(
-                                      onTap: isExpired ? () => _showSubscriptionExpiredDialog() : null,
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                                        child: _buildLimitStat(
-                                          isPaid ? 'Abonelik Durumu' : 'Kalan Deneme',
-                                          isPaid ? '$daysLeft Gün ($plan)' : (daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu'),
-                                          isPaid ? Icons.verified : Icons.timer_outlined,
-                                          isExpired ? Colors.redAccent : (isPaid ? Colors.greenAccent : (daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent)),
+                        child: Center(
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 1560),
+                            width: double.infinity,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white12),
+                                  ),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    child: Row(
+                                      children: [
+                                        InkWell(
+                                          onTap: isExpired ? () => _showSubscriptionExpiredDialog() : null,
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                                            child: _buildLimitStat(
+                                              isPaid ? 'Abonelik Durumu' : 'Kalan Deneme',
+                                              isPaid ? '$daysLeft Gün ($plan)' : (daysLeft > 0 ? '$daysLeft Gün' : 'Süre Doldu'),
+                                              isPaid ? Icons.verified : Icons.timer_outlined,
+                                              isExpired ? Colors.redAccent : (isPaid ? Colors.greenAccent : (daysLeft <= 3 ? Colors.redAccent : Colors.amberAccent)),
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        Container(width: 1, height: 32, color: Colors.white12),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                                          child: _buildLimitStat('Aktif Pazaryerleri', '$connCount / $connLimit', Icons.cable, Colors.blueAccent),
+                                        ),
+                                        Container(width: 1, height: 32, color: Colors.white12),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                                          child: _buildLimitStat('Kayıtlı Ürünler', '$productCount / $productLimit', Icons.inventory_2, Colors.greenAccent),
+                                        ),
+                                      ],
                                     ),
-                                    Container(width: 1, height: 32, color: Colors.white12),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                                      child: _buildLimitStat('Aktif Pazaryerleri', '$connCount / $connLimit', Icons.cable, Colors.blueAccent),
-                                    ),
-                                    Container(width: 1, height: 32, color: Colors.white12),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                                      child: _buildLimitStat('Kayıtlı Ürünler', '$productCount / $productLimit', Icons.inventory_2, Colors.greenAccent),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
+                                const SizedBox(height: 24),
 
-                            if (_currentTabIndex == 0) _buildConnectionsTab(),
-                            if (_currentTabIndex == 1) _buildOrdersTab(),
-                            if (_currentTabIndex == 2) _buildProductsTab(),
-                            if (_currentTabIndex == 3) _buildFinancialsTab(),
-                          ],
+                                if (_currentTabIndex == 0) _buildConnectionsTab(),
+                                if (_currentTabIndex == 1) _buildOrdersTab(),
+                                if (_currentTabIndex == 2) _buildProductsTab(),
+                                if (_currentTabIndex == 3) _buildFinancialsTab(),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
               ),
