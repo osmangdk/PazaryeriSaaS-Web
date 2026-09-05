@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="etsyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F1641E"/>
+      <stop offset="100%" stop-color="#D44B07"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#etsyGrad)"/>
+  <text x="100" y="125" fill="#FFFFFF" font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="bold" text-anchor="middle" letter-spacing="-1">Etsy</text>
+</svg>

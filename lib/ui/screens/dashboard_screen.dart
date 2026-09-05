@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/notification_service.dart';
 import 'package:frontend/data/api_service.dart';
 import 'package:frontend/ui/screens/barcode_scanner_screen.dart';
+import 'package:frontend/ui/widgets/marketplace_logo.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,6 +41,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   String _selectedOrderStatusFilter = 'ALL';
   String _orderSearchQuery = '';
   final TextEditingController _orderSearchController = TextEditingController();
+
+  // Financial Tab Filter State
+  String _financialOrderFilter = 'ALL'; // 'ALL', 'DELIVERED', 'SHIPPED', 'PENDING'
 
   // Category & Catalog Filter State
   String _selectedCategoryFilter = 'ALL';
@@ -195,6 +199,155 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     },
   ];
 
+  List<String> get _userIndustries {
+    final raw = _metrics?['selectedIndustries'] ?? _metrics?['tenant']?['selectedIndustries'] ?? _metrics?['tenant']?['SelectedIndustries'];
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toList();
+    }
+    return [];
+  }
+
+  bool _isCategoryMatchedToIndustry(String catId, String catTitle) {
+    final industries = _userIndustries;
+    if (industries.isEmpty) return false;
+
+    for (final ind in industries) {
+      final lowerInd = ind.toLowerCase();
+      final lowerTitle = catTitle.toLowerCase();
+      final lowerId = catId.toLowerCase();
+
+      if (lowerInd.contains('moda') && (lowerId.contains('moda') || lowerTitle.contains('moda'))) return true;
+      if (lowerInd.contains('elektronik') && (lowerId.contains('elektronik') || lowerTitle.contains('elektronik'))) return true;
+      if (lowerInd.contains('kozmetik') && (lowerId.contains('kozmetik') || lowerTitle.contains('kozmetik'))) return true;
+      if (lowerInd.contains('ev') && (lowerId.contains('ev') || lowerTitle.contains('ev') || lowerTitle.contains('yaşam'))) return true;
+      if (lowerInd.contains('anne') && (lowerId.contains('anne') || lowerTitle.contains('anne') || lowerTitle.contains('bebek'))) return true;
+      if (lowerInd.contains('spor') && (lowerId.contains('spor') || lowerTitle.contains('spor') || lowerTitle.contains('outdoor'))) return true;
+      if (lowerInd.contains('oto') && (lowerId.contains('oto') || lowerTitle.contains('oto') || lowerTitle.contains('yapı'))) return true;
+      if (lowerInd.contains('süpermarket') && (lowerId.contains('supermarket') || lowerTitle.contains('süpermarket') || lowerTitle.contains('pet'))) return true;
+      if (lowerInd.contains('kitap') && (lowerId.contains('kitap') || lowerTitle.contains('kitap') || lowerTitle.contains('hobi'))) return true;
+    }
+    return false;
+  }
+
+  List<Map<String, dynamic>> get _sortedCatalogCategories {
+    final allCat = _catalogCategories.firstWhere((c) => c['id'] == 'ALL');
+    final otherCats = _catalogCategories.where((c) => c['id'] != 'ALL').toList();
+
+    if (_userIndustries.isNotEmpty) {
+      otherCats.sort((a, b) {
+        final aMatched = _isCategoryMatchedToIndustry(a['id'] as String, a['title'] as String);
+        final bMatched = _isCategoryMatchedToIndustry(b['id'] as String, b['title'] as String);
+        if (aMatched && !bMatched) return -1;
+        if (!aMatched && bMatched) return 1;
+        return 0;
+      });
+    }
+    return [allCat, ...otherCats];
+  }
+
+  Map<String, dynamic> _computeLiveFinancialSummary() {
+    final orders = _orders ?? [];
+
+    List<dynamic> targetOrders = orders;
+    if (_financialOrderFilter == 'DELIVERED') {
+      targetOrders = orders.where((o) => (o['status'] ?? '').toString().toLowerCase().contains('teslim')).toList();
+    } else if (_financialOrderFilter == 'SHIPPED') {
+      targetOrders = orders.where((o) => (o['status'] ?? '').toString().toLowerCase().contains('kargo')).toList();
+    } else if (_financialOrderFilter == 'PENDING') {
+      targetOrders = orders.where((o) => (o['status'] ?? '').toString().toLowerCase().contains('yeni') || (o['status'] ?? '').toString().toLowerCase().contains('onay') || (o['status'] ?? '').toString().toLowerCase().contains('hazır')).toList();
+    }
+
+    double totalGross = 0.0;
+    double totalCommission = 0.0;
+    double totalCargo = 0.0;
+    double totalCost = 0.0;
+
+    final Map<String, Map<String, dynamic>> channelMap = {};
+
+    for (final o in targetOrders) {
+      final price = double.tryParse(o['totalPrice']?.toString() ?? '0') ?? 0.0;
+      final mp = (o['marketplace'] ?? 'Diğer').toString();
+
+      double commissionRate = 0.19;
+      if (mp.toLowerCase().contains('trendyol')) commissionRate = 0.20;
+      else if (mp.toLowerCase().contains('hepsiburada')) commissionRate = 0.18;
+      else if (mp.toLowerCase().contains('amazon')) commissionRate = 0.15;
+      else if (mp.toLowerCase().contains('pazarama')) commissionRate = 0.16;
+      else if (mp.toLowerCase().contains('n11')) commissionRate = 0.17;
+      else if (mp.toLowerCase().contains('ciceksepeti') || mp.toLowerCase().contains('çiçek')) commissionRate = 0.21;
+      else if (mp.toLowerCase().contains('ptt')) commissionRate = 0.14;
+      else if (mp.toLowerCase().contains('boyner')) commissionRate = 0.22;
+
+      final orderCommission = price * commissionRate;
+      final orderCargo = 45.0; // 45 TL sabit tahmini kargo maliyeti
+      final orderCost = price * 0.40; // ~%40 tahmini ürün maliyeti
+
+      totalGross += price;
+      totalCommission += orderCommission;
+      totalCargo += orderCargo;
+      totalCost += orderCost;
+
+      if (!channelMap.containsKey(mp)) {
+        channelMap[mp] = {
+          'marketplace': mp,
+          'orderCount': 0,
+          'grossSales': 0.0,
+          'commissionDeducted': 0.0,
+          'cargoCost': 0.0,
+          'netProfit': 0.0,
+        };
+      }
+
+      final entry = channelMap[mp]!;
+      entry['orderCount'] = (entry['orderCount'] as int) + 1;
+      entry['grossSales'] = (entry['grossSales'] as double) + price;
+      entry['commissionDeducted'] = (entry['commissionDeducted'] as double) + orderCommission;
+      entry['cargoCost'] = (entry['cargoCost'] as double) + orderCargo;
+      entry['netProfit'] = (entry['netProfit'] as double) + (price - orderCommission - orderCargo - orderCost);
+    }
+
+    final defaultMarketplaces = ['Trendyol', 'Hepsiburada', 'Amazon TR', 'Pazarama', 'N11', 'ÇiçekSepeti'];
+    for (final dmp in defaultMarketplaces) {
+      if (!channelMap.containsKey(dmp) && _financialOrderFilter == 'ALL') {
+        channelMap[dmp] = {
+          'marketplace': dmp,
+          'orderCount': 0,
+          'grossSales': 0.0,
+          'commissionDeducted': 0.0,
+          'cargoCost': 0.0,
+          'netProfit': 0.0,
+        };
+      }
+    }
+
+    final totalNetProfit = totalGross - totalCommission - totalCargo - totalCost;
+    final margin = totalGross > 0 ? (totalNetProfit / totalGross * 100).toStringAsFixed(1) : '0.0';
+
+    final deliveredOrders = orders.where((o) => (o['status'] ?? '').toString().toLowerCase().contains('teslim')).toList();
+    final deliveredCount = deliveredOrders.length;
+    final deliveredGross = deliveredOrders.fold<double>(0.0, (sum, o) => sum + (double.tryParse(o['totalPrice']?.toString() ?? '0') ?? 0.0));
+    final deliveredNetProfit = deliveredGross * 0.36;
+
+    final shippedOrders = orders.where((o) => (o['status'] ?? '').toString().toLowerCase().contains('kargo')).toList();
+    final pendingOrders = orders.where((o) => (o['status'] ?? '').toString().toLowerCase().contains('yeni') || (o['status'] ?? '').toString().toLowerCase().contains('onay') || (o['status'] ?? '').toString().toLowerCase().contains('hazır')).toList();
+
+    return {
+      'totalGrossSales': totalGross,
+      'totalCommissionDeduction': totalCommission,
+      'totalEstimatedCargoCost': totalCargo,
+      'totalNetProfit': totalNetProfit,
+      'overallProfitMarginPercent': double.tryParse(margin) ?? 0.0,
+      'channelBreakdowns': channelMap.values.toList(),
+      'orderCount': targetOrders.length,
+      'allOrdersCount': orders.length,
+      'deliveredCount': deliveredCount,
+      'deliveredGross': deliveredGross,
+      'deliveredNetProfit': deliveredNetProfit,
+      'shippedCount': shippedOrders.length,
+      'pendingCount': pendingOrders.length,
+    };
+  }
+
   // AI Chat State
   final List<Map<String, dynamic>> _aiMessages = [];
   final Set<String> _askedPrompts = {};
@@ -291,7 +444,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             children: [
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
+                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazarYerleri%20hakkında%20bilgi%20almak%20istiyorum');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -361,7 +514,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('mailto:destek@roatech.com?subject=RoaTech%20Destek%20Talebi');
+                  _launchSafeUrl('mailto:destek@pazaryerleri.com?subject=PazarYerleri%20Destek%20Talebi');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -383,7 +536,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('E-Posta Destek (destek@roatech.com)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('E-Posta Destek (destek@pazaryerleri.com)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                             Text('Ortalama 15 dakika içinde dönüş', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
                           ],
                         ),
@@ -431,7 +584,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       'isExpired': false,
       'tenant': {
         'companyName': 'Trendyol Entegrasyon Ltd.',
-        'email': 'demo@roatech.com',
+        'email': 'demo@pazaryerleri.com',
         'subscriptionPlan': 'Free',
         'subscriptionEndDate': DateTime.now().add(const Duration(days: 27)).toIso8601String(),
       },
@@ -450,6 +603,18 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       _connections = populatedConnections;
       _orders = populatedOrders;
       _financialSummary = financials;
+
+      // Kullanıcının kayıtlı sektörlerine uyan kategorileri otomatik açık getir
+      final userInds = _userIndustries;
+      if (userInds.isNotEmpty) {
+        for (final cat in _catalogCategories) {
+          final catId = cat['id'] as String;
+          if (catId != 'ALL' && _isCategoryMatchedToIndustry(catId, cat['title'] as String)) {
+            _expandedCategoryIds.add(catId);
+          }
+        }
+      }
+
       _isLoading = false;
     });
   }
@@ -818,7 +983,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             } else if (actionType == 'open_support_channels') {
               _showCustomerSupportDialog();
             } else if (actionType == 'open_whatsapp_support') {
-              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
+              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazarYerleri%20hakkında%20bilgi%20almak%20istiyorum');
             } else if (actionType == 'switch_tab_orders') {
               Navigator.pop(ctx);
               setState(() => _currentTabIndex = 1);
@@ -1128,14 +1293,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       {
         'id': 'Başlangıç Paketi',
         'name': '⚡ Başlangıç Paketi',
-        'price': '199 ₺ / Ay',
+        'price': '1.199 ₺ / Ay',
         'desc': '3 Pazaryeri • 250 Ürün • Otomatik Stok & Fiyat Eşitleme',
         'color': Colors.blueAccent,
       },
       {
         'id': 'Büyüme Paketi',
         'name': '🚀 Büyüme Paketi (Tavsiye Edilen)',
-        'price': '399 ₺ / Ay',
+        'price': '3.199 ₺ / Ay',
         'desc': '8 Pazaryeri • 2.500 Ürün • AI Danışman & Akıllı Fiyat Robotu',
         'color': Colors.amberAccent,
         'badge': 'EN POPÜLER'
@@ -1143,7 +1308,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       {
         'id': 'Profesyonel Paket',
         'name': '👑 Profesyonel Paket',
-        'price': '799 ₺ / Ay',
+        'price': '6.199 ₺ / Ay',
         'desc': 'Sınırsız Pazaryeri & Ürün • E-Fatura Entegrasyonu • 7/24 Destek',
         'color': Colors.purpleAccent,
       },
@@ -3130,35 +3295,140 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  Widget _getMarketplaceIconMini(String name) {
-    if (name.contains('Trendyol')) return const Icon(Icons.circle, color: Colors.orange, size: 10);
-    if (name.contains('Hepsiburada')) return const Icon(Icons.circle, color: Colors.deepOrange, size: 10);
-    if (name.contains('Amazon')) return const Icon(Icons.circle, color: Colors.amber, size: 10);
-    if (name.contains('N11')) return const Icon(Icons.circle, color: Colors.redAccent, size: 10);
-    if (name.contains('Pazarama')) return const Icon(Icons.circle, color: Colors.purpleAccent, size: 10);
-    if (name.contains('Ciceksepeti') || name.contains('Çiçek')) return const Icon(Icons.circle, color: Colors.pinkAccent, size: 10);
-    if (name.contains('Ptt')) return const Icon(Icons.circle, color: Colors.yellow, size: 10);
-    if (name.contains('Boyner')) return const Icon(Icons.circle, color: Colors.blueAccent, size: 10);
-    if (name.contains('Pasaj')) return const Icon(Icons.circle, color: Colors.amberAccent, size: 10);
-    if (name.contains('Teknosa')) return const Icon(Icons.circle, color: Colors.lightBlueAccent, size: 10);
-    if (name.contains('Koçtaş') || name.contains('Koctas')) return const Icon(Icons.circle, color: Colors.orangeAccent, size: 10);
-    if (name.contains('MediaMarkt')) return const Icon(Icons.circle, color: Colors.red, size: 10);
-    if (name.contains('FLO') || name.contains('Flo')) return const Icon(Icons.circle, color: Colors.orange, size: 10);
-    if (name.contains('Modanisa')) return const Icon(Icons.circle, color: Colors.pink, size: 10);
-    if (name.contains('İdefix') || name.contains('Idefix')) return const Icon(Icons.circle, color: Colors.blue, size: 10);
-    if (name.contains('Vodafone')) return const Icon(Icons.circle, color: Colors.redAccent, size: 10);
-    if (name.contains('Beymen')) return const Icon(Icons.circle, color: Colors.grey, size: 10);
-    if (name.contains('Akakçe') || name.contains('Akakce')) return const Icon(Icons.circle, color: Colors.cyanAccent, size: 10);
-    if (name.contains('Farmazon')) return const Icon(Icons.circle, color: Colors.greenAccent, size: 10);
-    if (name.contains('LCW') || name.contains('LC Waikiki')) return const Icon(Icons.circle, color: Colors.indigoAccent, size: 10);
-    if (name.contains('Cimri')) return const Icon(Icons.circle, color: Colors.tealAccent, size: 10);
-    return const Icon(Icons.circle, color: Colors.white38, size: 10);
+  bool get _isConnectionQuotaFull {
+    final limits = _metrics?['limits'];
+    final connCount = limits?['currentConnections'] ?? _metrics?['connectionCount'] ?? _metrics?['ConnectionCount'] ?? (_connections?.length ?? 0);
+    final connLimit = limits?['connectionLimit'] ?? _metrics?['connectionLimit'] ?? _metrics?['ConnectionLimit'] ?? 3;
+    return connCount >= connLimit;
   }
 
+  Widget _getMarketplaceIconMini(String name) {
+    return MarketplaceLogoWidget(
+      marketplaceName: name,
+      size: 16,
+      borderRadius: 4,
+    );
+  }
+
+  void _showQuotaExceededDialog() {
+    final limits = _metrics?['limits'];
+    final connCount = limits?['currentConnections'] ?? _metrics?['connectionCount'] ?? _metrics?['ConnectionCount'] ?? (_connections?.length ?? 0);
+    final connLimit = limits?['connectionLimit'] ?? _metrics?['connectionLimit'] ?? _metrics?['ConnectionLimit'] ?? 3;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Colors.amberAccent, width: 1.5),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.lock_person_outlined, color: Colors.amberAccent, size: 28),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Pazaryeri Bağlantı Kotası Doldu',
+                    style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                  ),
+                  Text(
+                    'Aktif Kullanım: $connCount / $connLimit Pazaryeri',
+                    style: GoogleFonts.inter(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Mevcut paketinizdeki maksimum $connLimit pazaryeri kotasına ulaştınız. Yeni bir pazaryeri (Amazon, ÇiçekSepeti, PttAVM, Teknosa vb.) bağlamak ve sınırsız satış avantajlarından yararlanmak için paketinizi yükseltebilir veya mevcut bir pazaryeri bağlantınızı silebilirsiniz.',
+              style: GoogleFonts.inter(color: Colors.white70, fontSize: 13.5, height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 22),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Üst paketlerde sınırsız pazaryeri bağlantısı, 1.2s ışık hızında anlık stok eşitleme ve akıllı kâr robotu dahildir!',
+                      style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white60)),
+          ),
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() => _currentTabIndex = 0);
+            },
+            icon: const Icon(Icons.tune, size: 16),
+            label: Text('Mevcutları Yönet', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12.5)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white70,
+              side: const BorderSide(color: Colors.white24),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showSubscriptionExpiredDialog(customActionTitle: 'Maksimum pazaryeri kotasına ($connCount/$connLimit) ulaştınız. Sınırsız pazaryeri bağlamak için paketinizi yükseltin.');
+            },
+            icon: const Icon(Icons.rocket_launch, size: 16, color: Colors.black),
+            label: Text('🚀 Paketi Yükselt', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12.5, color: Colors.black)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amberAccent,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showAddMarketplaceDialog() {
     if (_isSubscriptionExpired()) {
       _showSubscriptionExpiredDialog(customActionTitle: 'Yeni pazaryeri bağlayabilmek için lütfen üyeliğinizi başlatın veya paketinizi yükseltin.');
+      return;
+    }
+
+    if (_isConnectionQuotaFull) {
+      _showQuotaExceededDialog();
       return;
     }
 
@@ -3220,29 +3490,29 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white24)),
                             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5)),
                           ),
-                      items: const [
-                        DropdownMenuItem(value: 1, child: Text('🟠 Trendyol')),
-                        DropdownMenuItem(value: 2, child: Text('🟠 Hepsiburada')),
-                        DropdownMenuItem(value: 3, child: Text('📦 Amazon TR')),
-                        DropdownMenuItem(value: 4, child: Text('🔴 N11')),
-                        DropdownMenuItem(value: 5, child: Text('🟣 Pazarama')),
-                        DropdownMenuItem(value: 6, child: Text('🌸 ÇiçekSepeti')),
-                        DropdownMenuItem(value: 7, child: Text('🟡 PttAVM')),
-                        DropdownMenuItem(value: 8, child: Text('🔵 Boyner')),
-                        DropdownMenuItem(value: 9, child: Text('🟡 Sahibinden')),
-                        DropdownMenuItem(value: 10, child: Text('🟡 Turkcell Pasaj')),
-                        DropdownMenuItem(value: 11, child: Text('🔵 Teknosa')),
-                        DropdownMenuItem(value: 12, child: Text('🟠 Koçtaş')),
-                        DropdownMenuItem(value: 13, child: Text('🔴 MediaMarkt')),
-                        DropdownMenuItem(value: 14, child: Text('🟠 FLO')),
-                        DropdownMenuItem(value: 15, child: Text('🌸 Modanisa')),
-                        DropdownMenuItem(value: 16, child: Text('🔵 İdefix')),
-                        DropdownMenuItem(value: 17, child: Text('🔴 Vodafone')),
-                        DropdownMenuItem(value: 18, child: Text('⚫ Beymen')),
-                        DropdownMenuItem(value: 19, child: Text('🔵 Akakçe')),
-                        DropdownMenuItem(value: 20, child: Text('🟢 Farmazon (Eczane B2B)')),
-                        DropdownMenuItem(value: 21, child: Text('🔵 LC Waikiki')),
-                        DropdownMenuItem(value: 22, child: Text('🔵 Cimri')),
+                      items: [
+                        _buildMarketplaceDropdownItem(1, 'Trendyol'),
+                        _buildMarketplaceDropdownItem(2, 'Hepsiburada'),
+                        _buildMarketplaceDropdownItem(3, 'Amazon TR'),
+                        _buildMarketplaceDropdownItem(4, 'N11'),
+                        _buildMarketplaceDropdownItem(5, 'Pazarama'),
+                        _buildMarketplaceDropdownItem(6, 'ÇiçekSepeti'),
+                        _buildMarketplaceDropdownItem(7, 'PttAVM'),
+                        _buildMarketplaceDropdownItem(8, 'Boyner'),
+                        _buildMarketplaceDropdownItem(9, 'Sahibinden'),
+                        _buildMarketplaceDropdownItem(10, 'Turkcell Pasaj'),
+                        _buildMarketplaceDropdownItem(11, 'Teknosa'),
+                        _buildMarketplaceDropdownItem(12, 'Koçtaş'),
+                        _buildMarketplaceDropdownItem(13, 'MediaMarkt'),
+                        _buildMarketplaceDropdownItem(14, 'FLO'),
+                        _buildMarketplaceDropdownItem(15, 'Modanisa'),
+                        _buildMarketplaceDropdownItem(16, 'İdefix'),
+                        _buildMarketplaceDropdownItem(17, 'Vodafone'),
+                        _buildMarketplaceDropdownItem(18, 'Beymen'),
+                        _buildMarketplaceDropdownItem(19, 'Akakçe'),
+                        _buildMarketplaceDropdownItem(20, 'Farmazon (Eczane B2B)'),
+                        _buildMarketplaceDropdownItem(21, 'LC Waikiki'),
+                        _buildMarketplaceDropdownItem(22, 'Cimri'),
                       ],
                       onChanged: (val) => setDialogState(() => selectedType = val ?? 1),
                     ),
@@ -3309,6 +3579,30 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             ],
           );
         },
+      ),
+    );
+  }
+
+  DropdownMenuItem<int> _buildMarketplaceDropdownItem(int value, String title) {
+    return DropdownMenuItem<int>(
+      value: value,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          MarketplaceLogoWidget(
+            marketplaceName: title,
+            size: 20,
+            borderRadius: 4,
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              title,
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -4509,14 +4803,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 children: [
                                   Row(
                                     children: [
-                                      Image.asset(
-                                        'assets/images/roatech_emblem.png',
-                                        width: 32,
-                                        height: 32,
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 24),
-                                      ),
-
+                                       Container(
+                                         padding: const EdgeInsets.all(6),
+                                         decoration: BoxDecoration(
+                                           gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.cyanAccent]),
+                                           borderRadius: BorderRadius.circular(8),
+                                         ),
+                                         child: const Icon(Icons.hub, color: Colors.white, size: 18),
+                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
                                         child: Column(
@@ -4606,11 +4900,19 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                         ),
                                         const SizedBox(width: 8),
                                         ElevatedButton.icon(
-                                          onPressed: _showAddMarketplaceDialog,
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
-                                          icon: const Icon(Icons.add_link, size: 16),
-                                          label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
-                                        ),
+                                           onPressed: _showAddMarketplaceDialog,
+                                           style: ElevatedButton.styleFrom(
+                                             backgroundColor: connCount >= connLimit ? const Color(0xFF1E3A8A) : Colors.blueAccent,
+                                             foregroundColor: Colors.white,
+                                             shape: RoundedRectangleBorder(
+                                               borderRadius: BorderRadius.circular(10),
+                                               side: BorderSide(color: connCount >= connLimit ? Colors.amberAccent : Colors.transparent, width: 1.2),
+                                             ),
+                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                           ),
+                                           icon: Icon(connCount >= connLimit ? Icons.lock_person_outlined : Icons.add_link, size: 16, color: connCount >= connLimit ? Colors.amberAccent : Colors.white),
+                                           label: Text(connCount >= connLimit ? 'Pazaryeri Bağla ($connCount/$connLimit)' : 'Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11)),
+                                         ),
                                       ],
                                     ),
                                   ),
@@ -4618,15 +4920,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               )
                             : Row(
                                 children: [
-                                  Image.asset(
-                                    'assets/images/roatech_emblem.png',
-                                    width: 38,
-                                    height: 38,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 28),
-                                  ),
-
-                                  const SizedBox(width: 12),
+                                   Container(
+                                     padding: const EdgeInsets.all(8),
+                                     decoration: BoxDecoration(
+                                       gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.cyanAccent]),
+                                       borderRadius: BorderRadius.circular(10),
+                                     ),
+                                     child: const Icon(Icons.hub, color: Colors.white, size: 22),
+                                   ),
+                                   const SizedBox(width: 12),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -4687,9 +4989,16 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   const SizedBox(width: 8),
                                   ElevatedButton.icon(
                                     onPressed: _showAddMarketplaceDialog,
-                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                                    icon: const Icon(Icons.add_link, size: 18),
-                                    label: Text('Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: connCount >= connLimit ? const Color(0xFF1E3A8A) : Colors.blueAccent,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        side: BorderSide(color: connCount >= connLimit ? Colors.amberAccent : Colors.transparent, width: 1.2),
+                                      ),
+                                    ),
+                                    icon: Icon(connCount >= connLimit ? Icons.lock_person_outlined : Icons.add_link, size: 18, color: connCount >= connLimit ? Colors.amberAccent : Colors.white),
+                                    label: Text(connCount >= connLimit ? 'Pazaryeri Bağla ($connCount/$connLimit)' : 'Pazaryeri Bağla', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(width: 12),
                                   IconButton(
@@ -5019,7 +5328,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                     child: Row(
                       children: [
-                        Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.orange.withOpacity(0.2), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.storefront, color: Colors.orangeAccent, size: 28)),
+                        MarketplaceLogoWidget(
+                          marketplaceName: c['marketplaceName'] ?? 'Pazaryeri',
+                          size: 48,
+                          borderRadius: 12,
+                        ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -5562,8 +5875,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(width: 7, height: 7, decoration: BoxDecoration(color: mpColor, shape: BoxShape.circle)),
-                                        const SizedBox(width: 5),
+                                        MarketplaceLogoWidget(marketplaceName: marketplace, size: 14, borderRadius: 3),
+                                        const SizedBox(width: 6),
                                         Text(marketplace, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
                                       ],
                                     ),
@@ -6277,11 +6590,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       <div class="parties-grid">
         <div class="party-card seller">
           <div class="party-title" style="color: #2563eb;">SATICI (MÜKELLEF)</div>
-          <div style="font-weight: 700; font-size: 12.5px; color: #0f172a;">RoaTech Bilişim ve E-Ticaret A.Ş.</div>
+          <div style="font-weight: 700; font-size: 12.5px; color: #0f172a;">PazarYerleri Bilişim ve E-Ticaret A.Ş.</div>
           <div style="font-size: 11px; color: #334155; margin-top: 3px;"><b>VKN:</b> 7890123456 • <b>Vergi Dairesi:</b> Kadıköy V.D.</div>
           <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">Barbaros Mah. Mor Sümbül Sok. No:1/A Ataşehir / İstanbul</div>
-          <div style="font-size: 10.5px; color: #64748b;"><b>Tel:</b> 0850 885 00 00 • <b>E-Posta:</b> fatura@roatech.com</div>
-          <div style="font-size: 10.5px; color: #64748b;"><b>Web:</b> www.roatech.com • <b>Mersis:</b> 0789012345600001</div>
+          <div style="font-size: 10.5px; color: #64748b;"><b>Tel:</b> 0850 885 00 00 • <b>E-Posta:</b> fatura@pazaryerleri.com</div>
+          <div style="font-size: 10.5px; color: #64748b;"><b>Web:</b> www.pazaryerleri.com • <b>Mersis:</b> 0789012345600001</div>
         </div>
 
         <div class="party-card buyer">
@@ -6352,11 +6665,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       <div class="bottom-legal">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 6px;">
           <div style="font-size: 9px; color: #94a3b8;">
-            RoaTech Pazaryeri SaaS Entegrasyon Sistemi • Belge ${index + 1} / $totalCount
+            PazarYerleri Pazaryeri SaaS Entegrasyon Sistemi • Belge ${index + 1} / $totalCount
           </div>
           <div style="text-align: right; font-size: 9.5px; color: #475569;">
             <div style="font-weight: bold; color: #0f172a;">e-İmza ile İmzalanmıştır</div>
-            <div style="color: #64748b;">RoaTech Bilişim ve E-Ticaret A.Ş.</div>
+            <div style="color: #64748b;">PazarYerleri Bilişim ve E-Ticaret A.Ş.</div>
           </div>
         </div>
       </div>
@@ -6660,7 +6973,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       <div class="meta-grid">
         <div class="sender-info">
           <div class="section-label">GÖNDERİCİ:</div>
-          <div style="font-weight: bold; font-size: 10.5px;">RoaTech E-Ticaret Deposu</div>
+          <div style="font-weight: bold; font-size: 10.5px;">PazarYerleri E-Ticaret Deposu</div>
           <div style="font-size: 9px; color: #444;">Ataşehir / İstanbul</div>
         </div>
         <div class="package-meta">
@@ -7640,7 +7953,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('GÖNDERİCİ: RoaTech Mağazacılık A.Ş. / Ataşehir Depo', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9.5, fontWeight: FontWeight.w600)),
+              Text('GÖNDERİCİ: PazarYerleri Mağazacılık A.Ş. / Ataşehir Depo', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9.5, fontWeight: FontWeight.w600)),
               Text('SEVK ONAYLI ✅', style: GoogleFonts.inter(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 9.5)),
             ],
           ),
@@ -7747,7 +8060,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   children: [
                     Text('SATICI (MÜKELLEF)', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 11)),
                     const SizedBox(height: 4),
-                    Text('RoaTech Bilişim ve E-Ticaret A.Ş.', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                    Text('PazarYerleri Bilişim ve E-Ticaret A.Ş.', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
                     Text('VKN: 7890123456 • Kadıköy V.D.', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
                     Text('Barbaros Mah. Mor Sümbül Sok. No:1/A Ataşehir / İstanbul', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
                   ],
@@ -8197,8 +8510,29 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             ],
           ),
           const SizedBox(height: 12),
-          const Divider(color: Colors.white12, height: 1),
-          const SizedBox(height: 10),
+          if (_userIndustries.isNotEmpty) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.withOpacity(0.35)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.amberAccent, size: 14),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Sektörünüze özel kategoriler',
+                      style: GoogleFonts.inter(color: Colors.amberAccent, fontSize: 10.5, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // 🌐 Tüm Ürünleri Listele Butonu
           InkWell(
@@ -8255,7 +8589,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           const SizedBox(height: 8),
 
           // Kategori Ağacı Listesi
-          ..._catalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
+          ..._sortedCatalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
             final catId = cat['id'] as String;
             final catTitle = cat['title'] as String;
             final icon = cat['icon'] as IconData;
@@ -8265,6 +8599,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             final isExpanded = _expandedCategoryIds.contains(catId);
             final isMainSelected = _selectedCategoryFilter == catId;
             final catCount = _getCategoryCount(catId);
+            final isUserIndustry = _isCategoryMatchedToIndustry(catId, catTitle);
 
             return Container(
               margin: const EdgeInsets.only(bottom: 6),
@@ -8272,7 +8607,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 color: isMainSelected ? color.withOpacity(0.08) : Colors.white.withOpacity(0.02),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: isMainSelected ? color.withOpacity(0.4) : Colors.white.withOpacity(0.04),
+                  color: isMainSelected ? color.withOpacity(0.4) : (isUserIndustry ? Colors.amberAccent.withOpacity(0.3) : Colors.white.withOpacity(0.04)),
                   width: isMainSelected ? 1.2 : 1.0,
                 ),
               ),
@@ -8300,13 +8635,32 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           Icon(icon, color: color, size: 18),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              catTitle,
-                              style: GoogleFonts.inter(
-                                color: isMainSelected ? Colors.white : Colors.white70,
-                                fontWeight: isMainSelected ? FontWeight.bold : FontWeight.w600,
-                                fontSize: 12.5,
-                              ),
+                            child: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    catTitle,
+                                    style: GoogleFonts.inter(
+                                      color: isMainSelected ? Colors.white : Colors.white70,
+                                      fontWeight: isMainSelected ? FontWeight.bold : FontWeight.w600,
+                                      fontSize: 12.5,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (isUserIndustry) ...[
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(color: Colors.amberAccent.withOpacity(0.5), width: 0.8),
+                                    ),
+                                    child: Text('⭐', style: GoogleFonts.inter(fontSize: 9)),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                           Container(
@@ -8517,7 +8871,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       child: ListView(
                         controller: scrollController,
                         children: [
-                          ..._catalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
+                          ..._sortedCatalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
                             final catId = cat['id'] as String;
                             final catTitle = cat['title'] as String;
                             final icon = cat['icon'] as IconData;
@@ -8526,13 +8880,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             final isExpanded = _expandedCategoryIds.contains(catId);
                             final isMainSelected = _selectedCategoryFilter == catId;
                             final catCount = _getCategoryCount(catId);
+                            final isUserIndustry = _isCategoryMatchedToIndustry(catId, catTitle);
 
                             return Container(
                               margin: const EdgeInsets.only(bottom: 8),
                               decoration: BoxDecoration(
                                 color: isMainSelected ? color.withOpacity(0.1) : Colors.white.withOpacity(0.03),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: isMainSelected ? color : Colors.white12),
+                                border: Border.all(color: isMainSelected ? color : (isUserIndustry ? Colors.amberAccent.withOpacity(0.4) : Colors.white12)),
                               ),
                               child: ExpansionTile(
                                 key: PageStorageKey(catId),
@@ -8547,7 +8902,29 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   });
                                 },
                                 leading: Icon(icon, color: color, size: 22),
-                                title: Text(catTitle, style: GoogleFonts.inter(color: Colors.white, fontWeight: isMainSelected ? FontWeight.bold : FontWeight.w600, fontSize: 14)),
+                                title: Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        catTitle,
+                                        style: GoogleFonts.inter(color: Colors.white, fontWeight: isMainSelected ? FontWeight.bold : FontWeight.w600, fontSize: 14),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (isUserIndustry) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: Border.all(color: Colors.amberAccent.withOpacity(0.5), width: 0.8),
+                                        ),
+                                        child: Text('⭐ Sektörünüz', style: GoogleFonts.inter(color: Colors.amberAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -8733,13 +9110,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     const SizedBox(width: 8),
 
                     // Kategori Çipleri
-                    ..._catalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
+                    ..._sortedCatalogCategories.where((c) => c['id'] != 'ALL').map((cat) {
                       final catId = cat['id'] as String;
                       final catTitle = cat['title'] as String;
                       final icon = cat['icon'] as IconData;
                       final color = cat['color'] as Color;
                       final isSelected = _selectedCategoryFilter == catId;
                       final count = _getCategoryCount(catId);
+                      final isUserIndustry = _isCategoryMatchedToIndustry(catId, catTitle);
 
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
@@ -8758,7 +9136,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               color: isSelected ? color.withOpacity(0.22) : Colors.white.withOpacity(0.04),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: isSelected ? color : Colors.white12,
+                                color: isSelected ? color : (isUserIndustry ? Colors.amberAccent.withOpacity(0.4) : Colors.white12),
                                 width: isSelected ? 1.4 : 1.0,
                               ),
                             ),
@@ -8767,6 +9145,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                 Icon(icon, size: 15, color: color),
                                 const SizedBox(width: 6),
                                 Text(catTitle, style: GoogleFonts.inter(color: isSelected ? Colors.white : Colors.white70, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, fontSize: 12)),
+                                if (isUserIndustry) ...[
+                                  const SizedBox(width: 4),
+                                  Text('⭐', style: GoogleFonts.inter(fontSize: 10)),
+                                ],
                                 if (count > 0) ...[
                                   const SizedBox(width: 5),
                                   Container(
@@ -9453,21 +9835,17 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   }
 
   Widget _buildFinancialsTab() {
-    final gross = _financialSummary?['totalGrossSales'] ?? 0.0;
-    final commission = _financialSummary?['totalCommissionDeduction'] ?? 0.0;
-    final cargo = _financialSummary?['totalEstimatedCargoCost'] ?? 0.0;
-    final netProfit = _financialSummary?['totalNetProfit'] ?? 0.0;
-    final margin = _financialSummary?['overallProfitMarginPercent'] ?? 0.0;
-    final rawBreakdowns = _financialSummary?['channelBreakdowns'] as List<dynamic>?;
-
-    final breakdowns = (rawBreakdowns != null && rawBreakdowns.isNotEmpty)
-        ? rawBreakdowns
-        : [
-            {'marketplace': 'Trendyol', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
-            {'marketplace': 'Hepsiburada', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
-            {'marketplace': 'Amazon TR', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
-            {'marketplace': 'Pazarama', 'orderCount': 0, 'grossSales': 0.0, 'commissionDeducted': 0.0, 'netProfit': 0.0},
-          ];
+    final liveFin = _computeLiveFinancialSummary();
+    final gross = (liveFin['totalGrossSales'] as double?) ?? 0.0;
+    final commission = (liveFin['totalCommissionDeduction'] as double?) ?? 0.0;
+    final cargo = (liveFin['totalEstimatedCargoCost'] as double?) ?? 0.0;
+    final netProfit = (liveFin['totalNetProfit'] as double?) ?? 0.0;
+    final margin = (liveFin['overallProfitMarginPercent'] as double?) ?? 0.0;
+    final breakdowns = (liveFin['channelBreakdowns'] as List<dynamic>?) ?? [];
+    final allOrdersCount = liveFin['allOrdersCount'] ?? 0;
+    final deliveredCount = liveFin['deliveredCount'] ?? 0;
+    final shippedCount = liveFin['shippedCount'] ?? 0;
+    final pendingCount = liveFin['pendingCount'] ?? 0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -9477,9 +9855,87 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Gerçek Zamanlı Finans & Kâr/Zarar Analizi', style: GoogleFonts.inter(color: Colors.white, fontSize: isMobile ? 18 : 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Text('Pazaryeri komisyonları, kargo giderleri ve net kârlılık durumunuzu anlık izleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Gerçek Zamanlı Finans & Kâr/Zarar Analizi', style: GoogleFonts.inter(color: Colors.white, fontSize: isMobile ? 18 : 22, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('Pazaryeri komisyonları, kargo giderleri ve teslim edilen siparişlerinizin net kârlılık durumunu anlık izleyin', style: GoogleFonts.inter(color: Colors.white60, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                if (!isMobile) ...[
+                  ElevatedButton.icon(
+                    onPressed: () => setState(() => _currentTabIndex = 1),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent.withOpacity(0.2),
+                      foregroundColor: Colors.cyanAccent,
+                      side: const BorderSide(color: Colors.cyanAccent, width: 1),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    ),
+                    icon: const Icon(Icons.shopping_bag_outlined, size: 16),
+                    label: Text('Siparişlere Git & Durum Değiştir', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Bilgilendirme / Canlı Sipariş Durumu Açıklama Kartı
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B).withOpacity(0.8),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.cyanAccent.withOpacity(0.35)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: Colors.cyanAccent.withOpacity(0.15), shape: BoxShape.circle),
+                    child: const Icon(Icons.insights, color: Colors.cyanAccent, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.inter(color: Colors.white70, fontSize: 12, height: 1.4),
+                        children: [
+                          const TextSpan(text: '💡 Canlı Entegrasyon: ', style: TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold)),
+                          const TextSpan(text: 'Siparişler sekmesinde bir ürünün durumunu '),
+                          const TextSpan(text: '"Teslim Edildi"', style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
+                          const TextSpan(text: ' yaptığınızda veya kargo aşamalarını güncellediğinizde finansal veriler, komisyon kesintileri ve kesinleşen kâr anında bu ekrana yansır.'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Sipariş Durumu Bazlı Filtre Çipleri
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  _buildFinFilterChip('ALL', '🌐 Tüm Siparişler ($allOrdersCount)', Colors.blueAccent),
+                  const SizedBox(width: 8),
+                  _buildFinFilterChip('DELIVERED', '✅ Teslim Edilenler (Kesinleşen) ($deliveredCount)', Colors.greenAccent),
+                  const SizedBox(width: 8),
+                  _buildFinFilterChip('SHIPPED', '🚚 Kargodakiler ($shippedCount)', Colors.purpleAccent),
+                  const SizedBox(width: 8),
+                  _buildFinFilterChip('PENDING', '⏳ Yeni & Hazırlananlar ($pendingCount)', Colors.amberAccent),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Metrik Kartları (Responsive 2x2 Grid mobilde, 4 sütun masaüstünde)
@@ -9496,7 +9952,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 children: [
                   Expanded(child: _finCard('Kargo Gideri', formatTL(cargo), Icons.local_shipping_outlined, Colors.purpleAccent)),
                   const SizedBox(width: 10),
-                  Expanded(child: _finCard('Net Kâr (%$margin)', formatTL(netProfit), Icons.trending_up_outlined, Colors.greenAccent)),
+                  Expanded(
+                    child: _finCard(
+                      _financialOrderFilter == 'DELIVERED' ? 'Kesinleşen Kâr (%$margin)' : 'Net Kâr (%$margin)',
+                      formatTL(netProfit),
+                      Icons.trending_up_outlined,
+                      Colors.greenAccent,
+                    ),
+                  ),
                 ],
               ),
             ] else ...[
@@ -9508,7 +9971,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   const SizedBox(width: 12),
                   Expanded(child: _finCard('Tahmini Kargo Gideri', formatTL(cargo), Icons.local_shipping_outlined, Colors.purpleAccent)),
                   const SizedBox(width: 12),
-                  Expanded(child: _finCard('Net Kâr Marjı (%$margin)', formatTL(netProfit), Icons.trending_up_outlined, Colors.greenAccent)),
+                  Expanded(
+                    child: _finCard(
+                      _financialOrderFilter == 'DELIVERED' ? 'Kesinleşen Net Kâr (%$margin)' : 'Tahmini Net Kâr (%$margin)',
+                      formatTL(netProfit),
+                      Icons.trending_up_outlined,
+                      Colors.greenAccent,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -9706,6 +10176,34 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFinFilterChip(String filterKey, String label, Color chipColor) {
+    final isSelected = _financialOrderFilter == filterKey;
+    return InkWell(
+      onTap: () => setState(() => _financialOrderFilter = filterKey),
+      borderRadius: BorderRadius.circular(8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? chipColor.withOpacity(0.25) : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? chipColor : Colors.white12,
+            width: isSelected ? 1.4 : 1.0,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            color: isSelected ? Colors.white : Colors.white70,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
       ),
     );
   }

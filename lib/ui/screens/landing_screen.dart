@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/data/api_service.dart';
+import 'package:frontend/ui/widgets/marketplace_logo.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,14 +23,28 @@ class _LandingScreenState extends State<LandingScreen> {
 
   bool _isAnnualPricing = true;
 
-  // AI Danışman State
+  // AI Danışman & Fiyatlandırma State
   final _apiService = ApiService();
+  List<dynamic>? _subscriptionPlans;
   final List<Map<String, dynamic>> _aiMessages = [];
   final Set<String> _askedPrompts = {};
   bool _isAiThinking = false;
   bool _isAiFabMinimized = false;
   final TextEditingController _aiInputController = TextEditingController();
   final ScrollController _aiScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubscriptionPlans();
+  }
+
+  Future<void> _loadSubscriptionPlans() async {
+    final plans = await _apiService.getSubscriptionPlans();
+    if (plans != null && plans.isNotEmpty && mounted) {
+      setState(() => _subscriptionPlans = plans);
+    }
+  }
 
   Future<void> _launchSafeUrl(String urlStr) async {
     try {
@@ -44,7 +59,7 @@ class _LandingScreenState extends State<LandingScreen> {
     if (_aiMessages.isEmpty) {
       _aiMessages.add({
         'role': 'assistant',
-        'content': 'Merhaba! Ben sizin **RoaTech AI Danışmanınızım**. 🤖\n\nRoaTech\'in 30 gün ücretsiz deneme imkanı (3 pazaryeri ve 50 ürün kotası), 1.2s anlık stok eşitleme, 2 Al 1 Öde kampanya kurguları ve Trendyol/Hepsiburada entegrasyonu hakkında merak ettiğiniz her şeyi bana sorabilirsiniz.',
+        'content': 'Merhaba! Ben sizin **PazarYerleri AI Danışmanınızım**. 🤖\n\nPazarYerleri\'nin 30 gün ücretsiz deneme imkanı (3 pazaryeri ve 50 ürün kotası), 1.2s anlık stok eşitleme, 2 Al 1 Öde kampanya kurguları ve Trendyol/Hepsiburada entegrasyonu hakkında merak ettiğiniz her şeyi bana sorabilirsiniz.',
         'actions': [
           {'label': '🎁 1 Ay Ücretsiz Deneme Nedir?', 'action': 'ask', 'prompt': '1 Ay ücretsiz deneme paketi neleri kapsıyor?'},
           {'label': '🔥 2 Al 1 Öde Nasıl Çalışır?', 'action': 'ask', 'prompt': '2 Al 1 Öde kampanyaları nasıl çalışıyor?'},
@@ -89,7 +104,7 @@ class _LandingScreenState extends State<LandingScreen> {
             children: [
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
+                  _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazarYerleri%20hakkında%20bilgi%20almak%20istiyorum');
                 },
 
                 borderRadius: BorderRadius.circular(12),
@@ -160,7 +175,7 @@ class _LandingScreenState extends State<LandingScreen> {
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  _launchSafeUrl('mailto:destek@roatech.com?subject=RoaTech%20Destek%20Talebi');
+                  _launchSafeUrl('mailto:destek@pazaryerleri.com?subject=PazarYerleri%20Destek%20Talebi');
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -183,7 +198,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('E-Posta Destek Talebi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text('destek@roatech.com (Maks. 15 dk dönüş)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                            Text('destek@pazaryerleri.com (Maks. 15 dk dönüş)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
                           ],
                         ),
                       ),
@@ -263,7 +278,7 @@ class _LandingScreenState extends State<LandingScreen> {
             } else if (actionType == 'open_support_channels') {
               _showCustomerSupportDialog();
             } else if (actionType == 'open_whatsapp_support') {
-              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20RoaTech%20hakkında%20bilgi%20almak%20istiyorum');
+              _launchSafeUrl('https://wa.me/905550000000?text=Merhaba,%20PazarYerleri%20hakkında%20bilgi%20almak%20istiyorum');
             } else if (act['prompt'] != null && act['prompt'].toString().isNotEmpty) {
               sendMessage(act['prompt']);
             }
@@ -480,7 +495,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 _showAiConsultantDialog();
               },
               backgroundColor: Colors.purple.shade800,
-              tooltip: '✨ RoaTech AI Danışmanı (Açmak için tıklayın)',
+              tooltip: '✨ PazarYerleri AI Danışmanı (Açmak için tıklayın)',
               child: const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 24),
             )
           : Container(
@@ -505,7 +520,7 @@ class _LandingScreenState extends State<LandingScreen> {
                         children: [
                           const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 18),
                           const SizedBox(width: 8),
-                          Text('✨ RoaTech AI Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text('✨ PazarYerleri AI Danışmanı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                         ],
                       ),
                     ),
@@ -604,27 +619,21 @@ class _LandingScreenState extends State<LandingScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      'assets/images/roatech_emblem.png',
-                      width: isUltraSmallMobile ? 26 : 32,
-                      height: isUltraSmallMobile ? 26 : 32,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 18),
+                    Container(
+                      padding: EdgeInsets.all(isUltraSmallMobile ? 4 : 6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.cyanAccent]),
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      child: Icon(Icons.hub, color: Colors.white, size: isUltraSmallMobile ? 16 : 20),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Roatech',
+                          'PazarYerleri',
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: isUltraSmallMobile ? 15 : 18,
@@ -634,13 +643,12 @@ class _LandingScreenState extends State<LandingScreen> {
                           ),
                         ),
                         if (!isUltraSmallMobile) ...[
-                          const SizedBox(height: 2),
                           Text(
-                            'Pazaryeri Entegrasyon',
+                            'Entegrasyon & API',
                             style: GoogleFonts.inter(
                               color: const Color(0xFF38BDF8),
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -937,32 +945,33 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildMarketplacesSection({required GlobalKey key}) {
     final marketplaces = [
-      {'name': 'Trendyol', 'color': const Color(0xFFF27A1A), 'logoUrl': 'https://logo.clearbit.com/trendyol.com', 'initials': 'TY'},
-      {'name': 'Hepsiburada', 'color': const Color(0xFFFF6000), 'logoUrl': 'https://logo.clearbit.com/hepsiburada.com', 'initials': 'HB'},
-      {'name': 'N11', 'color': const Color(0xFF5E17EB), 'logoUrl': 'https://logo.clearbit.com/n11.com', 'initials': 'N11'},
-      {'name': 'Amazon', 'color': const Color(0xFFFF9900), 'logoUrl': 'https://logo.clearbit.com/amazon.com.tr', 'initials': 'AMZ'},
-      {'name': 'ÇiçekSepeti', 'color': const Color(0xFFE91E63), 'logoUrl': 'https://logo.clearbit.com/ciceksepeti.com', 'initials': 'ÇS'},
-      {'name': 'Pazarama', 'color': const Color(0xFF0066FF), 'logoUrl': 'https://logo.clearbit.com/pazarama.com', 'initials': 'PZ'},
-      {'name': 'PttAVM', 'color': const Color(0xFFFFCC00), 'logoUrl': 'https://logo.clearbit.com/pttavm.com', 'initials': 'PTT'},
-      {'name': 'Akakçe', 'color': const Color(0xFF00A3E0), 'logoUrl': 'https://logo.clearbit.com/akakce.com', 'initials': 'AKK'},
-      {'name': 'IdeaSoft', 'color': const Color(0xFF00A859), 'logoUrl': 'https://logo.clearbit.com/ideasoft.com.tr', 'initials': 'IDS'},
-      {'name': 'T-Soft', 'color': const Color(0xFFE53935), 'logoUrl': 'https://logo.clearbit.com/tsoft.com.tr', 'initials': 'TSF'},
-      {'name': 'Etsy', 'color': const Color(0xFFF56400), 'logoUrl': 'https://logo.clearbit.com/etsy.com', 'initials': 'ETSY'},
-      {'name': 'Ozon', 'color': const Color(0xFF005BFF), 'logoUrl': 'https://logo.clearbit.com/ozon.ru', 'initials': 'OZN'},
-      {'name': 'Teknosa', 'color': const Color(0xFF0055A5), 'logoUrl': 'https://logo.clearbit.com/teknosa.com', 'initials': 'TKN'},
-      {'name': 'Koçtaş', 'color': const Color(0xFFFF6600), 'logoUrl': 'https://logo.clearbit.com/koctas.com.tr', 'initials': 'KÇT'},
-      {'name': 'MediaMarkt', 'color': const Color(0xFFDF0000), 'logoUrl': 'https://logo.clearbit.com/mediamarkt.com.tr', 'initials': 'MM'},
-      {'name': 'Turkcell Pasaj', 'color': const Color(0xFFFFC72C), 'logoUrl': 'https://logo.clearbit.com/turkcell.com.tr', 'initials': 'PSJ'},
-      {'name': 'FLO', 'color': const Color(0xFFFF5000), 'logoUrl': 'https://logo.clearbit.com/flo.com.tr', 'initials': 'FLO'},
-      {'name': 'Modanisa', 'color': const Color(0xFFD81B60), 'logoUrl': 'https://logo.clearbit.com/modanisa.com', 'initials': 'MDN'},
-      {'name': 'İdefix', 'color': const Color(0xFF0088CC), 'logoUrl': 'https://logo.clearbit.com/idefix.com', 'initials': 'İDF'},
-      {'name': 'Vodafone', 'color': const Color(0xFFE60000), 'logoUrl': 'https://logo.clearbit.com/vodafone.com.tr', 'initials': 'VF'},
-      {'name': 'Beymen', 'color': const Color(0xFF9E9E9E), 'logoUrl': 'https://logo.clearbit.com/beymen.com', 'initials': 'BYM'},
-      {'name': 'LC Waikiki', 'color': const Color(0xFF003399), 'logoUrl': 'https://logo.clearbit.com/lcwaikiki.com', 'initials': 'LCW'},
-      {'name': 'Boyner', 'color': const Color(0xFF00897B), 'logoUrl': 'https://logo.clearbit.com/boyner.com.tr', 'initials': 'BYN'},
-      {'name': 'Sahibinden', 'color': const Color(0xFFFFD200), 'logoUrl': 'https://logo.clearbit.com/sahibinden.com', 'initials': 'SHB'},
-      {'name': 'Farmazon', 'color': const Color(0xFF00B16A), 'logoUrl': 'https://logo.clearbit.com/farmazon.com.tr', 'initials': 'FRM'},
-      {'name': 'Cimri', 'color': const Color(0xFF00A859), 'logoUrl': 'https://logo.clearbit.com/cimri.com', 'initials': 'CMR'},
+      {'name': 'Trendyol', 'color': const Color(0xFFF27A1A), 'initials': 'TY'},
+      {'name': 'Hepsiburada', 'color': const Color(0xFFFF6000), 'initials': 'HB'},
+      {'name': 'N11', 'color': const Color(0xFFE31E24), 'initials': 'N11'},
+      {'name': 'Amazon', 'color': const Color(0xFFFF9900), 'initials': 'AMZ'},
+      {'name': 'ÇiçekSepeti', 'color': const Color(0xFF0072C6), 'initials': 'ÇS'},
+      {'name': 'Pazarama', 'color': const Color(0xFF6D28D9), 'initials': 'PZ'},
+      {'name': 'PttAVM', 'color': const Color(0xFFFFCC00), 'initials': 'PTT'},
+      {'name': 'İdefix', 'color': const Color(0xFF0284C7), 'initials': 'İDF'},
+      {'name': 'Teknosa', 'color': const Color(0xFFF37021), 'initials': 'TKN'},
+      {'name': 'MediaMarkt', 'color': const Color(0xFFDF0000), 'initials': 'MM'},
+      {'name': 'Koçtaş', 'color': const Color(0xFF003087), 'initials': 'KÇT'},
+      {'name': 'Boyner', 'color': const Color(0xFF0F172A), 'initials': 'BYN'},
+      {'name': 'Beymen', 'color': const Color(0xFF000000), 'initials': 'BYM'},
+      {'name': 'LC Waikiki', 'color': const Color(0xFF0091DF), 'initials': 'LCW'},
+      {'name': 'FLO', 'color': const Color(0xFFFF671B), 'initials': 'FLO'},
+      {'name': 'A101', 'color': const Color(0xFF00A3AD), 'initials': 'A101'},
+      {'name': 'Turkcell Pasaj', 'color': const Color(0xFF002855), 'initials': 'PSJ'},
+      {'name': 'Modanisa', 'color': const Color(0xFFD82374), 'initials': 'MDN'},
+      {'name': 'Temu', 'color': const Color(0xFFFB7701), 'initials': 'TMU'},
+      {'name': 'Etsy', 'color': const Color(0xFFF1641E), 'initials': 'ETSY'},
+      {'name': 'Ozon', 'color': const Color(0xFF005BFF), 'initials': 'OZN'},
+      {'name': 'Getir', 'color': const Color(0xFF5D3EBC), 'initials': 'GTR'},
+      {'name': 'Yemeksepeti', 'color': const Color(0xFFEA004B), 'initials': 'YS'},
+      {'name': 'Akakçe', 'color': const Color(0xFF00A3E0), 'initials': 'AKK'},
+      {'name': 'IdeaSoft', 'color': const Color(0xFF10B981), 'initials': 'IDS'},
+      {'name': 'Sahibinden', 'color': const Color(0xFFFFD200), 'initials': 'SHB'},
+      {'name': 'Cimri', 'color': const Color(0xFF059669), 'initials': 'CMR'},
     ];
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -1026,7 +1035,6 @@ class _LandingScreenState extends State<LandingScreen> {
                 final m = marketplaces[index];
                 final color = m['color'] as Color;
                 final name = m['name'] as String;
-                final logoUrl = m['logoUrl'] as String;
                 final initials = m['initials'] as String;
 
                 return InkWell(
@@ -1081,7 +1089,7 @@ class _LandingScreenState extends State<LandingScreen> {
                         const SizedBox(width: 14),
                         // Sağ Taraf: 3D Kıvrımlı Sticker Logo Rozeti (Peeled Sticker Badge)
                         _PeeledStickerBadge(
-                          logoUrl: logoUrl,
+                          marketplaceName: name,
                           initials: initials,
                           brandColor: color,
                           size: 64,
@@ -1102,7 +1110,6 @@ class _LandingScreenState extends State<LandingScreen> {
   void _showMarketplaceDetailModal(Map<String, dynamic> m) {
     final name = m['name'] as String;
     final color = m['color'] as Color;
-    final logoUrl = m['logoUrl'] as String;
     final initials = m['initials'] as String;
 
     showDialog(
@@ -1116,7 +1123,7 @@ class _LandingScreenState extends State<LandingScreen> {
         title: Row(
           children: [
             _PeeledStickerBadge(
-              logoUrl: logoUrl,
+              marketplaceName: name,
               initials: initials,
               brandColor: color,
               size: 52,
@@ -1158,7 +1165,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                'RoaTech ile $name mağazanızı 90 saniyede bağlayabilir, 30 gün boyunca tamamen ücretsiz deneyebilirsiniz.',
+                'PazarYerleri ile $name mağazanızı 90 saniyede bağlayabilir, 30 gün boyunca tamamen ücretsiz deneyebilirsiniz.',
                 style: GoogleFonts.inter(color: Colors.white70, fontSize: 13, height: 1.4),
               ),
 
@@ -1358,7 +1365,7 @@ class _LandingScreenState extends State<LandingScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Depoda ürün ararken, yoldayken veya tatildeyken bilgisayara bağlı kalmayın. RoaTech mobil uygulaması ile 22 pazaryerindeki tüm satışlarınız, siparişleriniz ve kargolarınız parmaklarınızın ucunda.',
+          'Depoda ürün ararken, yoldayken veya tatildeyken bilgisayara bağlı kalmayın. PazarYerleri mobil uygulaması ile 22 pazaryerindeki tüm satışlarınız, siparişleriniz ve kargolarınız parmaklarınızın ucunda.',
           style: GoogleFonts.inter(color: Colors.white70, fontSize: 15, height: 1.6),
         ),
 
@@ -1401,7 +1408,7 @@ class _LandingScreenState extends State<LandingScreen> {
           runSpacing: 12,
           children: [
             ElevatedButton.icon(
-              onPressed: () => _launchSafeUrl('https://pazaryerleri.vercel.app/PazaryeriSaaS.apk'),
+              onPressed: () => _launchSafeUrl('https://pazaryerisaas-production.up.railway.app/PazaryeriSaaS.apk'),
               icon: const Icon(Icons.android, color: Colors.white, size: 20),
               label: Text(
                 'Android APK İndir (v2.0)',
@@ -1601,18 +1608,19 @@ class _LandingScreenState extends State<LandingScreen> {
                         children: [
                           Row(
                             children: [
-                              Image.asset(
-                                'assets/images/roatech_emblem.png',
-                                width: 22,
-                                height: 22,
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.hub, color: Colors.cyanAccent, size: 18),
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.cyanAccent]),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Icon(Icons.hub, color: Colors.white, size: 14),
                               ),
                               const SizedBox(width: 6),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Roatech', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12, height: 1.0)),
+                                  Text('PazarYerleri', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12, height: 1.0)),
                                   Text('Pazaryeri Entegrasyon', style: GoogleFonts.inter(color: const Color(0xFF38BDF8), fontSize: 7.5, fontWeight: FontWeight.bold)),
                                 ],
                               ),
@@ -1820,8 +1828,82 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
+  String _formatPriceValue(double price) {
+    final intVal = price.toInt();
+    if (intVal >= 1000) {
+      final thousands = intVal ~/ 1000;
+      final remainder = intVal % 1000;
+      return '$thousands.${remainder.toString().padLeft(3, '0')}';
+    }
+    return intVal.toString();
+  }
+
   Widget _buildPricingSection({required GlobalKey key}) {
     final isDesktop = MediaQuery.of(context).size.width > 850;
+
+    final List<Map<String, dynamic>> plans = (_subscriptionPlans != null && _subscriptionPlans!.isNotEmpty)
+        ? _subscriptionPlans!.map((p) {
+            final fList = (p['features'] is List)
+                ? (p['features'] as List).map((f) => f.toString()).toList()
+                : <String>[];
+            final mPrice = (p['monthlyPrice'] is num)
+                ? (p['monthlyPrice'] as num).toDouble()
+                : double.tryParse(p['monthlyPrice']?.toString() ?? '') ?? 1199.0;
+            final aPrice = (p['annualPrice'] is num)
+                ? (p['annualPrice'] as num).toDouble()
+                : double.tryParse(p['annualPrice']?.toString() ?? '') ?? 1099.0;
+            return {
+              'code': p['code'] ?? 'STARTER',
+              'title': p['name'] ?? 'Paket',
+              'desc': p['description'] ?? '',
+              'monthlyPrice': mPrice,
+              'annualPrice': aPrice,
+              'currency': p['currency'] ?? '₺',
+              'discountPercent': p['annualDiscountPercent'] ?? 30,
+              'isPopular': p['isPopular'] == true,
+              'badgeText': p['badgeText'],
+              'features': fList,
+            };
+          }).toList()
+        : [
+            {
+              'code': 'STARTER',
+              'title': 'Başlangıç (Starter)',
+              'desc': 'Yeni başlayan butik satıcılar ve esnaflar için',
+              'monthlyPrice': 1199.0,
+              'annualPrice': 1099.0,
+              'currency': '₺',
+              'discountPercent': 30,
+              'isPopular': false,
+              'badgeText': null,
+              'features': ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'],
+            },
+            {
+              'code': 'GROWTH',
+              'title': 'Büyüme (Growth)',
+              'desc': 'Hızlı büyüyen ve çok kanallı mağazalar için',
+              'monthlyPrice': 3199.0,
+              'annualPrice': 2999.0,
+              'currency': '₺',
+              'discountPercent': 30,
+              'isPopular': true,
+              'badgeText': 'EN ÇOK TERCİH EDİLEN',
+              'features': ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'],
+            },
+            {
+              'code': 'PRO',
+              'title': 'Profesyonel (Pro)',
+              'desc': 'Yüksek hacimli markalar, üreticiler ve depolar',
+              'monthlyPrice': 6199.0,
+              'annualPrice': 5999.0,
+              'currency': '₺',
+              'discountPercent': 30,
+              'isPopular': false,
+              'badgeText': null,
+              'features': ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'],
+            },
+          ];
+
     return Center(
       key: key,
       child: Padding(
@@ -1847,22 +1929,44 @@ class _LandingScreenState extends State<LandingScreen> {
               isDesktop
                   ? Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
-                        const SizedBox(width: 16),
-                        Expanded(child: _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true)),
-                        const SizedBox(width: 16),
-                        Expanded(child: _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false)),
-                      ],
+                      children: plans.map((p) {
+                        final val = _isAnnualPricing
+                            ? (p['annualPrice'] as double)
+                            : (p['monthlyPrice'] as double);
+                        final price = '${p['currency'] ?? '₺'}${_formatPriceValue(val)}';
+                        return Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: _pricingCard(
+                              title: p['title'] as String,
+                              price: price,
+                              desc: p['desc'] as String,
+                              features: p['features'] as List<String>,
+                              isPopular: p['isPopular'] as bool,
+                              badgeText: p['badgeText'] as String?,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     )
                   : Column(
-                      children: [
-                        _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
-                        const SizedBox(height: 16),
-                        _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true),
-                        const SizedBox(height: 16),
-                        _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false),
-                      ],
+                      children: plans.map((p) {
+                        final val = _isAnnualPricing
+                            ? (p['annualPrice'] as double)
+                            : (p['monthlyPrice'] as double);
+                        final price = '${p['currency'] ?? '₺'}${_formatPriceValue(val)}';
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _pricingCard(
+                            title: p['title'] as String,
+                            price: price,
+                            desc: p['desc'] as String,
+                            features: p['features'] as List<String>,
+                            isPopular: p['isPopular'] as bool,
+                            badgeText: p['badgeText'] as String?,
+                          ),
+                        );
+                      }).toList(),
                     ),
             ],
           ),
@@ -1871,7 +1975,14 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _pricingCard({required String title, required String price, required String desc, required List<String> features, required bool isPopular}) {
+  Widget _pricingCard({
+    required String title,
+    required String price,
+    required String desc,
+    required List<String> features,
+    required bool isPopular,
+    String? badgeText,
+  }) {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -2050,7 +2161,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'RoaTech © 2026 Tüm Hakları Saklıdır. Türkiye\'nin En Gelişmiş Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.',
+                      'PazarYerleri © 2026 Tüm Hakları Saklıdır. Türkiye\'nin En Gelişmiş Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.',
                       style: GoogleFonts.inter(color: Colors.white38, fontSize: 12, height: 1.4),
                     ),
                   ),
@@ -2089,26 +2200,20 @@ class _LandingScreenState extends State<LandingScreen> {
       children: [
         Row(
           children: [
-            Image.asset(
-              'assets/images/roatech_emblem.png',
-              width: 44,
-              height: 44,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 24),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.cyanAccent]),
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: const Icon(Icons.hub, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Roatech',
+                  'PazarYerleri',
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 24,
@@ -2134,7 +2239,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
         const SizedBox(height: 16),
         Text(
-          'RoaTech, pazaryerlerindeki mağazalarınız, e-Ticaret siteniz ve ERP/Muhasebe yazılımınızı birbirine bağlayan, tüm e-Ticaretinizi tek ekrandan yönetmenizi sağlayan bulut tabanlı bir entegrasyon yazılımıdır.',
+          'PazarYerleri, pazaryerlerindeki mağazalarınız, e-Ticaret siteniz ve ERP/Muhasebe yazılımınızı birbirine bağlayan, tüm e-Ticaretinizi tek ekrandan yönetmenizi sağlayan bulut tabanlı bir entegrasyon yazılımıdır.',
           style: GoogleFonts.inter(color: Colors.white60, fontSize: 13, height: 1.6),
         ),
         const SizedBox(height: 20),
@@ -2173,7 +2278,7 @@ class _LandingScreenState extends State<LandingScreen> {
         _buildFooterLink('Gizlilik ve Çerez Politikası', () => _showLegalDialog('Gizlilik Politikası', _privacyPolicyText)),
         _buildFooterLink('KVKK Aydınlatma Metni', () => _showLegalDialog('KVKK Aydınlatma Metni', _kvkkText)),
         _buildFooterLink('Sık Sorulan Sorular', () => _scrollTo(_faqKey)),
-        _buildFooterLink('Hakkımızda & Ekibimiz', () => _showLegalDialog('Hakkımızda', 'RoaTech, Türkiye ve global e-ticaret satıcılarının operasyonel yükünü sıfırlamak amacıyla geliştirilmiş yeni nesil çoklu kanal entegrasyon platformudur.')),
+        _buildFooterLink('Hakkımızda & Ekibimiz', () => _showLegalDialog('Hakkımızda', 'PazarYerleri, Türkiye ve global e-ticaret satıcılarının operasyonel yükünü sıfırlamak amacıyla geliştirilmiş yeni nesil çoklu kanal entegrasyon platformudur.')),
         _buildFooterLink('İletişim & Canlı AI Destek', () => _showAiConsultantDialog()),
       ],
     );
@@ -2252,8 +2357,8 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   static const String _userAgreementText = '''
-RoaTech Kullanıcı Sözleşmesi:
-1. Hizmet Kapsamı: RoaTech, kullanıcıların birden fazla e-ticaret pazaryerindeki ürün, stok, fiyat ve sipariş verilerini senkronize etmelerini sağlar.
+PazarYerleri Kullanıcı Sözleşmesi:
+1. Hizmet Kapsamı: PazarYerleri, kullanıcıların birden fazla e-ticaret pazaryerindeki ürün, stok, fiyat ve sipariş verilerini senkronize etmelerini sağlar.
 2. Veri Güvenliği: Kullanıcının girdiği API anahtarları 256-bit AES şifreleme standardı ile korunur ve üçüncü taraflarla paylaşılmaz.
 3. 30 Gün Ücretsiz Deneme: Tüm yeni kayıtlar 30 gün boyunca kredi kartsız ücretsiz deneme hakkına sahiptir.
 4. Hizmet Kesintisizliği: Sistem %99.9 çalışma süresi (uptime) hedefiyle bulut mimarisinde barındırılmaktadır.
@@ -2261,27 +2366,27 @@ RoaTech Kullanıcı Sözleşmesi:
 
   static const String _privacyPolicyText = '''
 Gizlilik ve Çerez Politikası:
-1. RoaTech, kullanıcılarının kişisel bilgilerini ve mağaza verilerini en üst düzey şifreleme protokolleriyle muhafaza eder.
+1. PazarYerleri, kullanıcılarının kişisel bilgilerini ve mağaza verilerini en üst düzey şifreleme protokolleriyle muhafaza eder.
 2. Çerezler yalnızca kullanıcı oturumunu aktif tutmak ve panel performansını artırmak amacıyla kullanılır.
 3. Mağaza satış ve ciro verileriniz kesinlikle üçüncü parti reklam verenlerle paylaşılmaz.
 ''';
 
   static const String _kvkkText = '''
 6698 Sayılı KVKK Kapsamında Aydınlatma Metni:
-Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca, veri sorumlusu sıfatıyla RoaTech tarafından; üyelik işlemlerinin yürütülmesi, faturalandırma ve teknik destek hizmetlerinin sağlanması amaçlarıyla sınırlı olarak işlenmektedir.
+Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca, veri sorumlusu sıfatıyla PazarYerleri tarafından; üyelik işlemlerinin yürütülmesi, faturalandırma ve teknik destek hizmetlerinin sağlanması amaçlarıyla sınırlı olarak işlenmektedir.
 ''';
 }
 
 
 
 class _PeeledStickerBadge extends StatelessWidget {
-  final String logoUrl;
+  final String marketplaceName;
   final String initials;
   final Color brandColor;
   final double size;
 
   const _PeeledStickerBadge({
-    required this.logoUrl,
+    required this.marketplaceName,
     required this.initials,
     required this.brandColor,
     this.size = 64,
@@ -2328,22 +2433,11 @@ class _PeeledStickerBadge extends StatelessWidget {
             ),
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(9),
-                child: Image.network(
-                  logoUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Text(
-                        initials,
-                        style: GoogleFonts.inter(
-                          color: brandColor,
-                          fontWeight: FontWeight.w900,
-                          fontSize: size * 0.26,
-                        ),
-                      ),
-                    );
-                  },
+                padding: const EdgeInsets.all(8),
+                child: MarketplaceLogoWidget(
+                  marketplaceName: marketplaceName,
+                  size: size * 0.70,
+                  borderRadius: size * 0.35,
                 ),
               ),
             ),

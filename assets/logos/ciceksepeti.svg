@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="csGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0088EB"/>
+      <stop offset="100%" stop-color="#005BAA"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#csGrad)"/>
+  <g transform="translate(100, 72)" fill="#FFFFFF">
+    <circle cx="0" cy="-22" r="14" fill="#FFFFFF"/>
+    <circle cx="21" cy="-7" r="14" fill="#FFFFFF"/>
+    <circle cx="13" cy="18" r="14" fill="#FFFFFF"/>
+    <circle cx="-13" cy="18" r="14" fill="#FFFFFF"/>
+    <circle cx="-21" cy="-7" r="14" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="10" fill="#FFD200"/>
+  </g>
+  <text x="100" y="146" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="900" text-anchor="middle" letter-spacing="-0.5">çiçeksepeti</text>
+</svg>

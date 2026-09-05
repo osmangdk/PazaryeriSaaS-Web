@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="getirGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5D3EBC"/>
+      <stop offset="100%" stop-color="#472A99"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#getirGrad)"/>
+  <g fill="#FFD300" transform="translate(100, 115)">
+    <text x="0" y="0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" text-anchor="middle" letter-spacing="-1">getir</text>
+  </g>
+  <circle cx="150" cy="80" r="7" fill="#5D3EBC" stroke="#FFD300" stroke-width="3"/>
+</svg>

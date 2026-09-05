@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="44" fill="#000000"/>
+  <rect x="18" y="18" width="164" height="164" rx="32" fill="none" stroke="#333333" stroke-width="2"/>
+  <text x="100" y="112" fill="#FFFFFF" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="bold" text-anchor="middle" letter-spacing="4">BEYMEN</text>
+</svg>

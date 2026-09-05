@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="44" fill="#232F3E"/>
+  <g transform="translate(25, 52)">
+    <text x="75" y="48" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="bold" text-anchor="middle" letter-spacing="-1">amazon</text>
+    <path d="M 22 66 C 50 86 100 86 128 66" fill="none" stroke="#FF9900" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 125 58 L 134 67 L 122 72 Z" fill="#FF9900"/>
+  </g>
+</svg>

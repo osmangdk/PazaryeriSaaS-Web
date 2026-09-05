@@ -27,22 +27,80 @@ class ApiService {
     ));
   }
 
-  Future<String?> register(String email, String password, String companyName) async {
+  Future<Map<String, dynamic>?> checkAvailability({String? taxNumber, String? phone, String? email}) async {
+    try {
+      final response = await _dio.get('/auth/check-availability', queryParameters: {
+        if (taxNumber != null && taxNumber.isNotEmpty) 'taxNumber': taxNumber,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+        if (email != null && email.isNotEmpty) 'email': email,
+      });
+      return response.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> registerAdvanced({
+    required String fullName,
+    required String email,
+    required String phone,
+    required String password,
+    required String companyName,
+    String companyType = 'Company',
+    String? taxNumber,
+    String? taxOffice,
+    String? city,
+    String? district,
+    List<String>? selectedIndustries,
+    List<String>? selectedMarketplaces,
+    String planCode = 'STARTER',
+  }) async {
     try {
       final response = await _dio.post('/auth/register', data: {
+        'fullName': fullName,
         'email': email,
+        'phone': phone,
         'password': password,
         'companyName': companyName,
+        'companyType': companyType,
+        'taxNumber': taxNumber,
+        'taxOffice': taxOffice,
+        'city': city,
+        'district': district,
+        'selectedIndustries': selectedIndustries,
+        'selectedMarketplaces': selectedMarketplaces,
+        'planCode': planCode,
       });
+
       final token = response.data['token'];
       if (token != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('jwt_token', token);
+        if (response.data['tenant'] != null) {
+          await prefs.setString('tenant_info', response.data['tenant'].toString());
+        }
       }
-      return token;
+      return {'success': true, 'token': token, 'data': response.data};
+    } on DioException catch (e) {
+      String errorMessage = 'Kayıt işlemi başarısız oldu.';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? errorMessage;
+      }
+      return {'success': false, 'message': errorMessage};
     } catch (e) {
-      return null;
+      return {'success': false, 'message': 'Bağlantı hatası oluştu: $e'};
     }
+  }
+
+  Future<String?> register(String email, String password, String companyName) async {
+    final res = await registerAdvanced(
+      fullName: companyName,
+      email: email,
+      phone: '05000000000',
+      password: password,
+      companyName: companyName,
+    );
+    return res['token'] as String?;
   }
 
   Future<String?> login(String email, String password) async {
@@ -57,6 +115,18 @@ class ApiService {
         await prefs.setString('jwt_token', token);
       }
       return token;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List<dynamic>?> getSubscriptionPlans() async {
+    try {
+      final response = await _dio.get('/pricing/plans');
+      if (response.data is List) {
+        return response.data as List<dynamic>;
+      }
+      return null;
     } catch (e) {
       return null;
     }
@@ -233,7 +303,7 @@ class ApiService {
       };
     } else if (msg.contains('ücretsiz') || msg.contains('fiyat') || msg.contains('deneme') || msg.contains('paket') || msg.contains('kapsıyor')) {
       return {
-        'reply': '🎁 30 Gün Boyunca Kredi Kartsız %100 Ücretsiz Deneme!\n\nRoaTech\'i kredi kartı girmeden hemen deneyebilirsiniz:\n* 30 Gün Ücretsiz Kullanım\n* 3 Aktif Pazaryeri Bağlantısı (Trendyol, Hepsiburada, Amazon TR vb.)\n* 50 Ürün Kotası & Sınırsız Senkronizasyon\n* 1.2s Gerçek Zamanlı Stok Eşitleme\n* GİB E-Fatura & Kargo Barkodu Basımı',
+        'reply': '🎁 30 Gün Boyunca Kredi Kartsız %100 Ücretsiz Deneme!\n\nPazarYerleri\'ni kredi kartı girmeden hemen deneyebilirsiniz:\n* 30 Gün Ücretsiz Kullanım\n* 3 Aktif Pazaryeri Bağlantısı (Trendyol, Hepsiburada, Amazon TR vb.)\n* 50 Ürün Kotası & Sınırsız Senkronizasyon\n* 1.2s Gerçek Zamanlı Stok Eşitleme\n* GİB E-Fatura & Kargo Barkodu Basımı',
         'suggestedActions': [
           {'label': '🚀 30 Gün Ücretsiz Başla', 'actionType': 'go_register'},
           {'label': '📞 Müşteri Temsilcisine Bağlan', 'actionType': 'open_support_channels'}

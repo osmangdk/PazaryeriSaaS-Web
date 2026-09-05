@@ -1,11 +1,11 @@
 {
-    "name": "RoaTech Pazaryeri Entegrasyon",
-    "short_name": "RoaTech",
+    "name": "PazarYerleri Pazaryeri Entegrasyon",
+    "short_name": "PazarYerleri",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0A1118",
     "theme_color": "#0A1118",
-    "description": "RoaTech - Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.",
+    "description": "PazarYerleri - Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

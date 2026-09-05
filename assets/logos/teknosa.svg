@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="tknGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7300"/>
+      <stop offset="100%" stop-color="#E65100"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#tknGrad)"/>
+  <g transform="translate(100, 108)" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-style="italic" font-weight="900" text-anchor="middle">
+    <text x="0" y="0" font-size="30" letter-spacing="1">TEKNOSA</text>
+  </g>
+  <circle cx="100" cy="58" r="16" fill="#003399"/>
+  <path d="M 94 58 L 106 58 M 100 52 L 100 64" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+</svg>

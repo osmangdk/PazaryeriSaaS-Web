@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="pzmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <linearGradient id="cyanP" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#pzmGrad)"/>
+  <g transform="translate(68, 38)">
+    <path d="M 0 0 L 34 0 C 52 0 66 12 66 30 C 66 48 52 60 34 60 L 18 60 L 18 90 L 0 90 Z" fill="url(#cyanP)"/>
+    <circle cx="34" cy="30" r="12" fill="#4C1D95"/>
+  </g>
+  <text x="100" y="162" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="900" text-anchor="middle" letter-spacing="0.5">pazarama</text>
+</svg>

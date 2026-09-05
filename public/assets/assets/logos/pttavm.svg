@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="pttGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD400"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#pttGrad)"/>
+  <g transform="translate(100, 75)" fill="#003399">
+    <path d="M -48 -22 Q -10 -40 0 0 Q 10 -40 48 -22 Q 22 10 0 26 Q -22 10 -48 -22 Z" fill="#003399"/>
+    <circle cx="0" cy="-6" r="9" fill="#FFD400"/>
+  </g>
+  <g text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900">
+    <text x="75" y="148" fill="#003399" font-size="30" letter-spacing="-1">Ptt</text>
+    <text x="132" y="148" fill="#E11D48" font-size="28" letter-spacing="0">AVM</text>
+  </g>
+</svg>
