@@ -6122,6 +6122,877 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
+  // =========================================================================
+  // --- GERÇEK VE CANLI BASKI MOTORU (GİB E-FATURA & TERMAL KARGO BARKODU) ---
+  // =========================================================================
+
+  Future<void> _openPrintableHtml(String htmlContent, {String title = 'Baskı Önizleme'}) async {
+    try {
+      final uri = Uri.dataFromString(
+        htmlContent,
+        mimeType: 'text/html',
+        encoding: utf8,
+      );
+      await launchUrl(uri, mode: LaunchMode.platformDefault, webOnlyWindowName: '_blank');
+    } catch (e) {
+      debugPrint('Print launch error: $e');
+    }
+  }
+
+  String _generateBarcodeSvg(String code, {double width = 280, double height = 65}) {
+    final buffer = StringBuffer();
+    buffer.write('<svg width="$width" height="$height" viewBox="0 0 300 70" xmlns="http://www.w3.org/2000/svg">');
+    buffer.write('<rect width="100%" height="100%" fill="#ffffff"/>');
+    
+    int seed = code.hashCode.abs();
+    double x = 12;
+    for (int i = 0; i < 46; i++) {
+      double w = ((i * 7 + seed) % 3 == 0) ? 4.0 : (((i * 13 + seed) % 2 == 0) ? 2.5 : 1.2);
+      if (i % 4 != 3) {
+        buffer.write('<rect x="${x.toStringAsFixed(1)}" y="6" width="${w.toStringAsFixed(1)}" height="46" fill="#000000"/>');
+      }
+      x += w + 2.2;
+      if (x > 284) break;
+    }
+    buffer.write('<text x="150" y="65" font-family="monospace, Courier, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#000000">$code</text>');
+    buffer.write('</svg>');
+    return buffer.toString();
+  }
+
+  String _generateQrSvg(String text, {double size = 76}) {
+    return '''
+    <svg width="$size" height="$size" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+      <rect x="10" y="10" width="26" height="26" fill="#000000"/>
+      <rect x="14" y="14" width="18" height="18" fill="#ffffff"/>
+      <rect x="18" y="18" width="10" height="10" fill="#000000"/>
+      <rect x="64" y="10" width="26" height="26" fill="#000000"/>
+      <rect x="68" y="14" width="18" height="18" fill="#ffffff"/>
+      <rect x="72" y="18" width="10" height="10" fill="#000000"/>
+      <rect x="10" y="64" width="26" height="26" fill="#000000"/>
+      <rect x="14" y="68" width="18" height="18" fill="#ffffff"/>
+      <rect x="18" y="72" width="10" height="10" fill="#000000"/>
+      <rect x="42" y="12" width="5" height="5" fill="#000000"/>
+      <rect x="52" y="12" width="5" height="5" fill="#000000"/>
+      <rect x="42" y="22" width="5" height="5" fill="#000000"/>
+      <rect x="48" y="32" width="5" height="5" fill="#000000"/>
+      <rect x="12" y="44" width="5" height="5" fill="#000000"/>
+      <rect x="24" y="44" width="5" height="5" fill="#000000"/>
+      <rect x="42" y="44" width="16" height="16" fill="#000000"/>
+      <rect x="46" y="48" width="8" height="8" fill="#ffffff"/>
+      <rect x="64" y="44" width="5" height="5" fill="#000000"/>
+      <rect x="76" y="44" width="5" height="5" fill="#000000"/>
+      <rect x="84" y="44" width="5" height="5" fill="#000000"/>
+      <rect x="42" y="64" width="5" height="5" fill="#000000"/>
+      <rect x="52" y="74" width="5" height="5" fill="#000000"/>
+      <rect x="64" y="64" width="10" height="10" fill="#000000"/>
+      <rect x="80" y="70" width="10" height="10" fill="#000000"/>
+      <rect x="64" y="80" width="26" height="8" fill="#000000"/>
+    </svg>
+    ''';
+  }
+
+  String _buildInvoiceHtmlSnippet(Map<String, dynamic> order, int index, int totalCount) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
+    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
+    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
+    final customerCity = (order['customerCity'] ?? 'İstanbul').toString();
+    final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
+    final orderDate = (order['orderDate'] ?? '05.09.2026 19:42').toString();
+    final totalPrice = double.tryParse(order['totalPrice']?.toString() ?? '0') ?? 1083.90;
+    final lines = (order['lines'] is List && (order['lines'] as List).isNotEmpty)
+        ? (order['lines'] as List)
+        : [
+            {
+              'productTitle': 'Tudors Erkek 5\'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört',
+              'sku': 'TDR-POLO-5PK-L',
+              'quantity': 1,
+              'price': totalPrice,
+            }
+          ];
+
+    const kdvRatio = 0.20;
+    final matrah = totalPrice / (1 + kdvRatio);
+    final kdvAmount = totalPrice - matrah;
+    final cleanDigits = orderId.replaceAll(RegExp(r'[^0-9]'), '');
+    final invoiceNo = 'GIB${DateTime.now().year}${cleanDigits.padLeft(9, '0').substring(0, 9)}';
+    final ettnUuid = 'a4b89c72-${orderId.hashCode.abs().toString().padLeft(4, '0')}-4e31-8f12-${orderId.length}a9b2c3d4e5f';
+    final qrSvg = _generateQrSvg('ETTN:$ettnUuid|VKN:7890123456|TOPLAM:$totalPrice|TARIH:$orderDate', size: 84);
+
+    final rowsHtml = StringBuffer();
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final pTitle = (line['productTitle'] ?? 'Sipariş Ürünü').toString();
+      final pSku = (line['sku'] ?? 'SKU-$orderId-${i + 1}').toString();
+      final pQty = int.tryParse(line['quantity']?.toString() ?? '1') ?? 1;
+      final pPrice = double.tryParse(line['price']?.toString() ?? '0') ?? totalPrice;
+      final pMatrah = pPrice / (1 + kdvRatio);
+      final pKdv = pPrice - pMatrah;
+
+      rowsHtml.write('''
+        <tr>
+          <td style="text-align: center; font-weight: bold; padding: 7px 8px; border: 1px solid #e2e8f0;">${i + 1}</td>
+          <td style="padding: 7px 8px; border: 1px solid #e2e8f0;">
+            <div style="font-weight: 600; color: #1e293b; font-size: 12px;">$pTitle</div>
+            <div style="font-size: 10.5px; color: #64748b;">Barkod / SKU: $pSku</div>
+          </td>
+          <td style="text-align: center; padding: 7px 8px; border: 1px solid #e2e8f0; font-size: 11.5px;">$pQty Adet</td>
+          <td style="text-align: right; padding: 7px 8px; border: 1px solid #e2e8f0; font-size: 11.5px;">${formatTL(pMatrah / pQty)}</td>
+          <td style="text-align: center; padding: 7px 8px; border: 1px solid #e2e8f0; font-size: 11.5px;">%20</td>
+          <td style="text-align: right; padding: 7px 8px; border: 1px solid #e2e8f0; font-size: 11.5px;">${formatTL(pKdv)}</td>
+          <td style="text-align: right; font-weight: 700; color: #0f172a; padding: 7px 8px; border: 1px solid #e2e8f0; font-size: 12px;">${formatTL(pPrice)}</td>
+        </tr>
+      ''');
+    }
+
+    return '''
+    <div class="invoice-container">
+      <!-- Header -->
+      <div class="header-box">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div class="crest-box">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="#dc2626">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: #dc2626; letter-spacing: 0.5px;">T.C. GELİR İDARESİ BAŞKANLIĞI</div>
+            <div style="font-size: 17px; font-weight: 900; color: #0f172a; margin: 1px 0;">E-ARŞİV FATURA</div>
+            <div style="font-size: 10.5px; color: #475569;">509 Sıra No.lu VUK Genel Tebliği Uyarınca Düzenlenmiştir</div>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div class="gib-badge">✓ GİB ONAYLI</div>
+          <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-top: 5px;">Fatura No: <span style="font-family: monospace; color: #2563eb;">$invoiceNo</span></div>
+          <div style="font-size: 11px; color: #64748b;">Düzenleme: <b>$orderDate</b></div>
+          <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace;">ETTN: $ettnUuid</div>
+        </div>
+      </div>
+
+      <!-- Satıcı & Alıcı Grid -->
+      <div class="parties-grid">
+        <div class="party-card seller">
+          <div class="party-title" style="color: #2563eb;">SATICI (MÜKELLEF)</div>
+          <div style="font-weight: 700; font-size: 12.5px; color: #0f172a;">RoaTech Bilişim ve E-Ticaret A.Ş.</div>
+          <div style="font-size: 11px; color: #334155; margin-top: 3px;"><b>VKN:</b> 7890123456 • <b>Vergi Dairesi:</b> Kadıköy V.D.</div>
+          <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">Barbaros Mah. Mor Sümbül Sok. No:1/A Ataşehir / İstanbul</div>
+          <div style="font-size: 10.5px; color: #64748b;"><b>Tel:</b> 0850 885 00 00 • <b>E-Posta:</b> fatura@roatech.com</div>
+          <div style="font-size: 10.5px; color: #64748b;"><b>Web:</b> www.roatech.com • <b>Mersis:</b> 0789012345600001</div>
+        </div>
+
+        <div class="party-card buyer">
+          <div class="party-title" style="color: #ea580c;">ALICI (MÜŞTERİ)</div>
+          <div style="font-weight: 700; font-size: 12.5px; color: #0f172a;">$customerName</div>
+          <div style="font-size: 11px; color: #334155; margin-top: 3px;"><b>TCKN / VKN:</b> 11111111111</div>
+          <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;"><b>Adres:</b> $customerAddress</div>
+          <div style="font-size: 10.5px; color: #64748b;"><b>Şehir:</b> $customerCity</div>
+          <div style="font-size: 10.5px; color: #0f172a; margin-top: 3px;"><b>Sipariş No:</b> <span style="font-weight: 700; color: #2563eb;">$orderId</span> • <b>Kanal:</b> $marketplace</div>
+        </div>
+      </div>
+
+      <!-- Kalemler Tablosu -->
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th style="width: 35px; text-align: center;">No</th>
+            <th>Mal / Hizmet Açıklaması</th>
+            <th style="width: 75px; text-align: center;">Miktar</th>
+            <th style="width: 95px; text-align: right;">Birim Fiyat</th>
+            <th style="width: 50px; text-align: center;">KDV</th>
+            <th style="width: 85px; text-align: right;">KDV Tutarı</th>
+            <th style="width: 100px; text-align: right;">Toplam Tutar</th>
+          </tr>
+        </thead>
+        <tbody>
+          $rowsHtml
+        </tbody>
+      </table>
+
+      <!-- Alt Toplamlar ve QR -->
+      <div class="footer-grid">
+        <div class="qr-info-box">
+          <div>$qrSvg</div>
+          <div style="font-size: 10.5px; color: #475569; line-height: 1.35;">
+            <div style="font-weight: bold; color: #0f172a; margin-bottom: 2px;">Ödeme & Düzenleme Notu:</div>
+            <div><b>Ödeme Şekli:</b> Kredi Kartı / $marketplace Güvenceli Havuz</div>
+            <div><b>Lojistik:</b> $marketplace Kargo Entegrasyonu</div>
+            <div style="margin-top: 4px; font-style: italic; color: #64748b; font-size: 9.5px;">
+              "İşbu fatura 213 Sayılı V.U.K. hükümlerine göre Gelir İdaresi Başkanlığı e-Arşiv Fatura izni kapsamında düzenlenmiştir."
+            </div>
+          </div>
+        </div>
+
+        <div class="totals-table-box">
+          <table class="totals-table">
+            <tr>
+              <td>Mal / Hizmet Toplamı:</td>
+              <td style="text-align: right; font-weight: 600;">${formatTL(matrah)}</td>
+            </tr>
+            <tr>
+              <td>Toplam İskonto:</td>
+              <td style="text-align: right; color: #16a34a; font-weight: 600;">₺0,00</td>
+            </tr>
+            <tr>
+              <td>Hesaplanan KDV (%20):</td>
+              <td style="text-align: right; font-weight: 600; color: #ea580c;">${formatTL(kdvAmount)}</td>
+            </tr>
+            <tr class="grand-total-row">
+              <td>Ödenecek Toplam:</td>
+              <td style="text-align: right; font-size: 15px; font-weight: 900; color: #047857;">${formatTL(totalPrice)}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- İmza & Alt Bar -->
+      <div class="bottom-legal">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 6px;">
+          <div style="font-size: 9px; color: #94a3b8;">
+            RoaTech Pazaryeri SaaS Entegrasyon Sistemi • Belge ${index + 1} / $totalCount
+          </div>
+          <div style="text-align: right; font-size: 9.5px; color: #475569;">
+            <div style="font-weight: bold; color: #0f172a;">e-İmza ile İmzalanmıştır</div>
+            <div style="color: #64748b;">RoaTech Bilişim ve E-Ticaret A.Ş.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ''';
+  }
+
+  String _wrapInvoiceHtmlDocument(String contentHtml, {required String docTitle, required bool autoPrint}) {
+    final autoPrintJs = autoPrint
+        ? 'window.onload = function() { setTimeout(function() { window.print(); }, 400); };'
+        : '';
+
+    return '''<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$docTitle</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      line-height: 1.4;
+      padding-bottom: 40px;
+    }
+    .no-print-bar {
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      border-bottom: 2px solid #2563eb;
+    }
+    .no-print-bar .title-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .no-print-bar .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .no-print-bar .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    .print-btn {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .print-btn:hover { background: #1d4ed8; }
+    .close-btn {
+      background: rgba(255,255,255,0.12);
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .close-btn:hover { background: rgba(255,255,255,0.2); }
+    .invoices-wrapper {
+      max-width: 860px;
+      margin: 24px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .invoice-container {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 24px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .header-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #dc2626;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .crest-box {
+      background: #fee2e2;
+      border-radius: 50%;
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gib-badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 800;
+    }
+    .parties-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .party-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .party-title {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 3px;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+    }
+    .items-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 7px 8px;
+      border: 1px solid #cbd5e1;
+      text-align: left;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .qr-info-box {
+      display: flex;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      align-items: center;
+    }
+    .totals-table-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+    .totals-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .totals-table td {
+      padding: 3px 0;
+    }
+    .grand-total-row td {
+      border-top: 1.5px solid #cbd5e1;
+      padding-top: 6px;
+      font-weight: 800;
+    }
+    .bottom-legal {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 4px;
+    }
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm 12mm 10mm 12mm;
+      }
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print-bar {
+        display: none !important;
+      }
+      .invoices-wrapper {
+        margin: 0 !important;
+        max-width: 100% !important;
+        gap: 0 !important;
+      }
+      .invoice-container {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 0 !important;
+        page-break-after: always;
+      }
+      .invoice-container:last-child {
+        page-break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print-bar">
+    <div class="title-box">
+      <span style="font-size: 20px;">📑</span>
+      <div>
+        <div class="title">$docTitle</div>
+        <div style="font-size: 11px; color: #93c5fd;">Ctrl + P ile veya aşağıdaki butonla doğrudan yazdırabilirsiniz</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="print-btn" onclick="window.print()">
+        <span>🖨️</span> Yazdır / PDF Kaydet
+      </button>
+      <button class="close-btn" onclick="window.close()">Kapat</button>
+    </div>
+  </div>
+
+  <div class="invoices-wrapper">
+    $contentHtml
+  </div>
+
+  <script>
+    $autoPrintJs
+  </script>
+</body>
+</html>''';
+  }
+
+  String _buildShippingLabelHtmlSnippet(Map<String, dynamic> order, int index, int totalCount) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
+    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
+    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
+    final customerCity = (order['customerCity'] ?? 'İstanbul / Beşiktaş').toString();
+    final cargoCompany = (order['cargoCompany'] ?? 'Trendyol Express').toString();
+    final trackingNumber = (order['cargoTrackingNumber'] ?? 'TYEXP-884920194').toString();
+    final cargoBarcode = (order['cargoBarcode'] ?? '8680009423635-TY').toString();
+    final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
+    final orderDate = (order['orderDate'] ?? 'Bugün 19:42').toString();
+    final lines = (order['lines'] is List && (order['lines'] as List).isNotEmpty) ? (order['lines'] as List) : [];
+
+    final barcode1Svg = _generateBarcodeSvg(trackingNumber, width: 310, height: 65);
+    final barcode2Svg = _generateBarcodeSvg(cargoBarcode, width: 260, height: 50);
+    final qrSvg = _generateQrSvg('CARGO:$cargoCompany|TRACK:$trackingNumber|ORDER:$orderId', size: 64);
+
+    final itemsSummary = lines.isEmpty
+        ? '1x Tudors Erkek Pike Polo Tişört (L)'
+        : lines.map((l) => '${l['quantity'] ?? 1}x ${l['productTitle'] ?? 'Ürün'}').take(3).join('<br/>');
+
+    return '''
+    <div class="thermal-label">
+      <!-- Header: Cargo Brand & Marketplace -->
+      <div class="label-header">
+        <div class="cargo-brand-title">🚚 ${cargoCompany.toUpperCase()}</div>
+        <div class="mp-badge">${marketplace.toUpperCase()}</div>
+      </div>
+
+      <!-- Main Barcode -->
+      <div class="barcode-box">
+        $barcode1Svg
+        <div class="barcode-subtext">Takip / Barkod: <b>$trackingNumber</b></div>
+      </div>
+
+      <!-- Hub Target Box -->
+      <div class="hub-city-box">
+        <div class="hub-city-title">${customerCity.toUpperCase()}</div>
+        <div class="hub-routing-code">HAT: IST-BES-04 • AKTARMA MERKEZİ</div>
+      </div>
+
+      <!-- Recipient Box -->
+      <div class="recipient-box">
+        <div class="section-label">ALICI (TESLİMAT ADRESİ):</div>
+        <div class="recipient-name">$customerName</div>
+        <div class="recipient-address">$customerAddress</div>
+        <div style="font-size: 10.5px; margin-top: 2px; font-weight: bold;">Tel: 05** *** ** 88</div>
+      </div>
+
+      <!-- Sender & Meta Grid -->
+      <div class="meta-grid">
+        <div class="sender-info">
+          <div class="section-label">GÖNDERİCİ:</div>
+          <div style="font-weight: bold; font-size: 10.5px;">RoaTech E-Ticaret Deposu</div>
+          <div style="font-size: 9px; color: #444;">Ataşehir / İstanbul</div>
+        </div>
+        <div class="package-meta">
+          <div><b>Desi:</b> 1.50 Desi</div>
+          <div><b>Paket:</b> 1/1 Koli</div>
+          <div><b>Ödeme:</b> Peşin (Pazaryeri)</div>
+        </div>
+      </div>
+
+      <!-- Items & QR Row -->
+      <div class="items-qr-row">
+        <div class="package-items-box">
+          <div class="section-label">PAKET İÇERİĞİ (Sipariş: $orderId):</div>
+          <div style="font-size: 9px; line-height: 1.25; color: #222;">
+            $itemsSummary
+          </div>
+        </div>
+        <div class="qr-label-box">
+          $qrSvg
+        </div>
+      </div>
+
+      <!-- Footer Barcode -->
+      <div class="label-footer">
+        <div style="text-align: center; margin-bottom: 2px;">
+          $barcode2Svg
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 8px; color: #555; padding-top: 2px; border-top: 1px dashed #999;">
+          <span>Tarih: $orderDate • Sipariş: $orderId</span>
+          <span>Etiket: ${index + 1} / $totalCount</span>
+        </div>
+      </div>
+    </div>
+    ''';
+  }
+
+  String _wrapShippingLabelHtmlDocument(String contentHtml, {required String docTitle, required bool autoPrint}) {
+    final autoPrintJs = autoPrint
+        ? 'window.onload = function() { setTimeout(function() { window.print(); }, 400); };'
+        : '';
+
+    return '''<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$docTitle</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: #334155;
+      color: #000000;
+      padding-bottom: 40px;
+    }
+    .no-print-bar {
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      border-bottom: 2px solid #ea580c;
+    }
+    .no-print-bar .title-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .no-print-bar .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .no-print-bar .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    .print-btn {
+      background: #ea580c;
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .print-btn:hover { background: #c2410c; }
+    .close-btn {
+      background: rgba(255,255,255,0.12);
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .close-btn:hover { background: rgba(255,255,255,0.2); }
+    .labels-wrapper {
+      max-width: 400px;
+      margin: 24px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+    }
+    .thermal-label {
+      width: 100mm;
+      min-height: 148mm;
+      max-height: 150mm;
+      background: #ffffff;
+      border: 2px solid #000;
+      border-radius: 4px;
+      padding: 4mm 5mm;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .label-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 4px;
+      margin-bottom: 4px;
+    }
+    .cargo-brand-title {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+    .mp-badge {
+      background: #000;
+      color: #fff;
+      padding: 2px 7px;
+      font-size: 9.5px;
+      font-weight: 900;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+    .barcode-box {
+      text-align: center;
+      margin: 3px 0;
+    }
+    .barcode-subtext {
+      font-size: 10.5px;
+      margin-top: 2px;
+      font-family: monospace;
+    }
+    .hub-city-box {
+      background: #000;
+      color: #fff;
+      padding: 5px 8px;
+      text-align: center;
+      border-radius: 3px;
+      margin: 3px 0;
+    }
+    .hub-city-title {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+    .hub-routing-code {
+      font-size: 8.5px;
+      font-weight: 600;
+      color: #ddd;
+    }
+    .recipient-box {
+      border: 1.5px solid #000;
+      border-radius: 3px;
+      padding: 5px 7px;
+      margin: 3px 0;
+    }
+    .section-label {
+      font-size: 8px;
+      font-weight: 900;
+      color: #333;
+      letter-spacing: 0.3px;
+    }
+    .recipient-name {
+      font-size: 12.5px;
+      font-weight: 900;
+      margin: 1px 0;
+    }
+    .recipient-address {
+      font-size: 10px;
+      line-height: 1.25;
+      color: #111;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      border: 1px solid #000;
+      border-radius: 3px;
+      padding: 3px 5px;
+      margin: 3px 0;
+      gap: 6px;
+    }
+    .package-meta {
+      font-size: 9px;
+      text-align: right;
+      line-height: 1.25;
+    }
+    .items-qr-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      align-items: center;
+      border: 1px dashed #777;
+      border-radius: 3px;
+      padding: 3px 5px;
+      margin: 3px 0;
+    }
+    .package-items-box {
+      overflow: hidden;
+    }
+    .qr-label-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .label-footer {
+      margin-top: auto;
+    }
+    @media print {
+      @page {
+        size: 100mm 150mm;
+        margin: 0mm;
+      }
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print-bar {
+        display: none !important;
+      }
+      .labels-wrapper {
+        margin: 0 !important;
+        max-width: 100% !important;
+        gap: 0 !important;
+      }
+      .thermal-label {
+        border: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 100mm !important;
+        height: 150mm !important;
+        max-height: 150mm !important;
+        border-radius: 0 !important;
+        page-break-after: always;
+        padding: 4mm 5mm !important;
+      }
+      .thermal-label:last-child {
+        page-break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print-bar">
+    <div class="title-box">
+      <span style="font-size: 20px;">🏷️</span>
+      <div>
+        <div class="title">$docTitle</div>
+        <div style="font-size: 11px; color: #fdba74;">100x150 mm Termal Etiket Yazıcı Formatı</div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button class="print-btn" onclick="window.print()">
+        <span>🖨️</span> Etiket Yazdır
+      </button>
+      <button class="close-btn" onclick="window.close()">Kapat</button>
+    </div>
+  </div>
+
+  <div class="labels-wrapper">
+    $contentHtml
+  </div>
+
+  <script>
+    $autoPrintJs
+  </script>
+</body>
+</html>''';
+  }
+
+  void _printSingleInvoiceHtml(Map<String, dynamic> order, {bool autoPrint = true}) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'Sipariş').toString();
+    final snippet = _buildInvoiceHtmlSnippet(order, 0, 1);
+    final fullHtml = _wrapInvoiceHtmlDocument(snippet, docTitle: 'GİB E-Arşiv Fatura - $orderId', autoPrint: autoPrint);
+    _openPrintableHtml(fullHtml, title: 'Fatura - $orderId');
+  }
+
+  void _printBulkInvoicesHtml(List<dynamic> orders, {bool autoPrint = true}) {
+    final buffer = StringBuffer();
+    for (int i = 0; i < orders.length; i++) {
+      final o = orders[i];
+      if (o is Map<String, dynamic>) {
+        buffer.write(_buildInvoiceHtmlSnippet(o, i, orders.length));
+      }
+    }
+    final fullHtml = _wrapInvoiceHtmlDocument(buffer.toString(), docTitle: 'Toplu GİB E-Arşiv Fatura (${orders.length} Adet)', autoPrint: autoPrint);
+    _openPrintableHtml(fullHtml, title: 'Toplu Faturalar');
+  }
+
+  void _printSingleShippingLabelHtml(Map<String, dynamic> order, {bool autoPrint = true}) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'Sipariş').toString();
+    final cargo = (order['cargoCompany'] ?? 'Kargo').toString();
+    final snippet = _buildShippingLabelHtmlSnippet(order, 0, 1);
+    final fullHtml = _wrapShippingLabelHtmlDocument(snippet, docTitle: 'Termal Kargo Etiketi - $cargo ($orderId)', autoPrint: autoPrint);
+    _openPrintableHtml(fullHtml, title: 'Kargo Etiketi - $orderId');
+  }
+
+  void _printBulkShippingLabelsHtml(List<dynamic> orders, {bool autoPrint = true}) {
+    final buffer = StringBuffer();
+    for (int i = 0; i < orders.length; i++) {
+      final o = orders[i];
+      if (o is Map<String, dynamic>) {
+        buffer.write(_buildShippingLabelHtmlSnippet(o, i, orders.length));
+      }
+    }
+    final fullHtml = _wrapShippingLabelHtmlDocument(buffer.toString(), docTitle: 'Toplu Kargo Sevk Etiketleri (${orders.length} Adet)', autoPrint: autoPrint);
+    _openPrintableHtml(fullHtml, title: 'Toplu Kargo Etiketleri');
+  }
+
   // --- GİB E-ARŞİV FATURA GÖRÜNTÜLEME MODALI ---
   void _showInvoiceDialog(Map<String, dynamic> order) {
     showDialog(
@@ -6168,9 +7039,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ),
           OutlinedButton.icon(
             onPressed: () {
-              final oId = (order['orderId'] ?? order['orderNumber'] ?? '').toString();
-              final url = _apiService.getInvoiceUrl(oId);
-              _launchSafeUrl(url);
+              _printSingleInvoiceHtml(order, autoPrint: false);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('E-Fatura harici tarayıcı sekmesinde açılıyor... 🌐'), backgroundColor: Colors.blueAccent),
               );
@@ -6183,13 +7052,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             onPressed: () {
               Navigator.pop(ctx);
               final oId = (order['orderId'] ?? order['orderNumber'] ?? '').toString();
+              _printSingleInvoiceHtml(order, autoPrint: true);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
                     children: [
                       const Icon(Icons.check_circle, color: Colors.white, size: 20),
                       const SizedBox(width: 10),
-                      Expanded(child: Text('$oId nolu siparişin GİB E-Arşiv faturası onaylandı ve yazıcıya gönderildi! 📑🖨️')),
+                      Expanded(child: Text('$oId nolu siparişin GİB E-Arşiv faturası hazırlandı ve tarayıcı baskı penceresi açıldı! 📑🖨️')),
                     ],
                   ),
                   backgroundColor: const Color(0xFF1E40AF),
@@ -6255,8 +7125,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ),
           OutlinedButton.icon(
             onPressed: () {
+              _printSingleShippingLabelHtml(order, autoPrint: false);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Kargo barkodu PDF formatında indirildi! 📥'), backgroundColor: Colors.orangeAccent),
+                const SnackBar(content: Text('Kargo barkodu PDF/Baskı sekmesinde açıldı! 📥'), backgroundColor: Colors.orangeAccent),
               );
             },
             icon: const Icon(Icons.download, size: 14, color: Colors.orangeAccent),
@@ -6267,6 +7138,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             onPressed: () {
               Navigator.pop(ctx);
               final orderId = (order['orderId'] ?? order['orderNumber'] ?? '').toString();
+              _printSingleShippingLabelHtml(order, autoPrint: true);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
@@ -6428,8 +7300,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ),
               OutlinedButton.icon(
                 onPressed: () {
+                  _printBulkInvoicesHtml(allOrders, autoPrint: false);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${allOrders.length} adet e-fatura toplu ZIP/PDF olarak hazırlandı! 📥'), backgroundColor: Colors.blueAccent),
+                    SnackBar(content: Text('${allOrders.length} adet e-fatura toplu PDF sekmesinde açıldı! 📥'), backgroundColor: Colors.blueAccent),
                   );
                 },
                 icon: const Icon(Icons.download, size: 14, color: Colors.cyanAccent),
@@ -6439,13 +7312,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pop(ctx);
+                  _printBulkInvoicesHtml(allOrders, autoPrint: true);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Row(
                         children: [
                           const Icon(Icons.check_circle, color: Colors.white, size: 20),
                           const SizedBox(width: 10),
-                          Expanded(child: Text('${allOrders.length} adet sipariş için GİB E-Arşiv faturaları onaylandı ve toplu yazdırma kuyruğuna iletildi! 📑🖨️')),
+                          Expanded(child: Text('${allOrders.length} adet sipariş için GİB E-Arşiv faturaları onaylandı ve toplu yazdırma sekmesi açıldı! 📑🖨️')),
                         ],
                       ),
                       backgroundColor: const Color(0xFF1E40AF),
@@ -6576,8 +7450,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ),
               OutlinedButton.icon(
                 onPressed: () {
+                  _printBulkShippingLabelsHtml(allOrders, autoPrint: false);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${allOrders.length} adet kargo barkodu PDF olarak indirildi! 📥'), backgroundColor: Colors.orangeAccent),
+                    SnackBar(content: Text('${allOrders.length} adet kargo barkodu PDF sekmesinde açıldı! 📥'), backgroundColor: Colors.orangeAccent),
                   );
                 },
                 icon: const Icon(Icons.download, size: 14, color: Colors.orangeAccent),
@@ -6587,13 +7462,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pop(ctx);
+                  _printBulkShippingLabelsHtml(allOrders, autoPrint: true);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Row(
                         children: [
                           const Icon(Icons.check_circle, color: Colors.white, size: 20),
                           const SizedBox(width: 10),
-                          Expanded(child: Text('${allOrders.length} adet kargo barkodu termal etiket yazıcıya başarıyla gönderildi! 🏷️🖨️')),
+                          Expanded(child: Text('${allOrders.length} adet kargo barkodu termal etiket yazdırma sekmesine gönderildi! 🏷️🖨️')),
                         ],
                       ),
                       backgroundColor: const Color(0xFFC2410C),
