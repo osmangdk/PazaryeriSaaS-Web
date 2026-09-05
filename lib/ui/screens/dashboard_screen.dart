@@ -2918,21 +2918,50 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   children: [
                     // Ürün Seçim Kutusu
                     if (products.isNotEmpty) ...[
+                      Row(
+                        children: [
+                          const Icon(Icons.inventory_2_outlined, color: Colors.amberAccent, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Kataloğunuzdan Bir Ürün Seçin (İsteğe Bağlı)',
+                            style: GoogleFonts.inter(
+                              color: Colors.amberAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       DropdownButtonFormField<String?>(
                         value: selectedProductId,
                         dropdownColor: const Color(0xFF1E293B),
+                        isExpanded: true,
                         style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                         decoration: InputDecoration(
-                          labelText: '📦 Kataloğunuzdan Bir Ürün Seçin (İsteğe Bağlı)',
-                          labelStyle: GoogleFonts.inter(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 12),
+                          hintText: 'Listeden bir ürün seçin veya manuel hesaplayın...',
+                          hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 12.5),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.05),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          fillColor: Colors.white.withOpacity(0.06),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Colors.white24),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Colors.white24),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Colors.amberAccent, width: 1.5),
+                          ),
                         ),
                         items: [
-                          const DropdownMenuItem<String?>(
+                          DropdownMenuItem<String?>(
                             value: null,
-                            child: Text('⚙️ Manuel Değerler ile Serbest Hesaplama'),
+                            child: Text('⚙️ Manuel Değerler ile Serbest Hesaplama', style: GoogleFonts.inter(color: Colors.cyanAccent, fontWeight: FontWeight.w500)),
                           ),
                           ...products.map((p) {
                             final pid = p['id'].toString();
@@ -2940,7 +2969,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             final price = p['price'] ?? 0;
                             return DropdownMenuItem<String?>(
                               value: pid,
-                              child: Text('$title (Mevcut Satış: ${formatTL(price)})', maxLines: 1, overflow: TextOverflow.ellipsis),
+                              child: Text(
+                                '$title (Mevcut Satış: ${formatTL(price)})',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(color: Colors.white),
+                              ),
                             );
                           }),
                         ],
@@ -3159,11 +3193,33 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    DropdownButtonFormField<int>(
-                      value: selectedType,
-                      dropdownColor: const Color(0xFF1E293B),
-                      style: GoogleFonts.inter(color: Colors.white),
-                      decoration: InputDecoration(labelText: 'Pazaryeri Seçin', labelStyle: GoogleFonts.inter(color: Colors.white60), filled: true, fillColor: Colors.white.withOpacity(0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.storefront_outlined, color: Colors.cyanAccent, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Bağlanacak Pazaryerini Seçin',
+                              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          value: selectedType,
+                          dropdownColor: const Color(0xFF1E293B),
+                          isExpanded: true,
+                          style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.06),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white24)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white24)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5)),
+                          ),
                       items: const [
                         DropdownMenuItem(value: 1, child: Text('🟠 Trendyol')),
                         DropdownMenuItem(value: 2, child: Text('🟠 Hepsiburada')),
@@ -3188,9 +3244,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         DropdownMenuItem(value: 21, child: Text('🔵 LC Waikiki')),
                         DropdownMenuItem(value: 22, child: Text('🔵 Cimri')),
                       ],
-
                       onChanged: (val) => setDialogState(() => selectedType = val ?? 1),
                     ),
+                  ],
+                ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: storeNameController,
