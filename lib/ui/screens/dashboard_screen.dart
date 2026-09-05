@@ -5269,7 +5269,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           const SizedBox(width: 6),
                           _buildOrderFilterChip('Kargoda', 'Kargo', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.blueAccent),
                           const SizedBox(width: 6),
-                          _buildOrderFilterChip('Teslim Edildi', 'Teslim', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.grey),
+                          _buildOrderFilterChip('Teslim Edildi', 'Teslim', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.tealAccent),
+                          const SizedBox(width: 6),
+                          _buildOrderFilterChip('İptal / İade', 'İptal', _selectedOrderStatusFilter, (val) => setState(() => _selectedOrderStatusFilter = val), color: Colors.redAccent),
                         ],
                       ),
                     ),
@@ -5312,38 +5314,133 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   else if (marketplace.contains('Çiçek')) mpColor = const Color(0xFFE91E63);
 
                   Color statusColor = Colors.greenAccent;
-                  IconData statusIcon = Icons.stars;
-                  if (status.contains('Kargo')) {
-                    statusColor = Colors.blueAccent;
-                    statusIcon = Icons.local_shipping;
-                  } else if (status.contains('Hazır')) {
-                    statusColor = Colors.amberAccent;
-                    statusIcon = Icons.inventory_2;
-                  } else if (status.contains('Teslim')) {
-                    statusColor = Colors.white70;
-                    statusIcon = Icons.check_circle;
-                  }
-
-                  String statusActionLabel;
-                  Color statusBtnColor;
-                  IconData statusActionIcon;
+                  IconData statusIcon = Icons.fiber_new_rounded;
+                  String? forwardTargetStatus;
+                  String? revertTargetStatus;
+                  String statusActionLabel = 'İşlem';
+                  String? revertActionLabel;
+                  Color statusBtnColor = const Color(0xFF10B981);
+                  IconData statusActionIcon = Icons.arrow_forward_rounded;
 
                   if (status.contains('Yeni')) {
-                    statusActionLabel = '📦 Siparişi Paketle & Hazırla';
+                    statusColor = Colors.greenAccent;
+                    statusIcon = Icons.fiber_new_rounded;
+                    forwardTargetStatus = 'Hazırlanıyor';
+                    statusActionLabel = '📦 Paketle & Hazırla';
                     statusBtnColor = const Color(0xFFD97706);
                     statusActionIcon = Icons.inventory_2_outlined;
+                    revertTargetStatus = 'İptal / İade';
+                    revertActionLabel = '❌ İptal Et';
                   } else if (status.contains('Hazır')) {
+                    statusColor = Colors.amberAccent;
+                    statusIcon = Icons.inventory_2_rounded;
+                    forwardTargetStatus = 'Kargoya Verildi';
                     statusActionLabel = '🚚 Kargoya Teslim Et';
                     statusBtnColor = const Color(0xFF2563EB);
                     statusActionIcon = Icons.local_shipping_outlined;
+                    revertTargetStatus = 'Yeni Sipariş';
+                    revertActionLabel = '↩️ Yeni Sipariş\'e Al';
                   } else if (status.contains('Kargo')) {
-                    statusActionLabel = '✅ Teslim Edildi Olarak İşaretle';
+                    statusColor = Colors.blueAccent;
+                    statusIcon = Icons.local_shipping_rounded;
+                    forwardTargetStatus = 'Teslim Edildi';
+                    statusActionLabel = '✅ Teslim Edildi Yap';
                     statusBtnColor = const Color(0xFF059669);
                     statusActionIcon = Icons.check_circle_outline;
+                    revertTargetStatus = 'Hazırlanıyor';
+                    revertActionLabel = '↩️ Hazırlanıyor\'a Döndür';
+                  } else if (status.contains('Teslim')) {
+                    statusColor = Colors.tealAccent;
+                    statusIcon = Icons.check_circle_rounded;
+                    forwardTargetStatus = null;
+                    statusActionLabel = '✅ Teslim Edildi';
+                    statusBtnColor = const Color(0xFF334155);
+                    statusActionIcon = Icons.done_all_rounded;
+                    revertTargetStatus = 'Kargoya Verildi';
+                    revertActionLabel = '↩️ Kargoda Yap';
+                  } else if (status.contains('İptal') || status.contains('İade')) {
+                    statusColor = Colors.redAccent;
+                    statusIcon = Icons.cancel_rounded;
+                    forwardTargetStatus = 'Yeni Sipariş';
+                    statusActionLabel = '🔄 Siparişi Yeniden Aç';
+                    statusBtnColor = const Color(0xFF0284C7);
+                    statusActionIcon = Icons.refresh_rounded;
+                    revertTargetStatus = null;
+                    revertActionLabel = null;
                   } else {
-                    statusActionLabel = '🔄 Durumu Başa Sar (Test)';
+                    statusColor = Colors.white70;
+                    statusIcon = Icons.info_outline;
+                    forwardTargetStatus = 'Yeni Sipariş';
+                    statusActionLabel = '🔄 Başa Sar';
                     statusBtnColor = const Color(0xFF475569);
                     statusActionIcon = Icons.refresh_rounded;
+                    revertTargetStatus = null;
+                    revertActionLabel = null;
+                  }
+
+                  void updateOrderStatus(String newStatus) {
+                    final previousStatus = (o['status'] ?? 'Yeni Sipariş').toString();
+                    if (previousStatus == newStatus) return;
+
+                    setState(() {
+                      o['status'] = newStatus;
+                    });
+
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: const Color(0xFF1E293B),
+                        margin: const EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(color: Colors.white24, width: 1),
+                        ),
+                        content: Row(
+                          children: [
+                            const Icon(Icons.swap_horiz_rounded, color: Colors.cyanAccent, size: 22),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  text: '$orderId durumu: ',
+                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                  children: [
+                                    TextSpan(
+                                      text: newStatus,
+                                      style: GoogleFonts.inter(color: Colors.amberAccent, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        action: SnackBarAction(
+                          label: 'GERİ AL ↩️',
+                          textColor: Colors.amberAccent,
+                          onPressed: () {
+                            setState(() {
+                              o['status'] = previousStatus;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: const Color(0xFF0F172A),
+                                margin: const EdgeInsets.all(16),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                content: Text(
+                                  '$orderId nolu sipariş önceki aşamasına ($previousStatus) geri alındı ↩️',
+                                  style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 12),
+                                ),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                        ),
+                        duration: const Duration(seconds: 6),
+                      ),
+                    );
                   }
 
                   return Container(
@@ -5400,21 +5497,47 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // Status Chip
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: statusColor.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: statusColor.withOpacity(0.3)),
+                                  // Interactive Status Badge & Dropdown Menu
+                                  Theme(
+                                    data: Theme.of(context).copyWith(
+                                      cardColor: const Color(0xFF1E293B),
+                                      popupMenuTheme: PopupMenuThemeData(
+                                        color: const Color(0xFF1E293B),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                          side: const BorderSide(color: Colors.white24),
+                                        ),
+                                      ),
                                     ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(statusIcon, color: statusColor, size: 13),
-                                        const SizedBox(width: 4),
-                                        Text(status, style: GoogleFonts.inter(color: statusColor, fontWeight: FontWeight.w600, fontSize: 11)),
+                                    child: PopupMenuButton<String>(
+                                      tooltip: 'Aşama Değiştir / Geri Al',
+                                      onSelected: (selectedStatus) => updateOrderStatus(selectedStatus),
+                                      itemBuilder: (context) => [
+                                        _buildStatusPopupItem('Yeni Sipariş', Icons.fiber_new_rounded, Colors.greenAccent, status.contains('Yeni')),
+                                        _buildStatusPopupItem('Hazırlanıyor', Icons.inventory_2_rounded, Colors.amberAccent, status.contains('Hazır')),
+                                        _buildStatusPopupItem('Kargoya Verildi', Icons.local_shipping_rounded, Colors.blueAccent, status.contains('Kargo')),
+                                        _buildStatusPopupItem('Teslim Edildi', Icons.check_circle_rounded, Colors.tealAccent, status.contains('Teslim')),
+                                        const PopupMenuDivider(),
+                                        _buildStatusPopupItem('İptal / İade', Icons.cancel_rounded, Colors.redAccent, status.contains('İptal') || status.contains('İade')),
                                       ],
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: statusColor.withOpacity(0.35)),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(statusIcon, color: statusColor, size: 13),
+                                            const SizedBox(width: 5),
+                                            Text(status, style: GoogleFonts.inter(color: statusColor, fontWeight: FontWeight.w600, fontSize: 11)),
+                                            const SizedBox(width: 3),
+                                            Icon(Icons.arrow_drop_down, color: statusColor.withOpacity(0.7), size: 15),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 6),
@@ -5640,7 +5763,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           ),
                         ),
 
-                        // Card Actions Footer (Responsive & Ultra Clean)
+                        // Card Actions Footer (Responsive & Ultra Clean with Rollback / Undo)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
@@ -5650,26 +5773,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           ),
                           child: LayoutBuilder(
                             builder: (context, cardFooterBox) {
-                              final isCompact = cardFooterBox.maxWidth < 560;
-
-                              void advanceOrderStatus() {
-                                setState(() {
-                                  if (status.contains('Yeni')) {
-                                    o['status'] = 'Hazırlanıyor';
-                                  } else if (status.contains('Hazır')) {
-                                    o['status'] = 'Kargoya Verildi';
-                                  } else if (status.contains('Kargo')) {
-                                    o['status'] = 'Teslim Edildi';
-                                  } else {
-                                    o['status'] = 'Yeni Sipariş';
-                                  }
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text('$orderId nolu sipariş durumu güncellendi: ${o['status']} ✅'),
-                                  backgroundColor: Colors.green,
-                                  duration: const Duration(seconds: 2),
-                                ));
-                              }
+                              final isCompact = cardFooterBox.maxWidth < 620;
 
                               if (isCompact) {
                                 return Column(
@@ -5705,20 +5809,56 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                       ],
                                     ),
                                     const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 38,
-                                      child: ElevatedButton.icon(
-                                        onPressed: advanceOrderStatus,
-                                        icon: Icon(statusActionIcon, size: 16, color: Colors.white),
-                                        label: Text(statusActionLabel, style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white)),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: statusBtnColor,
-                                          elevation: 1,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    Row(
+                                      children: [
+                                        if (revertActionLabel != null) ...[
+                                          Expanded(
+                                            flex: 2,
+                                            child: SizedBox(
+                                              height: 38,
+                                              child: OutlinedButton.icon(
+                                                onPressed: () => updateOrderStatus(revertTargetStatus!),
+                                                icon: const Icon(Icons.undo_rounded, size: 14, color: Colors.white70),
+                                                label: Text(
+                                                  revertActionLabel,
+                                                  style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white70),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                style: OutlinedButton.styleFrom(
+                                                  foregroundColor: Colors.white70,
+                                                  side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                                  backgroundColor: Colors.white.withOpacity(0.04),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                        ],
+                                        Expanded(
+                                          flex: 3,
+                                          child: SizedBox(
+                                            height: 38,
+                                            child: ElevatedButton.icon(
+                                              onPressed: forwardTargetStatus != null ? () => updateOrderStatus(forwardTargetStatus!) : null,
+                                              icon: Icon(statusActionIcon, size: 16, color: Colors.white),
+                                              label: Text(
+                                                statusActionLabel,
+                                                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: statusBtnColor,
+                                                disabledBackgroundColor: Colors.white12,
+                                                elevation: 1,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ],
                                 );
@@ -5747,14 +5887,36 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     onTap: () => _showCargoTrackingDialog(o),
                                   ),
                                   const Spacer(),
+                                  if (revertActionLabel != null) ...[
+                                    SizedBox(
+                                      height: 36,
+                                      child: OutlinedButton.icon(
+                                        onPressed: () => updateOrderStatus(revertTargetStatus!),
+                                        icon: const Icon(Icons.undo_rounded, size: 14, color: Colors.white70),
+                                        label: Text(
+                                          revertActionLabel,
+                                          style: GoogleFonts.inter(fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.white70),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.white70,
+                                          side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                          backgroundColor: Colors.white.withOpacity(0.04),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
                                   SizedBox(
                                     height: 36,
                                     child: ElevatedButton.icon(
-                                      onPressed: advanceOrderStatus,
+                                      onPressed: forwardTargetStatus != null ? () => updateOrderStatus(forwardTargetStatus!) : null,
                                       icon: Icon(statusActionIcon, size: 16, color: Colors.white),
                                       label: Text(statusActionLabel, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: statusBtnColor,
+                                        disabledBackgroundColor: Colors.white12,
                                         elevation: 1,
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                         padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -5773,6 +5935,31 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               ),
         const SizedBox(height: 70),
       ],
+    );
+  }
+
+  PopupMenuItem<String> _buildStatusPopupItem(String title, IconData icon, Color color, bool isSelected) {
+    return PopupMenuItem<String>(
+      value: title,
+      height: 38,
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.inter(
+                color: isSelected ? color : Colors.white,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 12.5,
+              ),
+            ),
+          ),
+          if (isSelected)
+            Icon(Icons.check, color: color, size: 16),
+        ],
+      ),
     );
   }
 
