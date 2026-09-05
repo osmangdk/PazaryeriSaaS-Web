@@ -540,27 +540,31 @@ class _LandingScreenState extends State<LandingScreen> {
             child: SingleChildScrollView(
               controller: _scrollController,
               physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-              child: Column(
-                children: [
-                  const SizedBox(height: 80),
-                  _buildHeroSection(),
-                  const SizedBox(height: 60),
-                  _buildMarketplacesSection(key: _marketplacesKey),
-                  const SizedBox(height: 80),
-                  _buildFeaturesSection(key: _featuresKey),
-                  const SizedBox(height: 80),
-                  _buildMobileAppSection(key: _mobileAppKey),
-                  const SizedBox(height: 80),
-                  _buildHowItWorksSection(key: _howItWorksKey),
-                  const SizedBox(height: 80),
-                  _buildPricingSection(key: _pricingKey),
-                  const SizedBox(height: 80),
-                  _buildFaqSection(key: _faqKey),
-                  const SizedBox(height: 80),
-                  _buildCtaBanner(),
-                  const SizedBox(height: 60),
-                  _buildFooter(),
-                ],
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 80),
+                    _buildHeroSection(),
+                    const SizedBox(height: 60),
+                    _buildMarketplacesSection(key: _marketplacesKey),
+                    const SizedBox(height: 80),
+                    _buildFeaturesSection(key: _featuresKey),
+                    const SizedBox(height: 80),
+                    _buildMobileAppSection(key: _mobileAppKey),
+                    const SizedBox(height: 80),
+                    _buildHowItWorksSection(key: _howItWorksKey),
+                    const SizedBox(height: 80),
+                    _buildPricingSection(key: _pricingKey),
+                    const SizedBox(height: 80),
+                    _buildFaqSection(key: _faqKey),
+                    const SizedBox(height: 80),
+                    _buildCtaBanner(),
+                    const SizedBox(height: 60),
+                    _buildFooter(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -570,20 +574,20 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-
   Widget _buildNavbar() {
     final isDesktop = MediaQuery.of(context).size.width > 1050;
     final isTablet = MediaQuery.of(context).size.width > 700;
 
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A1118).withOpacity(0.92),
+        color: const Color(0xFF0A1118).withOpacity(0.95),
         border: const Border(bottom: BorderSide(color: Colors.white10)),
       ),
       child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 1280),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1400),
           child: Row(
             children: [
               InkWell(
@@ -686,81 +690,83 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildHeroSection() {
     final isMobile = MediaQuery.of(context).size.width < 700;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.blueAccent.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 30),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.flash_on, color: Colors.blueAccent, size: 15),
+                    const SizedBox(width: 6),
+                    Text(
+                      isMobile ? '⚡ 1.2sn Anlık Senkronizasyon' : '2026 Nesil Entegrasyon Motoru — 1.2sn Senkronizasyon',
+                      style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: isMobile ? 11.5 : 13, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              const SizedBox(height: 24),
+              Text(
+                'Pazaryeri Kaosuna Son:\nTüm Satışları, Stokları ve Kargoları Tek Panelden Yönetin.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(color: Colors.white, fontSize: isMobile ? 28 : 46, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -1),
+              ),
+              const SizedBox(height: 20),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 780),
+                child: Text(
+                  'Trendyol, Hepsiburada, Amazon, N11, Teknosa, Koçtaş, MediaMarkt, FLO, Pasaj ve 22+ büyük pazaryeri siparişlerinizi tek merkezde toplayın. 30 gün boyunca kredi kartsız tamamen ücretsiz deneyin.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(color: Colors.white60, fontSize: 16, height: 1.6),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Wrap(
+                spacing: 16,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
                 children: [
-                  const Icon(Icons.flash_on, color: Colors.blueAccent, size: 15),
-                  const SizedBox(width: 6),
-                  Text(
-                    isMobile ? '⚡ 1.2sn Anlık Senkronizasyon' : '2026 Nesil Entegrasyon Motoru — 1.2sn Senkronizasyon',
-                    style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: isMobile ? 11.5 : 13, fontWeight: FontWeight.w600),
+                  ElevatedButton.icon(
+                    onPressed: () => context.go('/login'),
+                    icon: const Icon(Icons.rocket_launch, size: 18),
+                    label: Text('1 Ay (30 Gün) Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/login'),
+                    icon: const Icon(Icons.login, size: 18),
+                    label: Text('Mağazama Giriş Yap', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white24), padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Pazaryeri Kaosuna Son:\nTüm Satışları, Stokları ve Kargoları Tek Panelden Yönetin.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(color: Colors.white, fontSize: isMobile ? 28 : 46, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -1),
-            ),
-            const SizedBox(height: 20),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 780),
-              child: Text(
-                'Trendyol, Hepsiburada, Amazon, N11, Teknosa, Koçtaş, MediaMarkt, FLO, Pasaj ve 22+ büyük pazaryeri siparişlerinizi tek merkezde toplayın. 30 gün boyunca kredi kartsız tamamen ücretsiz deneyin.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(color: Colors.white60, fontSize: 16, height: 1.6),
+              const SizedBox(height: 24),
+              Wrap(
+                spacing: 24,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  _microTrustItem('30 Gün Kredi Kartsız Deneme'),
+                  _microTrustItem('3 Pazaryeri & 50 Ürün Kotası'),
+                  _microTrustItem('%100 Çift Satış Koruması'),
+                  _microTrustItem('90 Saniyede Kurulum'),
+                ],
               ),
-
-            ),
-            const SizedBox(height: 32),
-            Wrap(
-              spacing: 16,
-              runSpacing: 12,
-              alignment: WrapAlignment.center,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => context.go('/login'),
-                  icon: const Icon(Icons.rocket_launch, size: 18),
-                  label: Text('1 Ay (30 Gün) Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => context.go('/login'),
-                  icon: const Icon(Icons.login, size: 18),
-                  label: Text('Mağazama Giriş Yap', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15)),
-                  style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white24), padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 24,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                _microTrustItem('30 Gün Kredi Kartsız Deneme'),
-                _microTrustItem('3 Pazaryeri & 50 Ürün Kotası'),
-                _microTrustItem('%100 Çift Satış Koruması'),
-                _microTrustItem('90 Saniyede Kurulum'),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -810,20 +816,22 @@ class _LandingScreenState extends State<LandingScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final int crossAxisCount = screenWidth > 1150 ? 3 : (screenWidth > 720 ? 2 : 1);
 
-    return Padding(
+    return Center(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.blueAccent.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
-              ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1400),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                ),
               child: Text(
                 'PAZARYERİ VE E-TİCARET ENTEGRASYONLARI',
                 style: GoogleFonts.inter(
@@ -935,7 +943,8 @@ class _LandingScreenState extends State<LandingScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   void _showMarketplaceDetailModal(Map<String, dynamic> m) {
@@ -1056,49 +1065,52 @@ class _LandingScreenState extends State<LandingScreen> {
 
     final isDesktop = MediaQuery.of(context).size.width > 750;
 
-    return Padding(
+    return Center(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(
-          children: [
-            Text('NEDEN BİZ?', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
-            const SizedBox(height: 12),
-            Text('Satışlarınızı Büyütecek 4 Çekirdek Güç Modülü', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 36),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isDesktop ? 2 : 1,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                childAspectRatio: isDesktop ? 1.8 : 1.3,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1300),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('NEDEN BİZ?', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+              const SizedBox(height: 12),
+              Text('Satışlarınızı Büyütecek 4 Çekirdek Güç Modülü', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 36),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isDesktop ? 2 : 1,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20,
+                  childAspectRatio: isDesktop ? 1.8 : 1.3,
+                ),
+                itemCount: features.length,
+                itemBuilder: (context, index) {
+                  final f = features[index];
+                  final color = f['color'] as Color;
+                  return Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(12)), child: Icon(f['icon'] as IconData, color: color, size: 28)),
+                        const SizedBox(height: 16),
+                        Text(f['title'] as String, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: Text(f['desc'] as String, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5), overflow: TextOverflow.fade),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-              itemCount: features.length,
-              itemBuilder: (context, index) {
-                final f = features[index];
-                final color = f['color'] as Color;
-                return Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(12)), child: Icon(f['icon'] as IconData, color: color, size: 28)),
-                      const SizedBox(height: 16),
-                      Text(f['title'] as String, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: Text(f['desc'] as String, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5), overflow: TextOverflow.fade),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1107,12 +1119,13 @@ class _LandingScreenState extends State<LandingScreen> {
   Widget _buildMobileAppSection({required GlobalKey key}) {
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
-    return Padding(
+    return Center(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Container(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1300),
+          child: Container(
           padding: EdgeInsets.all(isDesktop ? 48 : 24),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
@@ -1146,6 +1159,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     _buildMobileAppMockup(),
                   ],
                 ),
+          ),
         ),
       ),
     );
@@ -1605,7 +1619,6 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildHowItWorksSection({required GlobalKey key}) {
-
     final steps = [
       {'step': '01', 'title': 'Mağazalarını Bağla', 'desc': 'API anahtarlarınızı girerek Trendyol, Hepsiburada ve diğer mağazalarınızı 90 saniyede ekleyin.'},
       {'step': '02', 'title': 'Ürünlerini Eşleştir', 'desc': 'Stok ve fiyatlarınızı tek tıkla merkezi kataloğunuzla eşleştirin veya içe aktarın.'},
@@ -1614,21 +1627,24 @@ class _LandingScreenState extends State<LandingScreen> {
 
     final isWide = MediaQuery.of(context).size.width > 750;
 
-    return Padding(
+    return Center(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(
-          children: [
-            Text('KOLAY KURULUM', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
-            const SizedBox(height: 12),
-            Text('3 Adımda Pazaryeri Satışlarınızı Otomatize Edin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 36),
-            isWide
-                ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: steps.map((s) => Expanded(child: _stepCard(s))).toList())
-                : Column(children: steps.map((s) => _stepCard(s)).toList()),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1300),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('KOLAY KURULUM', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+              const SizedBox(height: 12),
+              Text('3 Adımda Pazaryeri Satışlarınızı Otomatize Edin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 36),
+              isWide
+                  ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: steps.map((s) => Expanded(child: _stepCard(s))).toList())
+                  : Column(children: steps.map((s) => _stepCard(s)).toList()),
+            ],
+          ),
         ),
       ),
     );
@@ -1654,47 +1670,50 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _buildPricingSection({required GlobalKey key}) {
     final isDesktop = MediaQuery.of(context).size.width > 850;
-    return Padding(
+    return Center(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        child: Column(
-          children: [
-            Text('ŞEFFAF FİYATLANDIRMA', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
-            const SizedBox(height: 12),
-            Text('İşletmenizin Ölçeğine Uygun Planı Seçin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Aylık Ödeme', style: GoogleFonts.inter(color: !_isAnnualPricing ? Colors.white : Colors.white60)),
-                Switch(value: _isAnnualPricing, activeColor: Colors.blueAccent, onChanged: (val) => setState(() => _isAnnualPricing = val)),
-                Text('Yıllık Ödeme (%30 İndirim)', style: GoogleFonts.inter(color: _isAnnualPricing ? Colors.greenAccent : Colors.white60, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 36),
-            isDesktop
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
-                      const SizedBox(width: 16),
-                      Expanded(child: _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true)),
-                      const SizedBox(width: 16),
-                      Expanded(child: _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false)),
-                    ],
-                  )
-                : Column(
-                    children: [
-                      _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
-                      const SizedBox(height: 16),
-                      _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true),
-                      const SizedBox(height: 16),
-                      _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false),
-                    ],
-                  ),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1300),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('ŞEFFAF FİYATLANDIRMA', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+              const SizedBox(height: 12),
+              Text('İşletmenizin Ölçeğine Uygun Planı Seçin', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Aylık Ödeme', style: GoogleFonts.inter(color: !_isAnnualPricing ? Colors.white : Colors.white60)),
+                  Switch(value: _isAnnualPricing, activeColor: Colors.blueAccent, onChanged: (val) => setState(() => _isAnnualPricing = val)),
+                  Text('Yıllık Ödeme (%30 İndirim)', style: GoogleFonts.inter(color: _isAnnualPricing ? Colors.greenAccent : Colors.white60, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 36),
+              isDesktop
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false)),
+                        const SizedBox(width: 16),
+                        Expanded(child: _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true)),
+                        const SizedBox(width: 16),
+                        Expanded(child: _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false)),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        _pricingCard(title: 'Başlangıç (Starter)', price: _isAnnualPricing ? '₺159' : '₺199', desc: 'Yeni başlayan butik satıcılar ve esnaflar için', features: ['3 Pazaryeri Bağlantısı', '250 Ürün Kotası', 'Aylık 300 Sipariş', '1.2s Anlık Stok Senkronu', 'E-Posta Desteği'], isPopular: false),
+                        const SizedBox(height: 16),
+                        _pricingCard(title: 'Büyüme (Growth)', price: _isAnnualPricing ? '₺319' : '₺399', desc: 'Hızlı büyüyen ve çok kanallı mağazalar için', features: ['8 Pazaryeri (Tüm Platformlar)', '2.500 Ürün Kotası', 'Sınırsız Sipariş & Senkron', 'Akıllı Fiyat & Komisyon Robotu', 'AI Pazaryeri Danışmanı', 'Öncelikli Canlı Destek'], isPopular: true),
+                        const SizedBox(height: 16),
+                        _pricingCard(title: 'Profesyonel (Pro)', price: _isAnnualPricing ? '₺639' : '₺799', desc: 'Yüksek hacimli markalar, üreticiler ve depolar', features: ['Sınırsız Pazaryeri & Çoklu Mağaza', '25.000+ Ürün Kotası', 'Sınırsız Sipariş & Eşitleme', 'Otomatik E-Fatura & Barkod', 'Logo / Mikro / ERP Entegrasyonu', '7/24 Özel Destek Hattı'], isPopular: false),
+                      ],
+                    ),
+            ],
+          ),
         ),
       ),
     );
@@ -1755,64 +1774,72 @@ class _LandingScreenState extends State<LandingScreen> {
       {'q': 'Kullandığım muhasebe ve ERP programları ile entegre olabilir mi?', 'a': 'Platformumuz Paraşüt, Bizmu, Logo, Mikro, Zirve gibi tüm popüler ön muhasebe ve ERP yazılımlarıyla tam entegre çalışmaktadır.'},
     ];
 
-    return Padding(
+    return Center(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 850),
-        child: Column(
-          children: [
-            Text('SIKÇA SORULAN SORULAR', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
-            const SizedBox(height: 12),
-            Text('Aklınıza Takılan Tüm Soruların Cevapları', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 36),
-            ...faqs.map((faq) => Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.white10)),
-                  child: Material(
-                    color: Colors.white.withOpacity(0.03),
-                    borderRadius: BorderRadius.circular(14),
-                    clipBehavior: Clip.antiAlias,
-                    child: ExpansionTile(
-                      shape: const RoundedRectangleBorder(),
-                      collapsedShape: const RoundedRectangleBorder(),
-                      iconColor: Colors.blueAccent,
-                      collapsedIconColor: Colors.white60,
-                      title: Text(faq['q']!, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
-                      children: [
-                        Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), child: Text(faq['a']!, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5))),
-                      ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('SIKÇA SORULAN SORULAR', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.5)),
+              const SizedBox(height: 12),
+              Text('Aklınıza Takılan Tüm Soruların Cevapları', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 36),
+              ...faqs.map((faq) => Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.white10)),
+                    child: Material(
+                      color: Colors.white.withOpacity(0.03),
+                      borderRadius: BorderRadius.circular(14),
+                      clipBehavior: Clip.antiAlias,
+                      child: ExpansionTile(
+                        shape: const RoundedRectangleBorder(),
+                        collapsedShape: const RoundedRectangleBorder(),
+                        iconColor: Colors.blueAccent,
+                        collapsedIconColor: Colors.white60,
+                        title: Text(faq['q']!, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+                        children: [
+                          Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), child: Text(faq['a']!, style: GoogleFonts.inter(color: Colors.white60, fontSize: 14, height: 1.5))),
+                        ],
+                      ),
                     ),
-                  ),
-                )),
-          ],
+                  )),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildCtaBanner() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 1100),
-        padding: const EdgeInsets.all(48),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          children: [
-            Text('Bugün Başlayın, İlk Satışınızı 10 Dakika İçinde Otomatize Edin.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 16),
-            Text('30 gün boyunca kredi kartsız ücretsiz deneyin. E-ticaret operasyonunuzu sıfır hata ile büyütün.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
-            const SizedBox(height: 28),
-            ElevatedButton(
-              onPressed: () => context.go('/login'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blueAccent, padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text('Hemen 1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.w900, fontSize: 16)),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Container(
+            padding: const EdgeInsets.all(48),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              borderRadius: BorderRadius.circular(24),
             ),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('Bugün Başlayın, İlk Satışınızı 10 Dakika İçinde Otomatize Edin.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 16),
+                Text('30 gün boyunca kredi kartsız ücretsiz deneyin. E-ticaret operasyonunuzu sıfır hata ile büyütün.', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 15)),
+                const SizedBox(height: 28),
+                ElevatedButton(
+                  onPressed: () => context.go('/login'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blueAccent, padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  child: Text('Hemen 1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.w900, fontSize: 16)),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -1822,80 +1849,83 @@ class _LandingScreenState extends State<LandingScreen> {
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 32),
       decoration: const BoxDecoration(
         color: Color(0xFF070C12),
         border: Border(top: BorderSide(color: Colors.white12)),
       ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Column(
-          children: [
-            isDesktop
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Kolon 1: Şirket & Tanım (Misyon Bildirimi)
-                      Expanded(flex: 4, child: _buildFooterBrandCol()),
-                      const SizedBox(width: 48),
-                      // Kolon 2: Kurumsal
-                      Expanded(flex: 3, child: _buildFooterCorporateCol()),
-                      const SizedBox(width: 32),
-                      // Kolon 3: Entegrasyonlar
-                      Expanded(flex: 3, child: _buildFooterIntegrationsCol()),
-                      const SizedBox(width: 32),
-                      // Kolon 4: Özellikler & Mobil
-                      Expanded(flex: 3, child: _buildFooterFeaturesCol()),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildFooterBrandCol(),
-                      const SizedBox(height: 36),
-                      _buildFooterCorporateCol(),
-                      const SizedBox(height: 32),
-                      _buildFooterIntegrationsCol(),
-                      const SizedBox(height: 32),
-                      _buildFooterFeaturesCol(),
-                    ],
-                  ),
-            const SizedBox(height: 48),
-            const Divider(color: Colors.white12),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'RoaTech © 2026 Tüm Hakları Saklıdır. Türkiye\'nin En Gelişmiş Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.',
-                    style: GoogleFonts.inter(color: Colors.white38, fontSize: 12, height: 1.4),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.greenAccent.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
-                          const SizedBox(width: 6),
-                          Text('Tüm Sunucular Aktif', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1400),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              isDesktop
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Kolon 1: Şirket & Tanım (Misyon Bildirimi)
+                        Expanded(flex: 4, child: _buildFooterBrandCol()),
+                        const SizedBox(width: 48),
+                        // Kolon 2: Kurumsal
+                        Expanded(flex: 3, child: _buildFooterCorporateCol()),
+                        const SizedBox(width: 32),
+                        // Kolon 3: Entegrasyonlar
+                        Expanded(flex: 3, child: _buildFooterIntegrationsCol()),
+                        const SizedBox(width: 32),
+                        // Kolon 4: Özellikler & Mobil
+                        Expanded(flex: 3, child: _buildFooterFeaturesCol()),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFooterBrandCol(),
+                        const SizedBox(height: 36),
+                        _buildFooterCorporateCol(),
+                        const SizedBox(height: 32),
+                        _buildFooterIntegrationsCol(),
+                        const SizedBox(height: 32),
+                        _buildFooterFeaturesCol(),
+                      ],
                     ),
-                  ],
-                ),
-              ],
-            ),
-
-          ],
+              const SizedBox(height: 48),
+              const Divider(color: Colors.white12),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'RoaTech © 2026 Tüm Hakları Saklıdır. Türkiye\'nin En Gelişmiş Çoklu Kanal Pazaryeri ve E-Ticaret Entegrasyon Platformu.',
+                      style: GoogleFonts.inter(color: Colors.white38, fontSize: 12, height: 1.4),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.greenAccent.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.greenAccent.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
+                            const SizedBox(width: 6),
+                            Text('Tüm Sunucular Aktif', style: GoogleFonts.inter(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
