@@ -469,12 +469,14 @@ class _LandingScreenState extends State<LandingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 700;
+
     return Scaffold(
-      floatingActionButton: _isAiFabMinimized
+      floatingActionButton: (_isAiFabMinimized || isMobile)
           ? FloatingActionButton(
               heroTag: 'ai_landing_fab_minimized',
               onPressed: () {
-                setState(() => _isAiFabMinimized = false);
                 _showAiConsultantDialog();
               },
               backgroundColor: Colors.purple.shade800,
@@ -575,14 +577,20 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   Widget _buildNavbar() {
-    final isDesktop = MediaQuery.of(context).size.width > 1050;
-    final isTablet = MediaQuery.of(context).size.width > 700;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 1050;
+    final isTablet = screenWidth > 700 && screenWidth <= 1050;
+    final isSmallMobile = screenWidth < 420;
+    final isUltraSmallMobile = screenWidth < 360;
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16, vertical: 14),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop || isTablet ? 24 : (isUltraSmallMobile ? 8 : 14),
+        vertical: isUltraSmallMobile ? 8 : 12,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A1118).withOpacity(0.95),
+        color: const Color(0xFF0A1118).withOpacity(0.96),
         border: const Border(bottom: BorderSide(color: Colors.white10)),
       ),
       child: Center(
@@ -590,25 +598,27 @@ class _LandingScreenState extends State<LandingScreen> {
           constraints: const BoxConstraints(maxWidth: 1400),
           child: Row(
             children: [
+              // Logo & Marka Adı
               InkWell(
                 onTap: () => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
                       'assets/images/roatech_emblem.png',
-                      width: 34,
-                      height: 34,
+                      width: isUltraSmallMobile ? 26 : 32,
+                      height: isUltraSmallMobile ? 26 : 32,
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           color: Colors.blueAccent.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 20),
+                        child: const Icon(Icons.hub, color: Colors.cyanAccent, size: 18),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -617,27 +627,33 @@ class _LandingScreenState extends State<LandingScreen> {
                           'Roatech',
                           style: GoogleFonts.inter(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: isUltraSmallMobile ? 15 : 18,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -0.5,
                             height: 1.0,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Pazaryeri Entegrasyon',
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFF38BDF8),
-                            fontSize: 9.0,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
+                        if (!isUltraSmallMobile) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            'Pazaryeri Entegrasyon',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF38BDF8),
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ],
                 ),
               ),
+
+              const Spacer(),
+
+              // Menü Linkleri & Butonlar
               if (isDesktop) ...[
                 Expanded(
                   child: SingleChildScrollView(
@@ -656,27 +672,163 @@ class _LandingScreenState extends State<LandingScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-              ] else ...[
-                const Spacer(),
-              ],
-              TextButton(
-                onPressed: () => context.go('/login'),
-                child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 13)),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () => context.go('/login'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                TextButton(
+                  onPressed: () => context.go('/login'),
+                  child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 13)),
                 ),
-                child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
-              ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => context.go('/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+              ] else if (isTablet) ...[
+                TextButton(
+                  onPressed: () => context.go('/login'),
+                  child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 13)),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => context.go('/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+                const SizedBox(width: 6),
+                _buildMobileMenuButton(),
+              ] else ...[
+                // Mobil Cihazlar (< 700px)
+                if (isUltraSmallMobile) ...[
+                  // 344px vb. çok dar ekranlar
+                  ElevatedButton(
+                    onPressed: () => context.go('/login'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text('Giriş Yap', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                  ),
+                ] else if (isSmallMobile) ...[
+                  // 360px - 420px
+                  TextButton(
+                    onPressed: () => context.go('/login'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text('Giriş', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 12)),
+                  ),
+                  const SizedBox(width: 4),
+                  ElevatedButton(
+                    onPressed: () => context.go('/login'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text('Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                  ),
+                ] else ...[
+                  // 420px - 700px
+                  TextButton(
+                    onPressed: () => context.go('/login'),
+                    child: Text('Giriş Yap', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 12.5)),
+                  ),
+                  const SizedBox(width: 6),
+                  ElevatedButton(
+                    onPressed: () => context.go('/login'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                    ),
+                    child: Text('1 Ay Ücretsiz Başla', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                  ),
+                ],
+                const SizedBox(width: 4),
+                _buildMobileMenuButton(),
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMobileMenuButton() {
+    return PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: const Icon(Icons.menu, color: Colors.white70, size: 18),
+      ),
+      color: const Color(0xFF0F172A),
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: Colors.white12),
+      ),
+      offset: const Offset(0, 45),
+      onSelected: (val) {
+        if (val == 'features') _scrollTo(_featuresKey);
+        else if (val == 'marketplaces') _scrollTo(_marketplacesKey);
+        else if (val == 'mobile') _scrollTo(_mobileAppKey);
+        else if (val == 'how_it_works') _scrollTo(_howItWorksKey);
+        else if (val == 'pricing') _scrollTo(_pricingKey);
+        else if (val == 'faq') _scrollTo(_faqKey);
+        else if (val == 'login') context.go('/login');
+      },
+      itemBuilder: (context) => [
+        _buildPopupMenuItem('features', 'Özellikler', Icons.star_border),
+        _buildPopupMenuItem('marketplaces', 'Pazaryerleri (22+)', Icons.storefront),
+        _buildPopupMenuItem('mobile', 'Mobil Uygulama', Icons.phone_iphone),
+        _buildPopupMenuItem('how_it_works', 'Nasıl Çalışır?', Icons.help_outline),
+        _buildPopupMenuItem('pricing', 'Fiyatlandırma', Icons.sell_outlined),
+        _buildPopupMenuItem('faq', 'SSS', Icons.question_answer_outlined),
+        const PopupMenuDivider(height: 1),
+        _buildPopupMenuItem('login', 'Giriş Yap & Kayıt Ol', Icons.login, isHighlight: true),
+      ],
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupMenuItem(String value, String title, IconData icon, {bool isHighlight = false}) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: isHighlight ? Colors.blueAccent : Colors.white60),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              color: isHighlight ? Colors.blueAccent : Colors.white,
+              fontWeight: isHighlight ? FontWeight.bold : FontWeight.w500,
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }
