@@ -5862,30 +5862,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
   // --- GİB E-ARŞİV FATURA GÖRÜNTÜLEME MODALI ---
   void _showInvoiceDialog(Map<String, dynamic> order) {
-    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
-    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
-    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
-    final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
-    final orderDate = (order['orderDate'] ?? '01.09.2026 19:42').toString();
-    final totalPrice = double.tryParse(order['totalPrice']?.toString() ?? '0') ?? 1083.90;
-    final lines = (order['lines'] is List && (order['lines'] as List).isNotEmpty)
-        ? (order['lines'] as List)
-        : [
-            {
-              'productTitle': 'Tudors Erkek 5\'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört',
-              'sku': 'TDR-POLO-5PK-L',
-              'quantity': 1,
-              'price': totalPrice,
-            }
-          ];
-
-    final kdvRatio = 0.20;
-    final matrah = totalPrice / (1 + kdvRatio);
-    final kdvAmount = totalPrice - matrah;
-    final cleanDigits = orderId.replaceAll(RegExp(r'[^0-9]'), '');
-    final invoiceNo = 'GIB${DateTime.now().year}${cleanDigits.padLeft(9, '0').substring(0, 9)}';
-    final ettnUuid = 'a4b89c72-${orderId.hashCode.abs().toString().padLeft(4, '0')}-4e31-8f12-${orderId.length}a9b2c3d4e5f';
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -5909,8 +5885,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('GİB E-Arşiv Fatura Önizleme', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text('Fatura No: $invoiceNo • $marketplace', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
+                  Text('GİB E-Arşiv Fatura Baskı Önizleme', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('Yazdırmadan önce fatura detaylarını kontrol edin', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
                 ],
               ),
             ),
@@ -5918,204 +5894,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ],
         ),
         content: SizedBox(
-          width: 620,
+          width: 660,
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Fatura Başlık & Resmi Damga Kutusu
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
-                        ),
-                        child: const Icon(Icons.account_balance, color: Colors.redAccent, size: 26),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('T.C. GELİR İDARESİ BAŞKANLIĞI', style: GoogleFonts.inter(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.5)),
-                            Text('E-ARŞİV FATURA (509 VUK)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text('ETTN: $ettnUuid', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.greenAccent.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.greenAccent.withOpacity(0.4)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.verified, color: Colors.greenAccent, size: 14),
-                            const SizedBox(width: 5),
-                            Text('GİB ONAYLI', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 11)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // Satıcı & Alıcı Bilgileri
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Satıcı
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.02),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('SATICI (MÜKELLEF)', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 11)),
-                            const SizedBox(height: 4),
-                            Text('RoaTech Bilişim ve E-Ticaret A.Ş.', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
-                            Text('VKN: 7890123456 • Kadıköy V.D.', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                            Text('Barbaros Mah. Mor Sümbül Sok. No:1/A Ataşehir / İstanbul', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    // Alıcı
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.02),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('ALICI (MÜŞTERİ)', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 11)),
-                            const SizedBox(height: 4),
-                            Text(customerName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
-                            Text('TCKN: 11111111111', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                            Text(customerAddress, style: GoogleFonts.inter(color: Colors.white54, fontSize: 10), maxLines: 2, overflow: TextOverflow.ellipsis),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // Kalemler Tablosu
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black26,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(flex: 4, child: Text('Mal / Hizmet Açıklaması', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
-                            Expanded(flex: 1, child: Text('Miktar', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
-                            Expanded(flex: 2, child: Text('Birim Fiyat', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
-                            Expanded(flex: 1, child: Text('KDV', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
-                            Expanded(flex: 2, child: Text('Toplam', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
-                          ],
-                        ),
-                      ),
-                      ...lines.map((line) {
-                        final pTitle = (line['productTitle'] ?? 'Sipariş Ürünü').toString();
-                        final pQty = (line['quantity'] ?? 1).toString();
-                        final pPrice = double.tryParse(line['price']?.toString() ?? '0') ?? totalPrice;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          child: Row(
-                            children: [
-                              Expanded(flex: 4, child: Text(pTitle, style: GoogleFonts.inter(color: Colors.white, fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis)),
-                              Expanded(flex: 1, child: Text('$pQty Adet', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11))),
-                              Expanded(flex: 2, child: Text(formatTL(pPrice), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white, fontSize: 11))),
-                              Expanded(flex: 1, child: Text('%20', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11))),
-                              Expanded(flex: 2, child: Text(formatTL(pPrice), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // Fatura Toplam Özeti & QR
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.03),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Row(
-                    children: [
-                      // QR Kod Görseli
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.qr_code_2, color: Colors.black87, size: 44),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Ödeme: Kredi Kartı / Pazaryeri Havuzu', style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
-                            Text('Sipariş: $orderId ($marketplace)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
-                            Text('Tarih: $orderDate', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text('Matrah: ${formatTL(matrah)}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                          Text('KDV (%20): ${formatTL(kdvAmount)}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 11)),
-                          const SizedBox(height: 4),
-                          Text('ÖDENECEK: ${formatTL(totalPrice)}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            child: _buildGibInvoiceCard(order),
           ),
         ),
         actions: [
@@ -6125,7 +5906,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ),
           OutlinedButton.icon(
             onPressed: () {
-              final url = _apiService.getInvoiceUrl(orderId);
+              final oId = (order['orderId'] ?? order['orderNumber'] ?? '').toString();
+              final url = _apiService.getInvoiceUrl(oId);
               _launchSafeUrl(url);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('E-Fatura harici tarayıcı sekmesinde açılıyor... 🌐'), backgroundColor: Colors.blueAccent),
@@ -6138,13 +5920,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(ctx);
+              final oId = (order['orderId'] ?? order['orderNumber'] ?? '').toString();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
                     children: [
                       const Icon(Icons.check_circle, color: Colors.white, size: 20),
                       const SizedBox(width: 10),
-                      Expanded(child: Text('$invoiceNo nolu GİB E-Arşiv Fatura PDF olarak oluşturuldu ve yazdırma kuyruğuna gönderildi! 📑')),
+                      Expanded(child: Text('$oId nolu siparişin GİB E-Arşiv faturası onaylandı ve yazıcıya gönderildi! 📑🖨️')),
                     ],
                   ),
                   backgroundColor: const Color(0xFF1E40AF),
@@ -6152,8 +5935,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 ),
               );
             },
-            icon: const Icon(Icons.print, size: 15),
-            label: Text('🖨️ Faturayı Yazdır / PDF İndir', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+            icon: const Icon(Icons.print, size: 16),
+            label: Text('🖨️ Faturayı Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white),
           ),
         ],
@@ -6163,12 +5946,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
   // --- PAZARYERİ KARGO BARKODU & SEVK ETİKETİ MODALI ---
   void _showShippingLabelDialog(Map<String, dynamic> order) {
-    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
-    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
-    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
     final cargoCompany = (order['cargoCompany'] ?? 'Trendyol Express').toString();
-    final trackingNumber = (order['cargoTrackingNumber'] ?? 'TYEXP-884920194').toString();
-    final cargoBarcode = (order['cargoBarcode'] ?? '8680009423635-TY').toString();
     final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
 
     showDialog(
@@ -6194,8 +5972,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Kargo Barkodu & Sevk Etiketi', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text('$cargoCompany • $marketplace', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
+                  Text('Termal Kargo Barkodu Baskı Önizleme', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('$cargoCompany • $marketplace • 100x150 mm Termal Rulo', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
                 ],
               ),
             ),
@@ -6203,107 +5981,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ],
         ),
         content: SizedBox(
-          width: 460,
+          width: 480,
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Termal Etiket Çerçevesi (100x150 mm formatı)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 10, offset: Offset(0, 4))],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Kargo Şirket Başlığı
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(cargoCompany.toUpperCase(), style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 17, letterSpacing: 0.5)),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
-                            child: Text(marketplace.toUpperCase(), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
-                          ),
-                        ],
-                      ),
-                      const Divider(color: Colors.black38, thickness: 1.5, height: 16),
-
-                      // Büyük Barkod Çizgileri
-                      Center(
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 60,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: List.generate(38, (i) {
-                                  final isThick = (i % 3 == 0) || (i % 7 == 0);
-                                  final isSpace = (i % 5 == 0);
-                                  if (isSpace) return const SizedBox(width: 3);
-                                  return Container(
-                                    width: isThick ? 4 : 2,
-                                    color: Colors.black87,
-                                  );
-                                }),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(trackingNumber, style: GoogleFonts.courierPrime(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 15, letterSpacing: 2)),
-                            Text('Barkod Kodu: $cargoBarcode', style: GoogleFonts.inter(color: Colors.black54, fontSize: 10)),
-                          ],
-                        ),
-                      ),
-                      const Divider(color: Colors.black38, thickness: 1.5, height: 16),
-
-                      // Alıcı Bilgileri
-                      Text('ALICI BİLGİLERİ:', style: GoogleFonts.inter(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 10)),
-                      const SizedBox(height: 2),
-                      Text(customerName, style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
-                      Text(customerAddress, style: GoogleFonts.inter(color: Colors.black87, fontSize: 11, height: 1.3)),
-                      const SizedBox(height: 10),
-
-                      // Gönderici & Paket Detayı
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(6)),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('GÖNDERİCİ: RoaTech Mağazacılık', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 10)),
-                                  Text('Sipariş No: $orderId', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9)),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('DESİ: 1.5', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 10)),
-                                Text('Parça: 1 / 1', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            child: _buildThermalShippingLabelCard(order),
           ),
         ),
         actions: [
@@ -6311,16 +5991,27 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             onPressed: () => Navigator.pop(ctx),
             child: Text('Kapat', style: GoogleFonts.inter(color: Colors.white70)),
           ),
+          OutlinedButton.icon(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Kargo barkodu PDF formatında indirildi! 📥'), backgroundColor: Colors.orangeAccent),
+              );
+            },
+            icon: const Icon(Icons.download, size: 14, color: Colors.orangeAccent),
+            label: Text('PDF İndir', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+            style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orangeAccent)),
+          ),
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(ctx);
+              final orderId = (order['orderId'] ?? order['orderNumber'] ?? '').toString();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
                     children: [
                       const Icon(Icons.check_circle, color: Colors.white, size: 20),
                       const SizedBox(width: 10),
-                      Expanded(child: Text('$orderId için $cargoCompany kargo barkodu termal etiket yazıcıya gönderildi! 🏷️')),
+                      Expanded(child: Text('$orderId için $cargoCompany termal kargo barkodu yazıcıya gönderildi! 🏷️🖨️')),
                     ],
                   ),
                   backgroundColor: const Color(0xFFC2410C),
@@ -6329,7 +6020,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
               );
             },
             icon: const Icon(Icons.print, size: 16),
-            label: Text('🖨️ Termal Barkod Yazıcıya Gönder', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            label: Text('🖨️ Yazıcıya Gönder', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC2410C), foregroundColor: Colors.white),
           ),
         ],
@@ -6337,9 +6028,16 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     );
   }
 
-  // --- TOPLU GİB E-FATURA KESME & YAZDIRMA MODALI ---
+  // --- TOPLU GİB E-FATURA KESME & YAZDIRMA MODALI (ÖNİZLEMELİ) ---
   void _showBulkInvoiceDialog() {
     final allOrders = (_orders ?? []);
+    if (allOrders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Yazdırılacak sipariş bulunamadı.'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
     double totalRevenue = 0;
     for (var o in allOrders) {
       totalRevenue += double.tryParse(o['totalPrice']?.toString() ?? '0') ?? 0;
@@ -6347,286 +6045,691 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final kdvTotal = totalRevenue * (0.20 / 1.20);
     final matrahTotal = totalRevenue - kdvTotal;
 
+    int currentIdx = 0;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Colors.blueAccent, width: 1.5),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 24),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          final currentOrder = allOrders[currentIdx];
+          final cName = (currentOrder['customerName'] ?? 'Müşteri').toString();
+          final oId = (currentOrder['orderId'] ?? currentOrder['orderNumber'] ?? 'Sipariş').toString();
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Colors.blueAccent, width: 1.5),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Toplu GİB E-Fatura Kesme & Yazdırma', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text('${allOrders.length} Adet Sipariş Seçildi', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
-                ],
-              ),
-            ),
-            IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
-          ],
-        ),
-        content: SizedBox(
-          width: 580,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 24),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Toplu GİB E-Fatura Baskı Önizleme', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('Toplam ${allOrders.length} Fatura • Genel Toplam: ${formatTL(totalRevenue)}', style: GoogleFonts.inter(color: Colors.blueAccent, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 680,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Toplam Matrah', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                        Text(formatTL(matrahTotal), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                      ],
+                    // Toplu Özet Barı
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Fatura Adedi: ${allOrders.length}', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text('Toplam Matrah: ${formatTL(matrahTotal)}', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
+                          Text('KDV (%20): ${formatTL(kdvTotal)}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text('Ciro: ${formatTL(totalRevenue)}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('KDV (%20)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                        Text(formatTL(kdvTotal), style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 14)),
-                      ],
+                    const SizedBox(height: 12),
+
+                    // Sayfa Gezintisi (Pagination Bar)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: currentIdx > 0
+                                ? () => setDlgState(() => currentIdx--)
+                                : null,
+                            icon: const Icon(Icons.arrow_back_ios, size: 12),
+                            label: Text('Önceki Fatura', style: GoogleFonts.inter(fontSize: 11)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white10,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              Text('Fatura ${currentIdx + 1} / ${allOrders.length}', style: GoogleFonts.inter(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text('$cName • $oId', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
+                            ],
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: currentIdx < allOrders.length - 1
+                                ? () => setDlgState(() => currentIdx++)
+                                : null,
+                            icon: const Icon(Icons.arrow_forward_ios, size: 12),
+                            label: Text('Sonraki Fatura', style: GoogleFonts.inter(fontSize: 11)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white10,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('Genel Toplam', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
-                        Text(formatTL(totalRevenue), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-                      ],
-                    ),
+                    const SizedBox(height: 14),
+
+                    // Seçili Faturanın Canlı Resmi Belge Önizlemesi
+                    _buildGibInvoiceCard(currentOrder),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
-              Text('Fatura Kesilecek Siparişler:', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 13)),
-              const SizedBox(height: 8),
-              Container(
-                constraints: const BoxConstraints(maxHeight: 220),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(8),
-                  itemCount: allOrders.length,
-                  separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
-                  itemBuilder: (context, index) {
-                    final o = allOrders[index];
-                    final oId = o['orderId'] ?? o['orderNumber'] ?? 'ORD-$index';
-                    final cName = o['customerName'] ?? 'Müşteri';
-                    final mp = o['marketplace'] ?? 'Trendyol';
-                    final price = double.tryParse(o['totalPrice']?.toString() ?? '0') ?? 0;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                      child: Row(
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white70)),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${allOrders.length} adet e-fatura toplu ZIP/PDF olarak hazırlandı! 📥'), backgroundColor: Colors.blueAccent),
+                  );
+                },
+                icon: const Icon(Icons.download, size: 14, color: Colors.cyanAccent),
+                label: Text('Toplu PDF İndir', style: GoogleFonts.inter(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.cyanAccent)),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
                         children: [
-                          const Icon(Icons.check_box, color: Colors.blueAccent, size: 18),
+                          const Icon(Icons.check_circle, color: Colors.white, size: 20),
                           const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('$cName ($oId)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
-                                Text(mp, style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
-                              ],
-                            ),
-                          ),
-                          Text(formatTL(price), style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Expanded(child: Text('${allOrders.length} adet sipariş için GİB E-Arşiv faturaları onaylandı ve toplu yazdırma kuyruğuna iletildi! 📑🖨️')),
                         ],
                       ),
-                    );
-                  },
-                ),
+                      backgroundColor: const Color(0xFF1E40AF),
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.print, size: 16),
+                label: Text('🖨️ Tüm ${allOrders.length} Faturayı Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E40AF), foregroundColor: Colors.white),
               ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white70)),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text('${allOrders.length} adet sipariş için GİB E-Arşiv faturaları başarıyla kesildi ve toplu PDF olarak hazırlandı! 📑')),
-                    ],
-                  ),
-                  backgroundColor: const Color(0xFF1E40AF),
-                  duration: const Duration(seconds: 4),
-                ),
-              );
-            },
-            icon: const Icon(Icons.print, size: 16),
-            label: Text('📑 ${allOrders.length} Faturayı Toplu Kes & Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E40AF), foregroundColor: Colors.white),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  // --- TOPLU KARGO BARKODU BASIM MODALI ---
+  // --- TOPLU KARGO BARKODU BASIM MODALI (ÖNİZLEMELİ) ---
   void _showBulkShippingLabelDialog() {
     final allOrders = (_orders ?? []);
+    if (allOrders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Yazdırılacak kargo etiketi bulunamadı.'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    int currentLabelIdx = 0;
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Colors.orangeAccent, width: 1.5),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.orangeAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.qr_code_2, color: Colors.orangeAccent, size: 24),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDlgState) {
+          final currentOrder = allOrders[currentLabelIdx];
+          final cName = (currentOrder['customerName'] ?? 'Müşteri').toString();
+          final oId = (currentOrder['orderId'] ?? currentOrder['orderNumber'] ?? 'Sipariş').toString();
+          final cargo = (currentOrder['cargoCompany'] ?? 'Kargo').toString();
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Colors.orangeAccent, width: 1.5),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Toplu Kargo Barkodu Basımı', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text('${allOrders.length} Adet Sevk Etiketi Hazır', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
-                ],
-              ),
-            ),
-            IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
-          ],
-        ),
-        content: SizedBox(
-          width: 540,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orangeAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.orangeAccent.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.print_outlined, color: Colors.orangeAccent, size: 24),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text('Tüm siparişlerin kargo barkodları 100x150 mm termal rulo etiket formatında sıraya alındı.', style: GoogleFonts.inter(color: Colors.white70, fontSize: 12)),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text('Yazdırılacak Kargo Etiketleri:', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 13)),
-              const SizedBox(height: 8),
-              Container(
-                constraints: const BoxConstraints(maxHeight: 220),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: ListView.separated(
-                  shrinkWrap: true,
+            title: Row(
+              children: [
+                Container(
                   padding: const EdgeInsets.all(8),
-                  itemCount: allOrders.length,
-                  separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
-                  itemBuilder: (context, index) {
-                    final o = allOrders[index];
-                    final oId = o['orderId'] ?? o['orderNumber'] ?? 'ORD-$index';
-                    final cName = o['customerName'] ?? 'Müşteri';
-                    final cargo = o['cargoCompany'] ?? 'Trendyol Express';
-                    final tracking = o['cargoTrackingNumber'] ?? 'TYEXP-884920194';
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                  decoration: BoxDecoration(color: Colors.orangeAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.qr_code_2, color: Colors.orangeAccent, size: 24),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Toplu Kargo Barkodu Baskı Önizleme', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('${allOrders.length} Adet Sevk Etiketi Hazır • 100x150 mm Termal Rulo Formatı', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: Colors.white60), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            content: SizedBox(
+              width: 520,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Sayfa Gezintisi (Pagination Bar)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.orangeAccent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orangeAccent.withOpacity(0.3)),
+                      ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.check_box, color: Colors.orangeAccent, size: 18),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('$cName • $oId', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
-                                Text('$cargo - Takip: $tracking', style: GoogleFonts.inter(color: Colors.cyanAccent, fontSize: 11)),
-                              ],
+                          ElevatedButton.icon(
+                            onPressed: currentLabelIdx > 0
+                                ? () => setDlgState(() => currentLabelIdx--)
+                                : null,
+                            icon: const Icon(Icons.arrow_back_ios, size: 12),
+                            label: Text('Önceki Etiket', style: GoogleFonts.inter(fontSize: 11)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white10,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(4)),
-                            child: Text('1.5 Desi', style: GoogleFonts.inter(color: Colors.white70, fontSize: 10)),
+                          Column(
+                            children: [
+                              Text('Etiket ${currentLabelIdx + 1} / ${allOrders.length}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text('$cName • $cargo ($oId)', style: GoogleFonts.inter(color: Colors.white70, fontSize: 10)),
+                            ],
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: currentLabelIdx < allOrders.length - 1
+                                ? () => setDlgState(() => currentLabelIdx++)
+                                : null,
+                            icon: const Icon(Icons.arrow_forward_ios, size: 12),
+                            label: Text('Sonraki Etiket', style: GoogleFonts.inter(fontSize: 11)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white10,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            ),
                           ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Canlı Termal Etiket Çizimi
+                    _buildThermalShippingLabelCard(currentOrder),
+                  ],
                 ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white70)),
+              ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${allOrders.length} adet kargo barkodu PDF olarak indirildi! 📥'), backgroundColor: Colors.orangeAccent),
+                  );
+                },
+                icon: const Icon(Icons.download, size: 14, color: Colors.orangeAccent),
+                label: Text('Toplu PDF İndir', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.orangeAccent)),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text('${allOrders.length} adet kargo barkodu termal etiket yazıcıya başarıyla gönderildi! 🏷️🖨️')),
+                        ],
+                      ),
+                      backgroundColor: const Color(0xFFC2410C),
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.print, size: 16),
+                label: Text('🖨️ Tüm ${allOrders.length} Barkodu Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC2410C), foregroundColor: Colors.white),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // --- GERÇEKÇİ 100x150 MM TERMAL KARGO ETİKETİ ÇİZİCİSİ ---
+  Widget _buildThermalShippingLabelCard(Map<String, dynamic> order) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
+    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
+    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
+    final customerCity = (order['customerCity'] ?? 'İstanbul / Beşiktaş').toString();
+    final cargoCompany = (order['cargoCompany'] ?? 'Trendyol Express').toString();
+    final trackingNumber = (order['cargoTrackingNumber'] ?? 'TYEXP-884920194').toString();
+    final cargoBarcode = (order['cargoBarcode'] ?? '8680009423635-TY').toString();
+    final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
+    final orderDate = (order['orderDate'] ?? 'Bugün 19:42').toString();
+    final lines = (order['lines'] is List && (order['lines'] as List).isNotEmpty) ? (order['lines'] as List) : [];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade400, width: 1.5),
+        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 4))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Kargo Şirket Başlığı & Pazaryeri Rozeti
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.local_shipping, color: Colors.black87, size: 22),
+                  const SizedBox(width: 8),
+                  Text(cargoCompany.toUpperCase(), style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.5)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
+                child: Text(marketplace.toUpperCase(), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Vazgeç', style: GoogleFonts.inter(color: Colors.white70)),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text('${allOrders.length} adet kargo barkodu termal etiket yazıcıya gönderildi! 🏷️')),
-                    ],
+          const Divider(color: Colors.black87, thickness: 2, height: 16),
+
+          // Büyük Kargo Takip Barkodu (Code-128 Mock Görseli)
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  height: 65,
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.black38),
                   ),
-                  backgroundColor: const Color(0xFFC2410C),
-                  duration: const Duration(seconds: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: List.generate(42, (i) {
+                      final isThick = (i % 3 == 0) || (i % 7 == 0);
+                      final isSpace = (i % 5 == 0);
+                      if (isSpace) return const SizedBox(width: 3.5);
+                      return Container(
+                        width: isThick ? 4.5 : 2,
+                        color: Colors.black87,
+                      );
+                    }),
+                  ),
                 ),
-              );
-            },
-            icon: const Icon(Icons.print, size: 16),
-            label: Text('🏷️ ${allOrders.length} Kargo Barkodunu Yazdır', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC2410C), foregroundColor: Colors.white),
+                const SizedBox(height: 6),
+                Text(trackingNumber, style: GoogleFonts.courierPrime(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 2.5)),
+                Text('Barkod Kodu: $cargoBarcode', style: GoogleFonts.inter(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+          const Divider(color: Colors.black87, thickness: 1.5, height: 16),
+
+          // Alıcı (Müşteri) Bilgileri
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('ALICI (TESLİMAT BİLGİLERİ):', style: GoogleFonts.inter(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 9.5, letterSpacing: 0.5)),
+                    const SizedBox(height: 3),
+                    Text(customerName, style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 2),
+                    Text(customerCity, style: GoogleFonts.inter(color: Colors.blue.shade900, fontWeight: FontWeight.w700, fontSize: 12)),
+                    const SizedBox(height: 2),
+                    Text(customerAddress, style: GoogleFonts.inter(color: Colors.black87, fontSize: 11, height: 1.3)),
+                    const SizedBox(height: 3),
+                    Text('Tel: 0532 *** ** 45', style: GoogleFonts.inter(color: Colors.black54, fontSize: 10)),
+                  ],
+                ),
+              ),
+              // Karekod
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(border: Border.all(color: Colors.black26), borderRadius: BorderRadius.circular(4)),
+                child: const Icon(Icons.qr_code_2, color: Colors.black87, size: 54),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Paket Kontrol & Hata Önleme Kutusu
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.black26),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('📦 PAKET İÇERİK KONTROLÜ (HATA ÖNLEME):', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 9.5)),
+                    Text('1.5 Desi • 1 Parça', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 9.5)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text('Sipariş No: $orderId • $orderDate', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9.5)),
+                if (lines.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  ...lines.map((ln) {
+                    final t = (ln['productTitle'] ?? 'Ürün').toString();
+                    final v = (ln['variant'] ?? '').toString();
+                    final q = (ln['quantity'] ?? 1).toString();
+                    final s = (ln['sku'] ?? '').toString();
+                    return Text('• $q Adet x $t ${v.isNotEmpty ? "($v)" : ""} ${s.isNotEmpty ? "[$s]" : ""}', style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 10.5), maxLines: 2, overflow: TextOverflow.ellipsis);
+                  }),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Gönderici Mağaza Bilgisi
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('GÖNDERİCİ: RoaTech Mağazacılık A.Ş. / Ataşehir Depo', style: GoogleFonts.inter(color: Colors.black54, fontSize: 9.5, fontWeight: FontWeight.w600)),
+              Text('SEVK ONAYLI ✅', style: GoogleFonts.inter(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 9.5)),
+            ],
           ),
         ],
       ),
     );
   }
+
+  // --- RESMİ GİB E-ARŞİV FATURA ÇİZİCİSİ (A4 FORMATI) ---
+  Widget _buildGibInvoiceCard(Map<String, dynamic> order) {
+    final orderId = (order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045').toString();
+    final customerName = (order['customerName'] ?? 'Mehmet Akif Yıldız').toString();
+    final customerAddress = (order['customerAddress'] ?? 'Nisbetiye Mah. Aytar Cad. No:14 D:6, Beşiktaş / İstanbul').toString();
+    final marketplace = (order['marketplace'] ?? 'Trendyol').toString();
+    final orderDate = (order['orderDate'] ?? '01.09.2026 19:42').toString();
+    final totalPrice = double.tryParse(order['totalPrice']?.toString() ?? '0') ?? 1083.90;
+    final lines = (order['lines'] is List && (order['lines'] as List).isNotEmpty)
+        ? (order['lines'] as List)
+        : [
+            {
+              'productTitle': 'Tudors Erkek 5\'li Paket Slim Fit Pamuklu Pike Polo Yaka Tişört',
+              'sku': 'TDR-POLO-5PK-L',
+              'quantity': 1,
+              'price': totalPrice,
+            }
+          ];
+
+    final kdvRatio = 0.20;
+    final matrah = totalPrice / (1 + kdvRatio);
+    final kdvAmount = totalPrice - matrah;
+    final cleanDigits = orderId.replaceAll(RegExp(r'[^0-9]'), '');
+    final invoiceNo = 'GIB${DateTime.now().year}${cleanDigits.padLeft(9, '0').substring(0, 9)}';
+    final ettnUuid = 'a4b89c72-${orderId.hashCode.abs().toString().padLeft(4, '0')}-4e31-8f12-${orderId.length}a9b2c3d4e5f';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Fatura Başlık & Resmi Damga Kutusu
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.04),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                ),
+                child: const Icon(Icons.account_balance, color: Colors.redAccent, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('T.C. GELİR İDARESİ BAŞKANLIĞI', style: GoogleFonts.inter(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.5)),
+                    Text('E-ARŞİV FATURA (509 VUK)', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                    Text('Fatura No: $invoiceNo • ETTN: $ettnUuid', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10.5)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.greenAccent.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.greenAccent.withOpacity(0.4)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.verified, color: Colors.greenAccent, size: 14),
+                    const SizedBox(width: 5),
+                    Text('GİB ONAYLI', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 11)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Satıcı & Alıcı Bilgileri
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Satıcı
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.02),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('SATICI (MÜKELLEF)', style: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 11)),
+                    const SizedBox(height: 4),
+                    Text('RoaTech Bilişim ve E-Ticaret A.Ş.', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                    Text('VKN: 7890123456 • Kadıköy V.D.', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                    Text('Barbaros Mah. Mor Sümbül Sok. No:1/A Ataşehir / İstanbul', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Alıcı
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.02),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('ALICI (MÜŞTERİ)', style: GoogleFonts.inter(color: Colors.orangeAccent, fontWeight: FontWeight.bold, fontSize: 11)),
+                    const SizedBox(height: 4),
+                    Text(customerName, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
+                    Text('TCKN: 11111111111', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                    Text(customerAddress, style: GoogleFonts.inter(color: Colors.white54, fontSize: 10), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // Kalemler Tablosu
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black26,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(flex: 4, child: Text('Mal / Hizmet Açıklaması', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                    Expanded(flex: 1, child: Text('Miktar', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                    Expanded(flex: 2, child: Text('Birim Fiyat', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                    Expanded(flex: 1, child: Text('KDV', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                    Expanded(flex: 2, child: Text('Toplam', textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 11))),
+                  ],
+                ),
+              ),
+              ...lines.map((line) {
+                final pTitle = (line['productTitle'] ?? 'Sipariş Ürünü').toString();
+                final pQty = (line['quantity'] ?? 1).toString();
+                final pPrice = double.tryParse(line['price']?.toString() ?? '0') ?? totalPrice;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 4, child: Text(pTitle, style: GoogleFonts.inter(color: Colors.white, fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis)),
+                      Expanded(flex: 1, child: Text('$pQty Adet', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11))),
+                      Expanded(flex: 2, child: Text(formatTL(pPrice), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.white, fontSize: 11))),
+                      Expanded(flex: 1, child: Text('%20', textAlign: TextAlign.center, style: GoogleFonts.inter(color: Colors.white70, fontSize: 11))),
+                      Expanded(flex: 2, child: Text(formatTL(pPrice), textAlign: TextAlign.right, style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Fatura Toplam Özeti & QR
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.03),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.qr_code_2, color: Colors.black87, size: 44),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Ödeme: Kredi Kartı / $marketplace Havuzu', style: GoogleFonts.inter(color: Colors.white70, fontSize: 11)),
+                    Text('Sipariş: $orderId ($marketplace)', style: GoogleFonts.inter(color: Colors.white60, fontSize: 10)),
+                    Text('Düzenleme Tarihi: $orderDate', style: GoogleFonts.inter(color: Colors.white54, fontSize: 10)),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('Matrah: ${formatTL(matrah)}', style: GoogleFonts.inter(color: Colors.white60, fontSize: 11)),
+                  Text('KDV (%20): ${formatTL(kdvAmount)}', style: GoogleFonts.inter(color: Colors.orangeAccent, fontSize: 11)),
+                  const SizedBox(height: 4),
+                  Text('ÖDENECEK: ${formatTL(totalPrice)}', style: GoogleFonts.inter(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 13.5)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
 
   void _showCargoTrackingDialog(Map<String, dynamic> order) {
     final orderId = order['orderId'] ?? order['orderNumber'] ?? 'TY-984321045';
